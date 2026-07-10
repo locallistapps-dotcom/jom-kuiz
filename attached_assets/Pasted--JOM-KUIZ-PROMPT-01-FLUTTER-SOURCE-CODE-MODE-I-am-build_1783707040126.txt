@@ -1,0 +1,307 @@
+🚀 JOM KUIZ - PROMPT 01 (FLUTTER SOURCE CODE MODE)
+
+I am building a long-term Flutter application called Jom Kuiz.
+
+Jom Kuiz is a modern Malaysian education platform for parents and children.
+
+Before writing any code, I want you to become my lead software engineer for this project.
+
+This project MUST remain a Flutter (Dart) project.
+
+IMPORTANT
+
+Use this Replit workspace only as a Flutter source code generator.
+
+Do NOT convert this project to:
+
+- Expo
+- React Native
+- TypeScript
+
+Do NOT suggest changing frameworks.
+
+I understand this workspace cannot run Flutter.
+
+That is acceptable.
+
+I only want you to generate Flutter source code, project structure and Dart files.
+
+The project will be built later using a proper Flutter environment.
+
+---
+
+YOUR TASK
+
+Create a professional Flutter project foundation.
+
+Generate Flutter source code only.
+
+Do NOT try to compile, preview or run Flutter inside Replit.
+
+---
+
+TECHNOLOGY
+
+Framework
+
+Flutter Stable
+
+Language
+
+Dart
+
+Architecture
+
+Clean Architecture
+
+State Management
+
+Riverpod
+
+Database
+
+PostgreSQL Ready
+
+Authentication
+
+JWT Ready
+
+Refresh Token Ready
+
+API
+
+REST API Ready
+
+---
+
+CREATE
+
+Generate a complete Flutter project structure.
+
+Include:
+
+pubspec.yaml
+
+analysis_options.yaml
+
+lib/
+
+assets/
+
+l10n/
+
+test/
+
+android/
+
+web/
+
+ios/
+
+Do not worry if these cannot run inside Replit.
+
+Generate them as Flutter source files.
+
+---
+
+ARCHITECTURE
+
+Prepare:
+
+Presentation Layer
+
+Controller Layer
+
+Provider Layer
+
+Repository Layer
+
+Service Layer
+
+API Layer
+
+Core Layer
+
+Models
+
+Widgets
+
+Components
+
+Utilities
+
+Helpers
+
+Validators
+
+---
+
+THEME
+
+Create
+
+Light Theme
+
+Dark Theme placeholder
+
+Typography
+
+Color Scheme
+
+App Theme
+
+---
+
+ROUTING
+
+Prepare routing only.
+
+Placeholder screens:
+
+Splash
+
+Login
+
+Register
+
+Dashboard
+
+Settings
+
+404
+
+Do NOT implement features.
+
+---
+
+AUTHENTICATION
+
+Prepare only:
+
+AuthService
+
+TokenManager
+
+SessionManager
+
+RouteGuard
+
+Do NOT implement login logic.
+
+---
+
+LOCALIZATION
+
+Prepare:
+
+English
+
+Bahasa Melayu
+
+Translation structure only.
+
+---
+
+REUSABLE COMPONENTS
+
+Create reusable widgets:
+
+PrimaryButton
+
+SecondaryButton
+
+AppTextField
+
+PasswordField
+
+LoadingWidget
+
+ErrorWidget
+
+EmptyWidget
+
+---
+
+LOGGING
+
+Prepare:
+
+Logger
+
+Debug
+
+Info
+
+Warning
+
+Error
+
+---
+
+ERROR HANDLING
+
+Create
+
+Global Error Handler
+
+Global Exception Handler
+
+---
+
+DO NOT BUILD
+
+Do NOT build:
+
+Login
+
+Register
+
+Parent Module
+
+Child Module
+
+Education Module
+
+Quiz
+
+Wallet
+
+Referral
+
+Payment
+
+Admin Dashboard
+
+Analytics
+
+AI
+
+OCR
+
+Notification
+
+These will be implemented in future prompts.
+
+---
+
+OUTPUT
+
+Generate Flutter source code only.
+
+Generate proper Flutter folder structure.
+
+Generate pubspec.yaml.
+
+Generate Dart source files.
+
+Generate project architecture.
+
+Do NOT stop because Flutter cannot run in Replit.
+
+Do NOT switch to Expo.
+
+Do NOT switch to React Native.
+
+Treat this workspace as a Flutter source code generator only.
+
+When the Flutter foundation is complete, stop and wait for Prompt 02.
