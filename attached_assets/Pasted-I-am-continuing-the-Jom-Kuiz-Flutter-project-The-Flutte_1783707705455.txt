@@ -1,0 +1,308 @@
+I am continuing the Jom Kuiz Flutter project.
+
+The Flutter foundation created in Prompt 01 is approved.
+
+Do NOT recreate the project.
+
+Continue from the existing Flutter source code.
+
+====================================================
+
+OBJECTIVE
+
+Build ONLY the Authentication Module.
+
+Do not build any other feature.
+
+====================================================
+
+MODULE
+
+Authentication
+
+====================================================
+
+THIS MODULE MUST INCLUDE
+
+Authentication Domain
+
+Authentication Models
+
+Authentication Repository
+
+Authentication Service
+
+Authentication Provider (Riverpod)
+
+Authentication Routing
+
+Authentication UI
+
+Authentication Validation
+
+Authentication Tests
+
+====================================================
+
+SCREENS
+
+Create these screens only.
+
+1. Splash Screen
+
+- Check login session
+- Check JWT
+- Check Refresh Token
+- Redirect automatically
+
+----------------------------------
+
+2. Login Screen
+
+Fields
+
+Email
+
+Password
+
+Remember Me
+
+Buttons
+
+Login
+
+Forgot Password
+
+Register
+
+Validation
+
+Email format
+
+Password required
+
+Loading state
+
+Error state
+
+----------------------------------
+
+3. Register Parent Screen
+
+Fields
+
+Full Name
+
+Email
+
+Password
+
+Confirm Password
+
+Agree Terms
+
+Buttons
+
+Create Account
+
+Validation
+
+Email unique
+
+Password minimum 8 characters
+
+Password confirmation
+
+Terms required
+
+----------------------------------
+
+4. Forgot Password Screen
+
+Fields
+
+Email
+
+Button
+
+Send Reset Email
+
+----------------------------------
+
+5. Reset Password Screen
+
+Fields
+
+New Password
+
+Confirm Password
+
+====================================================
+
+DO NOT IMPLEMENT
+
+Subject
+
+Child
+
+Quiz
+
+Wallet
+
+Referral
+
+Payment
+
+Admin
+
+Analytics
+
+Notification
+
+AI
+
+OCR
+
+====================================================
+
+DATABASE
+
+Prepare repository and model ready for PostgreSQL.
+
+Do NOT create all database tables yet.
+
+Only prepare authentication entities.
+
+====================================================
+
+API
+
+Prepare REST API endpoints only.
+
+Examples
+
+POST /auth/login
+
+POST /auth/register
+
+POST /auth/logout
+
+POST /auth/refresh
+
+POST /auth/forgot-password
+
+POST /auth/reset-password
+
+Do not implement backend logic.
+
+====================================================
+
+JWT
+
+Prepare
+
+Access Token
+
+Refresh Token
+
+Token Storage
+
+Auto Refresh
+
+Logout
+
+Session Expired
+
+====================================================
+
+STATE MANAGEMENT
+
+Use Riverpod.
+
+====================================================
+
+VALIDATION
+
+Email
+
+Password
+
+Confirm Password
+
+Required Field
+
+====================================================
+
+ERROR HANDLING
+
+Prepare official error codes.
+
+AUTH-001
+
+AUTH-002
+
+AUTH-003
+
+AUTH-004
+
+AUTH-005
+
+====================================================
+
+UI
+
+Follow the Theme created in Prompt 01.
+
+Simple UI only.
+
+No fancy design.
+
+====================================================
+
+TESTING
+
+Create
+
+Unit Test
+
+Widget Test
+
+Authentication Test Structure
+
+====================================================
+
+IMPORTANT
+
+Do NOT create Parent Module.
+
+Do NOT create Child Module.
+
+Do NOT create Education Module.
+
+Do NOT create Quiz.
+
+Do NOT create Wallet.
+
+Do NOT create Payment.
+
+Do NOT create Referral.
+
+Only Authentication Module.
+
+====================================================
+
+OUTPUT
+
+When finished provide a summary.
+
+List every file created.
+
+List every folder modified.
+
+List every API prepared.
+
+List every screen created.
+
+Then STOP.
+
+Wait for Prompt 03.

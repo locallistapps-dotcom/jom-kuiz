@@ -13,6 +13,9 @@ abstract class Failure extends Equatable {
 
   @override
   List<Object?> get props => <Object?>[message, code];
+
+  @override
+  String toString() => message;
 }
 
 class NetworkFailure extends Failure {

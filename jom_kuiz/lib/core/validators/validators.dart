@@ -49,4 +49,9 @@ abstract final class Validators {
     }
     return null;
   }
+
+  /// Validates a checkbox-style agreement (e.g. "Agree to Terms").
+  static String? requireTrue(bool value, {String message = 'This is required'}) {
+    return value ? null : message;
+  }
 }

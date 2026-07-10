@@ -35,4 +35,14 @@ void main() {
       expect(Validators.confirmPassword('abc', 'abc'), isNull);
     });
   });
+
+  group('Validators.requireTrue', () {
+    test('rejects false', () {
+      expect(Validators.requireTrue(false), isNotNull);
+    });
+
+    test('accepts true', () {
+      expect(Validators.requireTrue(true), isNull);
+    });
+  });
 }
