@@ -1,0 +1,65 @@
+name: jom_kuiz
+description: "Jom Kuiz - A modern Malaysian education platform for parents and children."
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # State management
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+
+  # Routing
+  go_router: ^14.2.0
+
+  # Networking (REST API ready)
+  dio: ^5.5.0
+
+  # Local storage (token / session persistence)
+  flutter_secure_storage: ^9.2.2
+  shared_preferences: ^2.2.3
+
+  # Functional / immutability helpers used across Clean Architecture layers
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+  equatable: ^2.0.5
+
+  # Utilities
+  intl: ^0.19.0
+  logger: ^2.4.0
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+  # Code generation (models, riverpod providers, freezed unions)
+  build_runner: ^2.4.11
+  freezed: ^2.5.7
+  json_serializable: ^6.8.0
+  riverpod_generator: ^2.4.3
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/icons/
+
+  # Uncomment and add font files under assets/fonts/ when brand fonts are added.
+  # fonts:
+  #   - family: JomKuiz
+  #     fonts:
+  #       - asset: assets/fonts/JomKuiz-Regular.ttf
+  #       - asset: assets/fonts/JomKuiz-Bold.ttf
+  #         weight: 700
+
+  generate: true # enables flutter gen-l10n using l10n.yaml

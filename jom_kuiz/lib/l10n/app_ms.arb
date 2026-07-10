@@ -1,0 +1,39 @@
+{
+  "@@locale": "ms",
+  "appName": "Jom Kuiz",
+
+  "splashTagline": "Belajar jadi seronok",
+
+  "loginTitle": "Log Masuk",
+  "loginEmailLabel": "Emel",
+  "loginPasswordLabel": "Kata Laluan",
+  "loginSubmitButton": "Log Masuk",
+  "loginNoAccount": "Belum ada akaun?",
+  "loginRegisterLink": "Daftar",
+
+  "registerTitle": "Daftar",
+  "registerNameLabel": "Nama Penuh",
+  "registerEmailLabel": "Emel",
+  "registerPasswordLabel": "Kata Laluan",
+  "registerConfirmPasswordLabel": "Sahkan Kata Laluan",
+  "registerSubmitButton": "Cipta Akaun",
+  "registerHaveAccount": "Sudah ada akaun?",
+  "registerLoginLink": "Log Masuk",
+
+  "dashboardTitle": "Papan Pemuka",
+  "dashboardWelcome": "Selamat kembali",
+
+  "settingsTitle": "Tetapan",
+  "settingsLanguage": "Bahasa",
+  "settingsTheme": "Tema",
+  "settingsLogout": "Log Keluar",
+
+  "notFoundTitle": "Halaman Tidak Dijumpai",
+  "notFoundMessage": "Halaman yang anda cari tidak wujud.",
+  "notFoundGoHome": "Kembali ke Laman Utama",
+
+  "commonLoading": "Memuatkan...",
+  "commonError": "Ralat berlaku",
+  "commonEmpty": "Tiada apa-apa lagi di sini",
+  "commonRetry": "Cuba Lagi"
+}

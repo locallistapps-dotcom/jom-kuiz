@@ -1,0 +1,25 @@
+# Flutter/Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+*.g.dart
+*.freezed.dart
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Platform build artifacts (once real platform projects are generated)
+android/**/build/
+ios/**/Pods/
+ios/**/*.xcworkspace/xcuserdata/
+web/build/
+
+# Misc
+*.log
+.DS_Store

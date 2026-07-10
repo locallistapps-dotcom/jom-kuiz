@@ -1,0 +1,42 @@
+{
+  "@@locale": "en",
+  "appName": "Jom Kuiz",
+  "@appName": {
+    "description": "The application name"
+  },
+
+  "splashTagline": "Learning made fun",
+
+  "loginTitle": "Login",
+  "loginEmailLabel": "Email",
+  "loginPasswordLabel": "Password",
+  "loginSubmitButton": "Log In",
+  "loginNoAccount": "Don't have an account?",
+  "loginRegisterLink": "Register",
+
+  "registerTitle": "Register",
+  "registerNameLabel": "Full Name",
+  "registerEmailLabel": "Email",
+  "registerPasswordLabel": "Password",
+  "registerConfirmPasswordLabel": "Confirm Password",
+  "registerSubmitButton": "Create Account",
+  "registerHaveAccount": "Already have an account?",
+  "registerLoginLink": "Log In",
+
+  "dashboardTitle": "Dashboard",
+  "dashboardWelcome": "Welcome back",
+
+  "settingsTitle": "Settings",
+  "settingsLanguage": "Language",
+  "settingsTheme": "Theme",
+  "settingsLogout": "Log Out",
+
+  "notFoundTitle": "Page Not Found",
+  "notFoundMessage": "The page you are looking for does not exist.",
+  "notFoundGoHome": "Go Home",
+
+  "commonLoading": "Loading...",
+  "commonError": "Something went wrong",
+  "commonEmpty": "Nothing here yet",
+  "commonRetry": "Retry"
+}
