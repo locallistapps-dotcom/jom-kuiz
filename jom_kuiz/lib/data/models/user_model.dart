@@ -17,14 +17,20 @@ class UserModel {
   final String fullName;
   final DateTime? emailVerifiedAt;
 
+  /// Parses a Supabase GoTrue user object.
+  ///
+  /// `full_name` lives under `user_metadata.full_name` (not a top-level field).
+  /// Email confirmation timestamp is `email_confirmed_at` (not `email_verified_at`).
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    final Map<String, dynamic> meta =
+        (json['user_metadata'] as Map<String, dynamic>?) ?? <String, dynamic>{};
     return UserModel(
       id: json['id'] as String,
-      email: json['email'] as String,
-      fullName: json['full_name'] as String,
-      emailVerifiedAt: json['email_verified_at'] == null
+      email: json['email'] as String? ?? '',
+      fullName: meta['full_name'] as String? ?? '',
+      emailVerifiedAt: json['email_confirmed_at'] == null
           ? null
-          : DateTime.parse(json['email_verified_at'] as String),
+          : DateTime.tryParse(json['email_confirmed_at'] as String),
     );
   }
 

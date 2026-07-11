@@ -7,14 +7,14 @@ import '../../data/services/auth_service.dart';
 import '../../domain/repositories/auth_repository.dart';
 
 /// Wires the Authentication feature's dependency chain:
-/// `Dio -> AuthRemoteDataSource -> AuthRepository -> AuthService`.
+/// `authDioProvider -> AuthRemoteDataSource -> AuthRepository -> AuthService`.
 ///
-/// Infrastructure providers (`dioProvider`, `tokenManagerProvider`,
-/// `sessionManagerProvider`) live in `core/di/providers.dart`.
+/// Uses [authDioProvider] (base URL: `{supabaseUrl}/auth/v1`, includes `apikey`
+/// header) rather than the PostgREST [dioProvider] (`/rest/v1`).
 
 final Provider<AuthRemoteDataSource> authRemoteDataSourceProvider =
     Provider<AuthRemoteDataSource>(
-  (Ref ref) => AuthRemoteDataSourceImpl(ref.watch(dioProvider)),
+  (Ref ref) => AuthRemoteDataSourceImpl(ref.watch(authDioProvider)),
 );
 
 final Provider<AuthRepository> authRepositoryProvider = Provider<AuthRepository>(

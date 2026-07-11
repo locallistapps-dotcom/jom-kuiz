@@ -25,10 +25,12 @@ class RegisterRequest {
   final String email;
   final String password;
 
+  /// Supabase GoTrue signup body.
+  /// `full_name` goes inside the `data` object (stored as user_metadata).
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'full_name': fullName,
         'email': email,
         'password': password,
+        'data': <String, String>{'full_name': fullName},
       };
 }
 
