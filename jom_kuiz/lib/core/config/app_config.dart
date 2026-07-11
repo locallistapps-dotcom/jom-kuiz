@@ -8,21 +8,26 @@
 ///   --dart-define=SUPABASE_ANON_KEY=eyJh...
 /// ```
 abstract final class AppConfig {
-  /// PostgREST REST API base URL (e.g. `/questions`, `/admin_content`).
-  static const String apiBaseUrl = String.fromEnvironment(
+  /// PostgREST REST API base URL.
+  /// Set via `--dart-define=API_BASE_URL=https://<ref>.supabase.co/rest/v1`.
+  /// Defaults to `{supabaseUrl}/rest/v1` at runtime if not explicitly provided.
+  static const String _apiBaseUrlOverride = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://api.jomkuiz.my',
+    defaultValue: '',
   );
 
-  /// Supabase project root URL — used for Storage and non-REST endpoints.
-  /// Typically `https://<project-ref>.supabase.co`.
+  static String get apiBaseUrl =>
+      _apiBaseUrlOverride.isNotEmpty ? _apiBaseUrlOverride : '$supabaseUrl/rest/v1';
+
+  /// Supabase project root URL — `https://<project-ref>.supabase.co`.
+  /// Set via `--dart-define=SUPABASE_URL=https://<ref>.supabase.co`.
   static const String supabaseUrl = String.fromEnvironment(
     'SUPABASE_URL',
-    defaultValue: 'https://api.jomkuiz.my',
+    defaultValue: '',
   );
 
-  /// Supabase anonymous/public API key — used as `apikey` header for
-  /// Storage calls. Safe to embed in client apps (not a secret).
+  /// Supabase anonymous (publishable) key.
+  /// Safe to embed in client apps. Set via `--dart-define=SUPABASE_ANON_KEY=eyJ...`.
   static const String supabaseAnonKey = String.fromEnvironment(
     'SUPABASE_ANON_KEY',
     defaultValue: '',
