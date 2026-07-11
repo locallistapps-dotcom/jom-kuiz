@@ -57,22 +57,24 @@ class AuthController extends AsyncNotifier<void> {
 
     if (!loginSucceeded) return false;
 
-    // Determine role: admin takes precedence over parent.
-    String role = 'parent';
+    // Determine admin flag: parent role is always 'parent' so the user
+    // lands on the parent dashboard.  isAdminProvider tracks admin privilege
+    // separately for route access and the Admin CMS entry-point in the UI.
+    bool isAdminUser = false;
     try {
       final String? userId =
           await ref.read(tokenManagerProvider).getUserId();
       if (userId != null && userId.isNotEmpty) {
-        final bool isAdmin = await ref
+        isAdminUser = await ref
             .read(adminCheckRemoteDataSourceProvider)
             .isAdmin(userId: userId);
-        if (isAdmin) role = 'admin';
       }
     } catch (_) {
-      // Any failure in role-check → fall back to parent.
+      // Any failure in role-check → fall back to plain parent.
     }
 
-    ref.read(userRoleProvider.notifier).state = role;
+    ref.read(userRoleProvider.notifier).state = 'parent';
+    ref.read(isAdminProvider.notifier).state = isAdminUser;
     state = const AsyncValue<void>.data(null);
     ref.read(sessionControllerProvider.notifier).markAuthenticated();
     return true;

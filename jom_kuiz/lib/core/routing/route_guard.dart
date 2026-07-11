@@ -51,17 +51,18 @@ class RouteGuard {
 
         // Authenticated — determine home screen by role.
         final String role = _ref.read(userRoleProvider);
+        final bool isAdmin = _ref.read(isAdminProvider);
         final String homeRoute = switch (role) {
-          'admin' => AppRoutes.adminCms,
           'child' => AppRoutes.childDashboard,
-          _ => AppRoutes.dashboard,
+          _ => AppRoutes.dashboard, // parent (including admin-parents) land on dashboard
         };
 
         // Keep authenticated users off public / splash / child-login screens.
         if (isPublicRoute || isChildLogin) return homeRoute;
 
         // Block non-admins from all /admin/* routes.
-        if (isAdminRoute && role != 'admin') return homeRoute;
+        // Admin-parents (isAdmin=true) are allowed through even with role='parent'.
+        if (isAdminRoute && !isAdmin) return homeRoute;
 
         // Prevent a child from landing on the parent dashboard.
         if (role == 'child' && location == AppRoutes.dashboard) {

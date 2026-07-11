@@ -33,8 +33,9 @@ class SessionController extends AsyncNotifier<SessionStatus> {
   Future<void> logout() async {
     state = const AsyncValue<SessionStatus>.loading();
     await ref.read(authServiceProvider).logout();
-    // Clear role and selected child so the next login starts fresh.
+    // Clear role, admin flag, and selected child so the next login starts fresh.
     ref.read(userRoleProvider.notifier).state = '';
+    ref.read(isAdminProvider.notifier).state = false;
     ref.read(currentChildIdProvider.notifier).state = '';
     state = const AsyncValue<SessionStatus>.data(SessionStatus.unauthenticated);
   }

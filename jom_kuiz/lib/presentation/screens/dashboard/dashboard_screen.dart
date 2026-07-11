@@ -7,6 +7,7 @@ import '../../../core/routing/app_routes.dart';
 import '../../../domain/entities/parent_profile.dart';
 import '../../controllers/parent_controller.dart';
 import '../../controllers/session_controller.dart';
+import '../../providers/child_providers.dart';
 import '../../widgets/cards/placeholder_module_card.dart';
 import '../../widgets/feedback/app_error_widget.dart';
 import '../../widgets/feedback/loading_widget.dart';
@@ -53,6 +54,7 @@ class DashboardScreen extends ConsumerWidget {
           if (profile == null) {
             return const AppErrorWidget(message: 'Profile unavailable');
           }
+          final bool isAdmin = ref.watch(isAdminProvider);
           return RefreshIndicator(
             onRefresh: () =>
                 ref.read(parentControllerProvider.notifier).refresh(),
@@ -78,6 +80,14 @@ class DashboardScreen extends ConsumerWidget {
                 const SizedBox(height: 8),
                 const PlaceholderModuleCard(
                     module: PlaceholderModule.latestActivity),
+                // Admin CMS entry-point — visible only to admin-parents.
+                if (isAdmin) ...<Widget>[
+                  const SizedBox(height: 20),
+                  Text('Administration',
+                      style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 8),
+                  const _AdminCmsCard(),
+                ],
                 const SizedBox(height: 20),
                 Text('Quick Actions',
                     style: Theme.of(context).textTheme.titleMedium),
@@ -200,6 +210,48 @@ class _SubscriptionCard extends StatelessWidget {
         subtitle: const Text('View or upgrade your current plan'),
         trailing: const Icon(Icons.chevron_right),
         onTap: () => context.push(AppRoutes.subscription),
+      ),
+    );
+  }
+}
+
+// ── Admin CMS Card ────────────────────────────────────────────────────────────
+
+/// Shown only when [isAdminProvider] is true.  Taps into the existing Admin
+/// CMS route without duplicating any admin screen.
+class _AdminCmsCard extends StatelessWidget {
+  const _AdminCmsCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme cs = Theme.of(context).colorScheme;
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: cs.outlineVariant),
+      ),
+      child: ListTile(
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        leading: Container(
+          width: 40,
+          height: 40,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: cs.errorContainer,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            Icons.admin_panel_settings_outlined,
+            size: 20,
+            color: cs.onErrorContainer,
+          ),
+        ),
+        title: const Text('Admin CMS'),
+        subtitle: const Text('Manage content, questions, subscriptions & more'),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => context.push(AppRoutes.adminCms),
       ),
     );
   }

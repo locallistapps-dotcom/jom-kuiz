@@ -40,3 +40,12 @@ final StateProvider<String> currentChildIdProvider =
 /// uses this to redirect authenticated users to the correct home screen.
 final StateProvider<String> userRoleProvider =
     StateProvider<String>((Ref ref) => '');
+
+/// Whether the currently logged-in parent also has admin privileges.
+///
+/// Set to `true` in [AuthController.login] when the user is found in the
+/// `admin_users` table, and cleared on logout.  Admin-parents keep
+/// `userRoleProvider = 'parent'` so they land on the parent dashboard;
+/// this flag controls the Admin CMS entry-point visibility and route access.
+final StateProvider<bool> isAdminProvider =
+    StateProvider<bool>((Ref ref) => false);
