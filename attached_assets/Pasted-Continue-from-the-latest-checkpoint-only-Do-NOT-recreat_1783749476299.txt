@@ -1,0 +1,266 @@
+Continue from the latest checkpoint only.
+
+Do NOT recreate existing architecture.
+
+Do NOT modify completed modules.
+
+Implement the complete Performance Summary Module using the existing Clean Architecture, Riverpod, Result<T>, and Supabase conventions.
+
+Quiz Engine is already complete.
+
+Read data only from:
+
+- quiz_sessions
+- quiz_answers
+- quiz_results
+
+Replace the Performance Summary Placeholder with the real implementation.
+
+==================================================
+DOMAIN
+==================================================
+
+Create:
+
+- PerformanceRepository
+
+Use existing PerformanceSummary entity.
+
+==================================================
+DATA
+==================================================
+
+Create:
+
+- PerformanceRemoteDatasource
+- PerformanceRepositoryImpl
+
+==================================================
+APPLICATION
+==================================================
+
+Create:
+
+- PerformanceController
+- All required Riverpod Providers
+
+==================================================
+PRESENTATION
+==================================================
+
+Create the following screens.
+
+--------------------------------------------------
+1. Student Performance Dashboard
+--------------------------------------------------
+
+Display:
+
+- Total quizzes completed
+- Average score
+- Highest score
+- Lowest score
+- Total questions answered
+- Correct answers
+- Wrong answers
+- Total study time
+
+--------------------------------------------------
+2. Subject Performance
+--------------------------------------------------
+
+Display all subjects.
+
+Each subject displays:
+
+- Average score
+- Total quizzes
+- Progress percentage
+
+--------------------------------------------------
+3. Chapter Performance
+--------------------------------------------------
+
+Inside each subject display:
+
+- Chapter name
+- Average score
+- Total quizzes
+- Weak chapters
+- Strong chapters
+
+--------------------------------------------------
+4. Topic Performance
+--------------------------------------------------
+
+Display every topic.
+
+For each topic display:
+
+- Average score
+- Attempts
+- Best score
+- Last attempt
+- Recommendation
+
+Recommendation rules:
+
+Average <50%
+
+"Needs Immediate Revision"
+
+Average 50-69%
+
+"Practice More"
+
+Average 70-84%
+
+"Good Progress"
+
+Average >=85%
+
+"Excellent"
+
+--------------------------------------------------
+5. Quiz History
+--------------------------------------------------
+
+Display all completed quizzes.
+
+Each item shows:
+
+- Subject
+- Year
+- Chapter
+- Topic
+- Date
+- Score
+- Time Taken
+
+Tap opens Review Answers.
+
+==================================================
+PARENT VIEW
+==================================================
+
+Parents can view every linked child.
+
+For each child display:
+
+- Name
+- Total quizzes
+- Average score
+- Latest score
+- Strongest subject
+- Weakest subject
+
+Selecting a child opens the complete Performance Dashboard.
+
+==================================================
+ANALYTICS
+==================================================
+
+Automatically calculate:
+
+- Average score
+- Highest score
+- Lowest score
+- Subject average
+- Chapter average
+- Topic average
+- Success percentage
+- Weekly progress
+- Monthly progress
+
+==================================================
+REVISION SUGGESTIONS
+==================================================
+
+Automatically generate revision suggestions.
+
+Example:
+
+Mathematics
+
+Weak Topics:
+
+Fractions
+Decimals
+Percentage
+
+Recommended:
+
+Repeat these topics before attempting another quiz.
+
+==================================================
+FILTERS
+==================================================
+
+Support filters by:
+
+- Child
+- Subject
+- Year
+- Chapter
+- Topic
+- Date Range
+
+==================================================
+VALIDATION
+==================================================
+
+Handle:
+
+- Loading
+- Empty
+- Error
+- Network failure
+
+Return Result<T> consistently.
+
+==================================================
+SUPABASE READY
+==================================================
+
+Use efficient aggregate queries.
+
+Avoid unnecessary duplicate requests.
+
+==================================================
+ROUTING
+==================================================
+
+Replace Performance Placeholder with the real implementation.
+
+Update routes.
+
+==================================================
+OUTPUT
+==================================================
+
+After completion provide:
+
+- Files Created
+- Files Modified
+- Providers
+- Controllers
+- Datasources
+- Repositories
+- Routes Updated
+- Supabase Readiness
+- Remaining TODO
+- Estimated Next Prompt
+
+==================================================
+DO NOT IMPLEMENT YET
+==================================================
+
+- Subscription
+- Payment
+- Rewards
+- Referral
+- Admin Panel
+- UI/UX redesign
+- Push Notifications
+
+Only complete the Performance Summary Module.

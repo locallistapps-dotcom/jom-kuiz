@@ -17,6 +17,7 @@ import '../../presentation/screens/placeholder/placeholder_screen.dart';
 import '../../presentation/screens/subject/subject_screen.dart';
 import '../../presentation/screens/chapter/chapter_screen.dart';
 import '../../presentation/screens/question_bank/question_bank_screen.dart';
+import '../../presentation/screens/performance/performance_dashboard_screen.dart';
 import '../../presentation/screens/quiz_engine/quiz_home_screen.dart';
 import '../../presentation/screens/topic/topic_screen.dart';
 import '../../presentation/screens/year/year_screen.dart';
@@ -210,11 +211,11 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((Ref ref) {
         builder: (context, state) =>
             const PlaceholderScreen(moduleName: 'Quiz Result'),
       ),
+      // ── Performance Summary ──────────────────────────────────────────────────
       GoRoute(
         path: AppRoutes.performanceSummary,
         name: AppRoutes.performanceSummaryName,
-        builder: (context, state) =>
-            const PlaceholderScreen(moduleName: 'Performance Summary'),
+        builder: (context, state) => const PerformanceDashboardScreen(),
       ),
       GoRoute(
         path: AppRoutes.subscription,
