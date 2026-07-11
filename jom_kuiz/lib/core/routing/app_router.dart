@@ -15,6 +15,7 @@ import '../../presentation/screens/child/achievement_screen.dart';
 import '../../presentation/screens/child/child_dashboard_screen.dart';
 import '../../presentation/screens/placeholder/placeholder_screen.dart';
 import '../../presentation/screens/subject/subject_screen.dart';
+import '../../presentation/screens/year/year_screen.dart';
 import '../../presentation/screens/child/child_profile_screen.dart';
 import '../../presentation/screens/child/edit_child_profile_screen.dart';
 import '../../presentation/screens/child/homework_detail_screen.dart';
@@ -169,11 +170,11 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((Ref ref) {
         name: AppRoutes.subjectName,
         builder: (context, state) => const SubjectScreen(),
       ),
+      // ── Year ───────────────────────────────────────────────────────────────
       GoRoute(
         path: AppRoutes.year,
         name: AppRoutes.yearName,
-        builder: (context, state) =>
-            const PlaceholderScreen(moduleName: 'Year'),
+        builder: (context, state) => const YearScreen(),
       ),
       GoRoute(
         path: AppRoutes.chapter,
