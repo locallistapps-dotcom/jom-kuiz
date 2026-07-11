@@ -183,19 +183,22 @@ class QuestionBankRemoteDataSourceImpl implements QuestionBankRemoteDataSource {
     required int count,
   }) async {
     try {
-      // Supabase supports random ordering via `order=random()`
+      // PostgREST does not support `order=random()`. Fetch all active questions
+      // for the topic, shuffle client-side, then trim to the requested count.
       final Response<dynamic> res = await _dio.get<dynamic>(
         _base,
         queryParameters: <String, dynamic>{
           'topic_id': 'eq.$topicId',
           'is_active': 'eq.true',
           'select': '*',
-          'order': 'random()',
-          'limit': count,
+          'order': 'created_at.asc',
         },
       );
-      final List<dynamic> list = res.data as List<dynamic>;
-      return list
+      final List<dynamic> list =
+          List<dynamic>.from(res.data as List<dynamic>)..shuffle();
+      final List<dynamic> trimmed =
+          list.length > count ? list.sublist(0, count) : list;
+      return trimmed
           .map((dynamic e) =>
               QuestionModel.fromJson(e as Map<String, dynamic>))
           .toList();
