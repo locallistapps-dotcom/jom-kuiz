@@ -45,10 +45,24 @@ class _QuizStartScreenState extends ConsumerState<QuizStartScreen> {
   Future<void> _begin() async {
     setState(() => _starting = true);
 
-    await ref.read(quizEngineControllerProvider.notifier).startQuiz(
-          topicId: widget.topicId,
-          count: _selected,
-        );
+    try {
+      await ref.read(quizEngineControllerProvider.notifier).startQuiz(
+            topicId: widget.topicId,
+            count: _selected,
+          );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _starting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Unexpected error: $e'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 8),
+        ),
+      );
+      return;
+    }
 
     if (!mounted) return;
     final QuizEnginePhase phase =
@@ -65,6 +79,7 @@ class _QuizStartScreenState extends ConsumerState<QuizStartScreen> {
           content: Text(phase.message),
           backgroundColor: Theme.of(context).colorScheme.error,
           behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 8),
         ),
       );
     } else {

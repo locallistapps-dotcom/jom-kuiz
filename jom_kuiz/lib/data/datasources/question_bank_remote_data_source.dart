@@ -204,6 +204,12 @@ class QuestionBankRemoteDataSourceImpl implements QuestionBankRemoteDataSource {
           .toList();
     } on DioException catch (e) {
       throw _mapError(e);
+    } catch (e) {
+      // Catch parse errors (TypeErrors, etc.) and convert to a legible failure.
+      throw ServerException(
+        'Question parse error: $e',
+        QuestionBankErrorCodes.questionOperationFailed,
+      );
     }
   }
 

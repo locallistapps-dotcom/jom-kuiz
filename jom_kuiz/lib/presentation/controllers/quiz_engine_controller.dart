@@ -60,52 +60,58 @@ class QuizEngineController extends Notifier<QuizEnginePhase> {
     }
     state = const QuizLoading();
 
-    final Result<List<Question>> result = await _qbRepo.getRandomQuestions(
-      topicId: topicId,
-      count: count == 0 ? 9999 : count, // 9999 = fetch all, trimmed below
-    );
+    try {
+      final Result<List<Question>> result = await _qbRepo.getRandomQuestions(
+        topicId: topicId,
+        count: count == 0 ? 9999 : count, // 9999 = fetch all, trimmed below
+      );
 
-    result.when(
-      success: (List<Question> raw) {
-        // Filter active questions only (server should already do this, but
-        // guard client-side to be safe).
-        final List<Question> active =
-            raw.where((Question q) => q.isActive).toList();
+      result.when(
+        success: (List<Question> raw) {
+          // Filter active questions only (server should already do this, but
+          // guard client-side to be safe).
+          final List<Question> active =
+              raw.where((Question q) => q.isActive).toList();
 
-        if (active.isEmpty) {
-          state = const QuizEngineError(
-            message:
-                'No questions are available for this topic yet. Please try another topic.',
+          if (active.isEmpty) {
+            state = const QuizEngineError(
+              message:
+                  'No questions are available for this topic yet. Please try another topic.',
+            );
+            return;
+          }
+
+          // Shuffle for randomness (datasource already uses random() order,
+          // shuffle again for extra safety against deterministic server seeds).
+          final List<Question> shuffled = List<Question>.from(active)
+            ..shuffle(math.Random());
+
+          // Trim to requested count when fetching "all" was used.
+          final List<Question> questions =
+              (count == 0 || shuffled.length <= count)
+                  ? shuffled
+                  : shuffled.sublist(0, count);
+
+          final String sessionId = _generateUuid();
+
+          state = QuizPlaying(
+            session: QuizEngineSession(
+              sessionId: sessionId,
+              topicId: topicId,
+              questions: questions,
+              startedAt: DateTime.now().toUtc(),
+            ),
           );
-          return;
-        }
-
-        // Shuffle for randomness (datasource already uses random() order,
-        // shuffle again for extra safety against deterministic server seeds).
-        final List<Question> shuffled = List<Question>.from(active)
-          ..shuffle(math.Random());
-
-        // Trim to requested count when fetching "all" was used.
-        final List<Question> questions =
-            (count == 0 || shuffled.length <= count)
-                ? shuffled
-                : shuffled.sublist(0, count);
-
-        final String sessionId = _generateUuid();
-
-        state = QuizPlaying(
-          session: QuizEngineSession(
-            sessionId: sessionId,
-            topicId: topicId,
-            questions: questions,
-            startedAt: DateTime.now().toUtc(),
-          ),
-        );
-      },
-      failure: (Failure f) {
-        state = QuizEngineError(message: f.message);
-      },
-    );
+        },
+        failure: (Failure f) {
+          state = QuizEngineError(message: f.message);
+        },
+      );
+    } catch (e) {
+      // Catch unexpected exceptions (e.g. type errors during parsing) and
+      // surface the real message instead of leaving the state as QuizLoading.
+      state = QuizEngineError(message: 'Quiz load failed: $e');
+    }
   }
 
   // ── Navigation ─────────────────────────────────────────────────────────────
@@ -242,14 +248,19 @@ class QuizEngineController extends Notifier<QuizEnginePhase> {
     }
   }
 
-  /// Generates a v4-like UUID using dart:math (no external package).
+  /// Generates a valid v4 UUID using dart:math (no external package).
+  ///
+  /// Format: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx (36 chars)
+  /// Group sizes: 8-4-4-4-12 hex chars separated by hyphens.
   String _generateUuid() {
     final math.Random rng = math.Random();
     String hex(int bytes) => List<int>.generate(bytes, (_) => rng.nextInt(256))
         .map((int b) => b.toRadixString(16).padLeft(2, '0'))
         .join();
-    return '${hex(4)}-${hex(2)}-4${hex(1).substring(1)}-'
-        '${(8 + rng.nextInt(4)).toRadixString(16)}${hex(1).substring(1)}-'
+    // Group 3: '4' + 3 random hex chars (version 4)
+    // Group 4: variant nibble (8–b) + 3 random hex chars
+    return '${hex(4)}-${hex(2)}-4${hex(2).substring(1)}-'
+        '${(8 + rng.nextInt(4)).toRadixString(16)}${hex(2).substring(1)}-'
         '${hex(6)}';
   }
 }

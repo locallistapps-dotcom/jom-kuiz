@@ -17,10 +17,12 @@ extension QuestionTypeX on QuestionType {
   static QuestionType fromJson(String raw) {
     switch (raw) {
       case 'mcq':
+      case 'multiple_choice': // DB uses 'multiple_choice' (CHECK constraint)
         return QuestionType.mcq;
       case 'true_false':
         return QuestionType.trueFalse;
       case 'fill_in_blank':
+      case 'short_answer': // DB CHECK allows 'short_answer' as fill-in variant
         return QuestionType.fillInTheBlank;
       default:
         return QuestionType.mcq;

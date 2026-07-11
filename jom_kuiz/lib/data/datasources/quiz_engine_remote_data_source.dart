@@ -102,8 +102,14 @@ class QuizEngineRemoteDataSourceImpl implements QuizEngineRemoteDataSource {
     if (e.response?.statusCode == 401 || e.response?.statusCode == 403) {
       return const UnauthorizedException('Unauthorized');
     }
+    // Include status code and server message for easier debugging.
+    final int? status = e.response?.statusCode;
+    final dynamic body = e.response?.data;
+    final String detail = body is Map
+        ? (body['message'] as String? ?? body.toString())
+        : body?.toString() ?? e.message ?? 'unknown';
     return ServerException(
-      'Failed to save quiz data',
+      'Save failed (HTTP $status): $detail',
       QuizEngineErrorCodes.persistenceFailed,
       e,
     );
