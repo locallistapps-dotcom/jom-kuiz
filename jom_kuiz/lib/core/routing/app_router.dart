@@ -14,6 +14,7 @@ import '../../presentation/screens/child/achievement_screen.dart';
 // import '../../presentation/screens/teacher/teacher_dashboard_screen.dart';
 import '../../presentation/screens/child/child_dashboard_screen.dart';
 import '../../presentation/screens/placeholder/placeholder_screen.dart';
+import '../../presentation/screens/subject/subject_screen.dart';
 import '../../presentation/screens/child/child_profile_screen.dart';
 import '../../presentation/screens/child/edit_child_profile_screen.dart';
 import '../../presentation/screens/child/homework_detail_screen.dart';
@@ -160,13 +161,13 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((Ref ref) {
         name: AppRoutes.childAchievementsName,
         builder: (context, state) => const AchievementScreen(),
       ),
-    ],
+
       // ── Blueprint Modules (placeholder — replace builder when implemented) ──
+      // ── Subject ────────────────────────────────────────────────────────────
       GoRoute(
         path: AppRoutes.subject,
         name: AppRoutes.subjectName,
-        builder: (context, state) =>
-            const PlaceholderScreen(moduleName: 'Subject'),
+        builder: (context, state) => const SubjectScreen(),
       ),
       GoRoute(
         path: AppRoutes.year,
