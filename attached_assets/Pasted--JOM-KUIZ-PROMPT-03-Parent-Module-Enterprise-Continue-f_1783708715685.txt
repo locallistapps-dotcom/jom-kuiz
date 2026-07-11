@@ -1,0 +1,357 @@
+# JOM KUIZ - PROMPT 03
+
+## Parent Module (Enterprise)
+
+Continue from Prompt 02.
+
+The Authentication Module has been completed and approved.
+
+Do NOT recreate existing files.
+
+Only extend the existing Flutter project.
+
+==================================================
+
+OBJECTIVE
+
+Build ONLY the Parent Module.
+
+Do NOT build Child Module yet.
+
+==================================================
+
+MODULE
+
+Parent
+
+==================================================
+
+CREATE
+
+Domain
+
+Entity
+
+Model
+
+Repository
+
+Repository Implementation
+
+Remote Data Source
+
+Service
+
+Riverpod Provider
+
+Controller
+
+Validator
+
+Routes
+
+UI
+
+Unit Test
+
+Widget Test
+
+==================================================
+
+DATABASE READY
+
+Prepare database entities only.
+
+Do NOT generate SQL migrations.
+
+Fields:
+
+parent_id
+
+full_name
+
+email
+
+phone_number
+
+country
+
+state
+
+city
+
+profile_photo
+
+gender
+
+date_of_birth
+
+language
+
+timezone
+
+bio
+
+notification_enabled
+
+email_verified
+
+account_status
+
+created_at
+
+updated_at
+
+==================================================
+
+REST API
+
+Prepare endpoints only.
+
+GET /parent/profile
+
+PUT /parent/profile
+
+PUT /parent/avatar
+
+PUT /parent/password
+
+PUT /parent/settings
+
+DELETE /parent/account
+
+Do NOT implement backend.
+
+==================================================
+
+SCREENS
+
+1.
+
+Parent Dashboard
+
+Display:
+
+Welcome Card
+
+Profile Card
+
+Total Children (placeholder)
+
+Subscription Status (placeholder)
+
+Reward Wallet (placeholder)
+
+Referral (placeholder)
+
+Latest Activity (placeholder)
+
+Quick Actions
+
+2.
+
+Edit Profile
+
+Fields
+
+Full Name
+
+Phone Number
+
+Country
+
+State
+
+City
+
+Gender
+
+Date Of Birth
+
+Language
+
+Bio
+
+Avatar Upload Placeholder
+
+Validation Required
+
+3.
+
+Security
+
+Change Password
+
+Current Password
+
+New Password
+
+Confirm Password
+
+Logout
+
+4.
+
+Settings
+
+Language
+
+Dark Mode
+
+Notification
+
+Privacy
+
+Delete Account
+
+==================================================
+
+VALIDATION
+
+Required Fields
+
+Phone Format
+
+Maximum Length
+
+Minimum Length
+
+Email Read Only
+
+==================================================
+
+STATE MANAGEMENT
+
+Use Riverpod.
+
+==================================================
+
+ERROR CODES
+
+PARENT-001
+
+Profile Not Found
+
+PARENT-002
+
+Invalid Phone Number
+
+PARENT-003
+
+Profile Update Failed
+
+PARENT-004
+
+Avatar Upload Failed
+
+PARENT-005
+
+Password Update Failed
+
+==================================================
+
+IMPORTANT BUSINESS RULES
+
+Prepare placeholders ONLY.
+
+DO NOT implement logic yet.
+
+Children
+
+Subscription
+
+Wallet
+
+Reward
+
+Referral
+
+Analytics
+
+Subjects
+
+Quiz
+
+Leaderboard
+
+Payment
+
+Admin
+
+Only prepare clean extension points so future modules can integrate without major refactoring.
+
+==================================================
+
+UI
+
+Follow Theme from Prompt 01.
+
+Simple.
+
+Clean.
+
+Responsive.
+
+No fancy design.
+
+==================================================
+
+TESTING
+
+Prepare
+
+Unit Test
+
+Widget Test
+
+Provider Test
+
+==================================================
+
+OUTPUT
+
+When finished provide:
+
+1.
+
+Files Created
+
+2.
+
+Files Modified
+
+3.
+
+API Endpoints
+
+4.
+
+Screens Created
+
+5.
+
+Providers
+
+6.
+
+Repositories
+
+7.
+
+Controllers
+
+8.
+
+Services
+
+9.
+
+Tests Added
+
+10.
+
+Business Rule Placeholders Prepared
+
+Then STOP.
+
+Wait for Prompt 04.

@@ -8,6 +8,8 @@ abstract final class AppRoutes {
   static const String resetPassword = '/reset-password';
   static const String dashboard = '/dashboard';
   static const String settings = '/settings';
+  static const String editProfile = '/parent/edit-profile';
+  static const String security = '/parent/security';
 
   static const String splashName = 'splash';
   static const String loginName = 'login';
@@ -16,6 +18,8 @@ abstract final class AppRoutes {
   static const String resetPasswordName = 'resetPassword';
   static const String dashboardName = 'dashboard';
   static const String settingsName = 'settings';
+  static const String editProfileName = 'editProfile';
+  static const String securityName = 'security';
 
   /// Routes reachable while signed out. Any other route requires an
   /// authenticated session -- see [RouteGuard].

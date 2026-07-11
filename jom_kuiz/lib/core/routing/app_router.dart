@@ -9,6 +9,8 @@ import '../../presentation/screens/auth/register_parent_screen.dart';
 import '../../presentation/screens/auth/reset_password_screen.dart';
 import '../../presentation/screens/dashboard/dashboard_screen.dart';
 import '../../presentation/screens/error/not_found_screen.dart';
+import '../../presentation/screens/parent/edit_profile_screen.dart';
+import '../../presentation/screens/parent/security_screen.dart';
 import '../../presentation/screens/settings/settings_screen.dart';
 import '../../presentation/screens/splash/splash_screen.dart';
 import 'app_routes.dart';
@@ -77,6 +79,16 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((Ref ref) {
         path: AppRoutes.settings,
         name: AppRoutes.settingsName,
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.editProfile,
+        name: AppRoutes.editProfileName,
+        builder: (context, state) => const EditProfileScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.security,
+        name: AppRoutes.securityName,
+        builder: (context, state) => const SecurityScreen(),
       ),
     ],
     errorBuilder: (context, state) => const NotFoundScreen(),

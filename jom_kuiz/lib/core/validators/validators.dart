@@ -6,6 +6,10 @@
 abstract final class Validators {
   static final RegExp _emailPattern = RegExp(r'^[\w\.\-+]+@([\w\-]+\.)+[\w\-]{2,}$');
 
+  /// Accepts optional leading `+`, then 8-15 digits (E.164-ish, permissive
+  /// enough for Malaysian and international parent phone numbers).
+  static final RegExp _phonePattern = RegExp(r'^\+?[0-9]{8,15}$');
+
   static String? required(String? value, {String fieldName = 'This field'}) {
     if (value == null || value.trim().isEmpty) {
       return '$fieldName is required';
@@ -53,5 +57,22 @@ abstract final class Validators {
   /// Validates a checkbox-style agreement (e.g. "Agree to Terms").
   static String? requireTrue(bool value, {String message = 'This is required'}) {
     return value ? null : message;
+  }
+
+  /// Phone number is optional (parents may not provide one), but when
+  /// present it must match [_phonePattern].
+  static String? phone(String? value) {
+    if (value == null || value.trim().isEmpty) return null;
+    if (!_phonePattern.hasMatch(value.trim())) {
+      return 'Enter a valid phone number';
+    }
+    return null;
+  }
+
+  static String? maxLength(String? value, int length, {String fieldName = 'This field'}) {
+    if (value != null && value.length > length) {
+      return '$fieldName must be at most $length characters';
+    }
+    return null;
   }
 }
