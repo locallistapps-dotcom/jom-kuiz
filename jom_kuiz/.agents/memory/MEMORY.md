@@ -1,8 +1,1 @@
-- [No-codegen rule](no-codegen.md) — all models/DTOs hand-written; no json_serializable/freezed/riverpod_generator (build_runner can't run in this workspace)
-- [Test provider overrides](test-provider-overrides.md) — any test reaching sessionManagerProvider must also override tokenStorageProvider with FakeTokenStorage to avoid MissingPluginException
-- [Controller mutation pattern](controller-mutation-pattern.md) — mutation methods return Result<T>, only update AsyncNotifier state on success; failure leaves prior state intact
-- [deleteAccount session rule](delete-account-session-rule.md) — local session is cleared ONLY on server-confirmed deletion; failed delete must leave the parent signed in
-- [Badge entity vs Flutter widget](badge-name-conflict.md) — domain Badge entity conflicts with Flutter Material 3 Badge widget; use `hide Badge` on material import in any screen that uses the entity
-- [currentChildIdProvider pattern](current-child-id-provider.md) — StateProvider<String> set before navigating to child screens; all child controllers react reactively; tests override with overrideWith((ref) => childId)
-- [Strict lint config](strict-lint-config.md) — strict-casts/inference/raw-types + use_key_in_widget_constructors; all private widget classes need super.key in their constructor
-- [Teacher module layout](teacher-module-layout.md) — Prompt 05A only adds the dashboard; classes/attendance/homework/quiz/announcements are future prompts
+- [Prompt 12 Account Mgmt](prompt-12-account-mgmt.md) — Prompt 12 implementation status, architecture decisions for parent/child account management 2.0

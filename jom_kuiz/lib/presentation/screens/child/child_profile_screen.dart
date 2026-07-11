@@ -4,12 +4,16 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/routing/app_routes.dart';
 import '../../../domain/entities/child_profile.dart';
+import '../../../domain/entities/education_level.dart';
 import '../../controllers/child_profile_controller.dart';
 import '../../widgets/feedback/app_error_widget.dart';
 import '../../widgets/feedback/loading_widget.dart';
 
-/// Displays the child's full profile in read-only mode.
-/// Navigate to [AppRoutes.childEditProfile] to make changes.
+/// Displays the child's full profile in read-only mode (child self-view).
+///
+/// Shows the new Prompt 12 fields: Student ID, Education Level, Year / Grade,
+/// and Account Status. Navigate to [AppRoutes.childEditProfile] to edit
+/// self-editable fields (name, bio, gender, date of birth).
 class ChildProfileScreen extends ConsumerWidget {
   const ChildProfileScreen({super.key});
 
@@ -20,7 +24,7 @@ class ChildProfileScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Child Profile'),
+        title: const Text('My Profile'),
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.edit_outlined),
@@ -43,6 +47,7 @@ class ChildProfileScreen extends ConsumerWidget {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: <Widget>[
+              // ── Avatar ─────────────────────────────────────────────────────
               Center(
                 child: CircleAvatar(
                   radius: 44,
@@ -69,34 +74,92 @@ class ChildProfileScreen extends ConsumerWidget {
                       ),
                 ),
               ),
+              // Account status badge
+              if (profile.accountStatus == ChildAccountStatus.disabled)
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Chip(
+                      label: const Text('Disabled'),
+                      backgroundColor: Theme.of(context).colorScheme.error,
+                      labelStyle: const TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
               const SizedBox(height: 24),
+
+              // ── Identity section ──────────────────────────────────────────
+              _ProfileSection(
+                title: 'Identity',
+                children: <Widget>[
+                  _ProfileTile(
+                    label: 'Student ID',
+                    value: profile.studentId.isEmpty
+                        ? '—'
+                        : profile.studentId,
+                    icon: Icons.badge_outlined,
+                    immutable: true,
+                  ),
+                  _ProfileTile(
+                    label: 'Username',
+                    value: profile.username,
+                    icon: Icons.alternate_email,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // ── Education section ──────────────────────────────────────────
+              _ProfileSection(
+                title: 'Education',
+                children: <Widget>[
+                  _ProfileTile(
+                    label: 'Level',
+                    value: EducationLevelHelper.labelFor(profile.educationLevel),
+                    icon: Icons.school_outlined,
+                  ),
+                  _ProfileTile(
+                    label: 'Year / Grade',
+                    value: profile.yearGrade.isEmpty ? '—' : profile.yearGrade,
+                    icon: Icons.class_outlined,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // ── Personal section ──────────────────────────────────────────
               _ProfileSection(
                 title: 'Personal',
                 children: <Widget>[
                   _ProfileTile(
                     label: 'Gender',
                     value: profile.gender ?? 'Not set',
+                    icon: Icons.person_outline,
                   ),
                   _ProfileTile(
                     label: 'Birthday',
                     value: profile.dateOfBirth == null
                         ? 'Not set'
                         : _formatDate(profile.dateOfBirth!),
+                    icon: Icons.cake_outlined,
                   ),
-                  _ProfileTile(label: 'Bio', value: profile.bio ?? '—'),
+                  _ProfileTile(
+                    label: 'Bio',
+                    value: profile.bio ?? '—',
+                    icon: Icons.notes_outlined,
+                  ),
                 ],
               ),
               const SizedBox(height: 16),
+
+              // ── Meta section ───────────────────────────────────────────────
               _ProfileSection(
-                title: 'Education',
+                title: 'Account',
                 children: <Widget>[
                   _ProfileTile(
-                    label: 'School',
-                    value: profile.school ?? 'Not set',
-                  ),
-                  _ProfileTile(
-                    label: 'Grade / Class',
-                    value: profile.grade ?? 'Not set',
+                    label: 'Member Since',
+                    value: _formatDate(profile.createdAt),
+                    icon: Icons.calendar_today_outlined,
                   ),
                 ],
               ),
@@ -119,8 +182,11 @@ class ChildProfileScreen extends ConsumerWidget {
       '${date.day.toString().padLeft(2, '0')}';
 }
 
+// ── Sub-widgets ───────────────────────────────────────────────────────────────
+
 class _ProfileSection extends StatelessWidget {
-  const _ProfileSection({super.key, required this.title, required this.children});
+  const _ProfileSection(
+      {super.key, required this.title, required this.children});
   final String title;
   final List<Widget> children;
 
@@ -143,19 +209,29 @@ class _ProfileSection extends StatelessWidget {
 }
 
 class _ProfileTile extends StatelessWidget {
-  const _ProfileTile({super.key, required this.label, required this.value});
+  const _ProfileTile({
+    super.key,
+    required this.label,
+    required this.value,
+    required this.icon,
+    this.immutable = false,
+  });
   final String label;
   final String value;
+  final IconData icon;
+  final bool immutable;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
+          Icon(icon,
+              size: 18, color: Theme.of(context).colorScheme.primary),
+          const SizedBox(width: 10),
           SizedBox(
-            width: 110,
+            width: 100,
             child: Text(
               label,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -169,6 +245,10 @@ class _ProfileTile extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),
+          if (immutable)
+            Icon(Icons.lock_outline,
+                size: 14,
+                color: Theme.of(context).colorScheme.outline),
         ],
       ),
     );

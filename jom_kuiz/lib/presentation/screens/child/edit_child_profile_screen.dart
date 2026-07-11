@@ -7,10 +7,12 @@ import '../../controllers/child_profile_controller.dart';
 import '../../widgets/buttons/primary_button.dart';
 import '../../widgets/inputs/app_text_field.dart';
 
-/// Edit Child Profile screen.
+/// Edit Child Profile screen — child self-edit only.
 ///
-/// Full name is required; all other fields are optional.
-/// Avatar upload is a placeholder ("coming soon").
+/// Children may edit: Full Name, Gender, Date of Birth, Bio.
+///
+/// Parent-only fields (username, password, education level, year / grade)
+/// are managed by the parent via the Children Management screens.
 class EditChildProfileScreen extends ConsumerStatefulWidget {
   const EditChildProfileScreen({super.key});
 
@@ -22,8 +24,6 @@ class EditChildProfileScreen extends ConsumerStatefulWidget {
 class _EditChildProfileScreenState
     extends ConsumerState<EditChildProfileScreen> {
   final TextEditingController _fullNameController = TextEditingController();
-  final TextEditingController _schoolController = TextEditingController();
-  final TextEditingController _gradeController = TextEditingController();
   final TextEditingController _bioController = TextEditingController();
 
   static const List<String> _genderOptions = <String>['female', 'male', 'other'];
@@ -42,19 +42,14 @@ class _EditChildProfileScreenState
     if (_initialized) return;
     _initialized = true;
     _fullNameController.text = profile.fullName;
-    _schoolController.text = profile.school ?? '';
-    _gradeController.text = profile.grade ?? '';
     _bioController.text = profile.bio ?? '';
-    _gender =
-        _genderOptions.contains(profile.gender) ? profile.gender : null;
+    _gender = _genderOptions.contains(profile.gender) ? profile.gender : null;
     _dateOfBirth = profile.dateOfBirth;
   }
 
   @override
   void dispose() {
     _fullNameController.dispose();
-    _schoolController.dispose();
-    _gradeController.dispose();
     _bioController.dispose();
     super.dispose();
   }
@@ -73,8 +68,9 @@ class _EditChildProfileScreenState
   bool _validate() {
     final String? fullNameError =
         Validators.minLength(_fullNameController.text, 2, fieldName: 'Full name');
-    final String? bioError =
-        Validators.maxLength(_bioController.text, _bioMaxLength, fieldName: 'Bio');
+    final String? bioError = Validators.maxLength(
+        _bioController.text, _bioMaxLength,
+        fieldName: 'Bio');
     setState(() {
       _fullNameError = fullNameError;
       _bioError = bioError;
@@ -88,36 +84,29 @@ class _EditChildProfileScreenState
 
     final String? dobStr = _dateOfBirth == null
         ? null
-        : '${_dateOfBirth!.year}-${_dateOfBirth!.month.toString().padLeft(2, '0')}-${_dateOfBirth!.day.toString().padLeft(2, '0')}';
+        : '${_dateOfBirth!.year}-'
+            '${_dateOfBirth!.month.toString().padLeft(2, '0')}-'
+            '${_dateOfBirth!.day.toString().padLeft(2, '0')}';
 
-    final result =
-        await ref.read(childProfileControllerProvider.notifier).updateProfile(
-              fullName: _fullNameController.text.trim(),
-              dateOfBirth: dobStr,
-              gender: _gender,
-              school: _schoolController.text.trim().isEmpty
-                  ? null
-                  : _schoolController.text.trim(),
-              grade: _gradeController.text.trim().isEmpty
-                  ? null
-                  : _gradeController.text.trim(),
-              bio: _bioController.text.trim().isEmpty
-                  ? null
-                  : _bioController.text.trim(),
-            );
+    final result = await ref
+        .read(childProfileControllerProvider.notifier)
+        .updateProfile(
+          fullName: _fullNameController.text.trim(),
+          dateOfBirth: dobStr,
+          gender: _gender,
+          bio: _bioController.text.trim().isEmpty
+              ? null
+              : _bioController.text.trim(),
+        );
 
     if (!mounted) return;
     setState(() => _isSubmitting = false);
 
     result.when(
-      success: (_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Profile updated')));
-      },
-      failure: (failure) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(failure.toString())));
-      },
+      success: (_) => ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Profile updated'))),
+      failure: (failure) => ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(failure.toString()))),
     );
   }
 
@@ -128,13 +117,13 @@ class _EditChildProfileScreenState
     if (profile != null) _hydrate(profile);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit Child Profile')),
+      appBar: AppBar(title: const Text('Edit My Profile')),
       body: profile == null
           ? const Center(child: CircularProgressIndicator())
           : ListView(
               padding: const EdgeInsets.all(16),
               children: <Widget>[
-                // Avatar placeholder
+                // ── Avatar placeholder ───────────────────────────────────────
                 Center(
                   child: Stack(
                     children: <Widget>[
@@ -152,19 +141,44 @@ class _EditChildProfileScreenState
                         bottom: 0,
                         child: IconButton.filled(
                           icon: const Icon(Icons.camera_alt_outlined, size: 16),
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
+                          onPressed: () => ScaffoldMessenger.of(context)
+                              .showSnackBar(const SnackBar(
                                   content:
-                                      Text('Avatar upload is coming soon')),
-                            );
-                          },
+                                      Text('Avatar upload coming soon'))),
                         ),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 24),
+
+                // ── Read-only info note ──────────────────────────────────────
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceVariant,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: <Widget>[
+                      Icon(Icons.info_outline,
+                          size: 16,
+                          color:
+                              Theme.of(context).colorScheme.onSurfaceVariant),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Username, education level, and year / grade can '
+                          'only be changed by your parent.',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // ── Editable fields ──────────────────────────────────────────
                 AppTextField(
                   label: 'Full Name',
                   controller: _fullNameController,
@@ -195,22 +209,18 @@ class _EditChildProfileScreenState
                     child: Text(
                       _dateOfBirth == null
                           ? 'Not set'
-                          : '${_dateOfBirth!.year}-${_dateOfBirth!.month.toString().padLeft(2, '0')}-${_dateOfBirth!.day.toString().padLeft(2, '0')}',
+                          : '${_dateOfBirth!.year}-'
+                              '${_dateOfBirth!.month.toString().padLeft(2, '0')}-'
+                              '${_dateOfBirth!.day.toString().padLeft(2, '0')}',
                     ),
                   ),
                 ),
                 const SizedBox(height: 16),
                 AppTextField(
-                    label: 'School', controller: _schoolController),
-                const SizedBox(height: 16),
-                AppTextField(
-                    label: 'Grade / Class', controller: _gradeController),
-                const SizedBox(height: 16),
-                AppTextField(
                   label: 'Bio',
                   controller: _bioController,
                   errorText: _bioError,
-                  hintText: 'A short bio',
+                  hintText: 'A short bio (max $_bioMaxLength characters)',
                 ),
                 const SizedBox(height: 24),
                 PrimaryButton(

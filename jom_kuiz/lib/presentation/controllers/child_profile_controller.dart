@@ -5,11 +5,15 @@ import '../../core/utils/result.dart';
 import '../../domain/entities/child_profile.dart';
 import '../providers/child_providers.dart';
 
-/// Manages the currently selected child's profile.
+/// Manages the currently selected child's profile (self-view).
 ///
 /// Reacts automatically when [currentChildIdProvider] changes. Mutation
 /// methods return [Result]<T> and only update state on success — a failed
 /// save never blanks the previously loaded profile.
+///
+/// Self-edit fields: fullName, bio, gender, dateOfBirth, avatar.
+/// Parent-only fields (educationLevel, yearGrade, username, password) are
+/// managed via [ChildManagementController].
 final AsyncNotifierProvider<ChildProfileController, ChildProfile?>
     childProfileControllerProvider =
     AsyncNotifierProvider<ChildProfileController, ChildProfile?>(
@@ -39,12 +43,14 @@ class ChildProfileController extends AsyncNotifier<ChildProfile?> {
     });
   }
 
+  /// Updates the child's self-editable profile fields.
+  ///
+  /// Education level, year/grade, username, and password are parent-only and
+  /// must be changed via [ChildManagementController].
   Future<Result<ChildProfile>> updateProfile({
     required String fullName,
     String? dateOfBirth,
     String? gender,
-    String? school,
-    String? grade,
     String? bio,
   }) async {
     final String childId = ref.read(currentChildIdProvider);
@@ -54,8 +60,6 @@ class ChildProfileController extends AsyncNotifier<ChildProfile?> {
               fullName: fullName,
               dateOfBirth: dateOfBirth,
               gender: gender,
-              school: school,
-              grade: grade,
               bio: bio,
             );
     result.when(

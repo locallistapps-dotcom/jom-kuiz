@@ -31,8 +31,6 @@ class ChildRepositoryImpl implements ChildRepository {
     required String fullName,
     String? dateOfBirth,
     String? gender,
-    String? school,
-    String? grade,
     String? bio,
   }) async {
     try {
@@ -42,8 +40,6 @@ class ChildRepositoryImpl implements ChildRepository {
           fullName: fullName,
           dateOfBirth: dateOfBirth,
           gender: gender,
-          school: school,
-          grade: grade,
           bio: bio,
         ),
       );
@@ -72,8 +68,7 @@ class ChildRepositoryImpl implements ChildRepository {
   @override
   Future<Result<List<Homework>>> getHomework({required String childId}) async {
     try {
-      final models =
-          await _remoteDataSource.getHomework(childId: childId);
+      final models = await _remoteDataSource.getHomework(childId: childId);
       return Result<List<Homework>>.success(
           models.map((m) => m.toEntity()).toList());
     } on AppException catch (e) {
@@ -108,8 +103,7 @@ class ChildRepositoryImpl implements ChildRepository {
   @override
   Future<Result<Quiz>> getQuizDetail({required String quizId}) async {
     try {
-      final model =
-          await _remoteDataSource.getQuizDetail(quizId: quizId);
+      final model = await _remoteDataSource.getQuizDetail(quizId: quizId);
       return Result<Quiz>.success(model.toEntity());
     } on AppException catch (e) {
       return Result<Quiz>.failure(GlobalExceptionHandler.toFailure(e));

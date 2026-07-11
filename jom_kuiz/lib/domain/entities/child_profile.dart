@@ -1,5 +1,9 @@
 import 'package:equatable/equatable.dart';
 
+import 'education_level.dart';
+
+export 'education_level.dart';
+
 /// Link status between a child account and a parent account.
 enum LinkStatus { linked, pending, unlinked }
 
@@ -28,9 +32,8 @@ class LinkedParent extends Equatable {
 
 /// Core domain representation of a child's profile.
 ///
-/// Linked-parent information is embedded for display convenience.
-/// Fields belonging to other modules (quiz engine, wallet, etc.) are absent
-/// and will reference [childId] once those modules exist.
+/// Combines both the child's identity information (returned during a child
+/// login session) and the education-level fields managed by the parent.
 class ChildProfile extends Equatable {
   const ChildProfile({
     required this.childId,
@@ -38,12 +41,13 @@ class ChildProfile extends Equatable {
     required this.username,
     required this.createdAt,
     required this.updatedAt,
-    this.email,
+    this.studentId = '',
+    this.educationLevel = EducationLevel.primary,
+    this.yearGrade = '',
+    this.accountStatus = ChildAccountStatus.active,
     this.profilePhoto,
     this.dateOfBirth,
     this.gender,
-    this.school,
-    this.grade,
     this.bio,
     this.linkedParent,
   });
@@ -51,15 +55,21 @@ class ChildProfile extends Equatable {
   final String childId;
   final String fullName;
   final String username;
-  final String? email;
+
+  /// 8-digit auto-generated immutable identifier used for child login.
+  final String studentId;
+
+  final EducationLevel educationLevel;
+
+  /// Structured year / grade string, e.g. `"Year 3"`, `"Form 1"`, `"Preschool"`.
+  final String yearGrade;
+
+  final ChildAccountStatus accountStatus;
   final String? profilePhoto;
   final DateTime? dateOfBirth;
 
-  /// "male", "female", or "other" — kept as a free string to avoid
-  /// breaking changes if the server extends the set later.
+  /// "male", "female", or "other" — kept as a free string.
   final String? gender;
-  final String? school;
-  final String? grade;
   final String? bio;
   final LinkedParent? linkedParent;
   final DateTime createdAt;
@@ -68,12 +78,13 @@ class ChildProfile extends Equatable {
   ChildProfile copyWith({
     String? fullName,
     String? username,
-    String? email,
+    String? studentId,
+    EducationLevel? educationLevel,
+    String? yearGrade,
+    ChildAccountStatus? accountStatus,
     String? profilePhoto,
     DateTime? dateOfBirth,
     String? gender,
-    String? school,
-    String? grade,
     String? bio,
     LinkedParent? linkedParent,
   }) {
@@ -81,12 +92,13 @@ class ChildProfile extends Equatable {
       childId: childId,
       fullName: fullName ?? this.fullName,
       username: username ?? this.username,
-      email: email ?? this.email,
+      studentId: studentId ?? this.studentId,
+      educationLevel: educationLevel ?? this.educationLevel,
+      yearGrade: yearGrade ?? this.yearGrade,
+      accountStatus: accountStatus ?? this.accountStatus,
       profilePhoto: profilePhoto ?? this.profilePhoto,
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       gender: gender ?? this.gender,
-      school: school ?? this.school,
-      grade: grade ?? this.grade,
       bio: bio ?? this.bio,
       linkedParent: linkedParent ?? this.linkedParent,
       createdAt: createdAt,
@@ -99,12 +111,13 @@ class ChildProfile extends Equatable {
         childId,
         fullName,
         username,
-        email,
+        studentId,
+        educationLevel,
+        yearGrade,
+        accountStatus,
         profilePhoto,
         dateOfBirth,
         gender,
-        school,
-        grade,
         bio,
         linkedParent,
         createdAt,

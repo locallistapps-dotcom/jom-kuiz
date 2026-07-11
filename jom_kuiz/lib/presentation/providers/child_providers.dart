@@ -27,9 +27,16 @@ final Provider<ChildService> childServiceProvider = Provider<ChildService>(
       ChildService(repository: ref.watch(childRepositoryProvider)),
 );
 
-/// Holds the ID of the child currently being viewed.
+/// Holds the ID of the child currently being viewed or logged-in as.
 ///
-/// Set this provider before navigating into any child screen. All child
+/// Set this before navigating into any child screen. All child
 /// controllers react to changes automatically via [ref.watch].
 final StateProvider<String> currentChildIdProvider =
+    StateProvider<String>((Ref ref) => '');
+
+/// Active user role: `'parent'`, `'child'`, or `''` (unauthenticated).
+///
+/// Set immediately after login and cleared on logout. The [RouteGuard]
+/// uses this to redirect authenticated users to the correct home screen.
+final StateProvider<String> userRoleProvider =
     StateProvider<String>((Ref ref) => '');

@@ -91,6 +91,10 @@ class QuestionBankRepositoryImpl implements QuestionBankRepository {
     String? optionC,
     String? optionD,
     String? explanation,
+    String? explanationImageUrl,
+    String? explanationVideoUrl,
+    String? questionImageUrl,
+    String? reference,
   }) async {
     try {
       final QuestionModel model =
@@ -105,6 +109,10 @@ class QuestionBankRepositoryImpl implements QuestionBankRepository {
         optionC: optionC,
         optionD: optionD,
         explanation: explanation,
+        explanationImageUrl: explanationImageUrl,
+        explanationVideoUrl: explanationVideoUrl,
+        questionImageUrl: questionImageUrl,
+        reference: reference,
       ));
       return Result<Question>.success(model.toEntity());
     } on AppException catch (e) {
@@ -125,6 +133,10 @@ class QuestionBankRepositoryImpl implements QuestionBankRepository {
     String? optionC,
     String? optionD,
     String? explanation,
+    String? explanationImageUrl,
+    String? explanationVideoUrl,
+    String? questionImageUrl,
+    String? reference,
     required bool isActive,
   }) async {
     try {
@@ -142,6 +154,10 @@ class QuestionBankRepositoryImpl implements QuestionBankRepository {
           optionC: optionC,
           optionD: optionD,
           explanation: explanation,
+          explanationImageUrl: explanationImageUrl,
+          explanationVideoUrl: explanationVideoUrl,
+          questionImageUrl: questionImageUrl,
+          reference: reference,
           isActive: isActive,
         ),
       );

@@ -8,9 +8,9 @@ import '../../domain/repositories/child_repository.dart';
 
 /// Orchestrates the Child module's business flows on top of [ChildRepository].
 ///
-/// Thin for now — mostly pass-through — but provides the correct layer for
-/// cross-cutting concerns (e.g. validation, caching, analytics hooks) that
-/// future prompts may add without touching controllers or repositories.
+/// Self-edit operations only (name, bio, gender, date of birth, avatar).
+/// Education-level / year-grade / username / password mutations belong to
+/// [AccountManagementService] and are parent-only.
 class ChildService {
   const ChildService({required ChildRepository repository})
       : _repository = repository;
@@ -33,8 +33,6 @@ class ChildService {
     required String fullName,
     String? dateOfBirth,
     String? gender,
-    String? school,
-    String? grade,
     String? bio,
   }) {
     if (fullName.trim().isEmpty) {
@@ -49,8 +47,6 @@ class ChildService {
       fullName: fullName,
       dateOfBirth: dateOfBirth,
       gender: gender,
-      school: school,
-      grade: grade,
       bio: bio,
     );
   }

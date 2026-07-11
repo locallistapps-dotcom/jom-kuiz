@@ -138,6 +138,10 @@ class QuestionBankController extends AsyncNotifier<List<Question>> {
     String? optionC,
     String? optionD,
     String? explanation,
+    String? explanationImageUrl,
+    String? explanationVideoUrl,
+    String? questionImageUrl,
+    String? reference,
   }) async {
     final Result<Question> result =
         await ref.read(questionBankServiceProvider).createQuestion(
@@ -151,6 +155,10 @@ class QuestionBankController extends AsyncNotifier<List<Question>> {
               optionC: optionC,
               optionD: optionD,
               explanation: explanation,
+              explanationImageUrl: explanationImageUrl,
+              explanationVideoUrl: explanationVideoUrl,
+              questionImageUrl: questionImageUrl,
+              reference: reference,
             );
 
     result.when(
@@ -177,6 +185,10 @@ class QuestionBankController extends AsyncNotifier<List<Question>> {
     String? optionC,
     String? optionD,
     String? explanation,
+    String? explanationImageUrl,
+    String? explanationVideoUrl,
+    String? questionImageUrl,
+    String? reference,
     required bool isActive,
   }) async {
     final Result<Question> result =
@@ -192,6 +204,10 @@ class QuestionBankController extends AsyncNotifier<List<Question>> {
               optionC: optionC,
               optionD: optionD,
               explanation: explanation,
+              explanationImageUrl: explanationImageUrl,
+              explanationVideoUrl: explanationVideoUrl,
+              questionImageUrl: questionImageUrl,
+              reference: reference,
               isActive: isActive,
             );
 

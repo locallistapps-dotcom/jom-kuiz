@@ -17,6 +17,15 @@ abstract final class AppRoutes {
   // ── Teacher ───────────────────────────────────────────────────────────────
   static const String teacherDashboard = '/teacher/dashboard';
 
+  // ── Child Login ───────────────────────────────────────────────────────────
+  static const String childLogin = '/child-login';
+
+  // ── Children Management (parent) ──────────────────────────────────────────
+  static const String childrenList = '/parent/children';
+  static const String addChild = '/parent/children/add';
+  static const String editChild = '/parent/children/edit';
+  static const String childManagement = '/parent/children/manage';
+
   // ── Child ─────────────────────────────────────────────────────────────────
   static const String childDashboard = '/child/dashboard';
   static const String childProfile = '/child/profile';
@@ -67,6 +76,10 @@ abstract final class AppRoutes {
   // ── Admin CMS ─────────────────────────────────────────────────────────────
   static const String adminCms = '/admin';
 
+  /// Admin-only enhanced question management screen (distinct from the
+  /// standard [questionBank] screen; has bulk ops, CSV, and rich dropdowns).
+  static const String adminQuestions = '/admin/questions';
+
   // ── Route names ───────────────────────────────────────────────────────────
   static const String splashName = 'splash';
   static const String loginName = 'login';
@@ -100,6 +113,14 @@ abstract final class AppRoutes {
   static const String rewardWalletName = 'rewardWallet';
   static const String paymentName = 'payment';
   static const String adminCmsName = 'adminCms';
+  static const String adminQuestionsName = 'adminQuestions';
+
+  // ── Route names (new) ─────────────────────────────────────────────────────
+  static const String childLoginName = 'childLogin';
+  static const String childrenListName = 'childrenList';
+  static const String addChildName = 'addChild';
+  static const String editChildName = 'editChild';
+  static const String childManagementName = 'childManagement';
 
   /// Routes reachable while signed out. Every other route requires an
   /// authenticated session — see [RouteGuard].

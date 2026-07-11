@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/session_status.dart';
 import '../providers/auth_providers.dart';
+import '../providers/child_providers.dart';
 
 /// Drives the app's top-level auth redirect decisions (splash screen,
 /// [RouteGuard]).
@@ -32,6 +33,9 @@ class SessionController extends AsyncNotifier<SessionStatus> {
   Future<void> logout() async {
     state = const AsyncValue<SessionStatus>.loading();
     await ref.read(authServiceProvider).logout();
+    // Clear role and selected child so the next login starts fresh.
+    ref.read(userRoleProvider.notifier).state = '';
+    ref.read(currentChildIdProvider.notifier).state = '';
     state = const AsyncValue<SessionStatus>.data(SessionStatus.unauthenticated);
   }
 }

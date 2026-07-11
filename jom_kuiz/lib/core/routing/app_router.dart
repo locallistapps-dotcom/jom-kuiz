@@ -14,6 +14,8 @@ import '../../presentation/screens/child/achievement_screen.dart';
 // import '../../presentation/screens/teacher/teacher_dashboard_screen.dart';
 import '../../presentation/screens/child/child_dashboard_screen.dart';
 import '../../presentation/screens/placeholder/placeholder_screen.dart';
+import '../../presentation/screens/admin/admin_cms_screen.dart';
+import '../../presentation/screens/admin/admin_question_screen.dart';
 import '../../presentation/screens/subject/subject_screen.dart';
 import '../../presentation/screens/chapter/chapter_screen.dart';
 import '../../presentation/screens/question_bank/question_bank_screen.dart';
@@ -30,8 +32,13 @@ import '../../presentation/screens/child/quiz_detail_screen.dart';
 import '../../presentation/screens/child/quiz_list_screen.dart';
 import '../../presentation/screens/dashboard/dashboard_screen.dart';
 import '../../presentation/screens/error/not_found_screen.dart';
+import '../../presentation/screens/parent/add_child_screen.dart';
+import '../../presentation/screens/parent/child_management_screen.dart';
+import '../../presentation/screens/parent/children_list_screen.dart';
+import '../../presentation/screens/parent/edit_child_screen.dart';
 import '../../presentation/screens/parent/edit_profile_screen.dart';
 import '../../presentation/screens/parent/security_screen.dart';
+import '../../presentation/screens/auth/child_login_screen.dart';
 import '../../presentation/screens/settings/settings_screen.dart';
 import '../../presentation/screens/splash/splash_screen.dart';
 import 'app_routes.dart';
@@ -92,6 +99,13 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((Ref ref) {
         },
       ),
 
+      // ── Child Login ─────────────────────────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.childLogin,
+        name: AppRoutes.childLoginName,
+        builder: (context, state) => const ChildLoginScreen(),
+      ),
+
       // ── Parent ─────────────────────────────────────────────────────────────
       GoRoute(
         path: AppRoutes.dashboard,
@@ -112,6 +126,34 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((Ref ref) {
         path: AppRoutes.security,
         name: AppRoutes.securityName,
         builder: (context, state) => const SecurityScreen(),
+      ),
+
+      // ── Children Management ─────────────────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.childrenList,
+        name: AppRoutes.childrenListName,
+        builder: (context, state) => const ChildrenListScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.addChild,
+        name: AppRoutes.addChildName,
+        builder: (context, state) => const AddChildScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.editChild,
+        name: AppRoutes.editChildName,
+        builder: (context, state) {
+          final String childId = state.extra as String? ?? '';
+          return EditChildScreen(childId: childId);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.childManagement,
+        name: AppRoutes.childManagementName,
+        builder: (context, state) {
+          final String childId = state.extra as String? ?? '';
+          return ChildManagementScreen(childId: childId);
+        },
       ),
 
       // ── Teacher (INACTIVE — code preserved, route excluded from navigation) ─
@@ -244,8 +286,12 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((Ref ref) {
       GoRoute(
         path: AppRoutes.adminCms,
         name: AppRoutes.adminCmsName,
-        builder: (context, state) =>
-            const PlaceholderScreen(moduleName: 'Admin CMS'),
+        builder: (context, state) => const AdminCmsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminQuestions,
+        name: AppRoutes.adminQuestionsName,
+        builder: (context, state) => const AdminQuestionScreen(),
       ),
     ],
     errorBuilder: (context, state) => const NotFoundScreen(),

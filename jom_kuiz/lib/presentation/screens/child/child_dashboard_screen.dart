@@ -165,8 +165,6 @@ class _ClassInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String school = profile.school ?? '—';
-    final String grade = profile.grade ?? '—';
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -174,13 +172,27 @@ class _ClassInfoCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'Class Information',
+              'Education',
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: 8),
-            _InfoRow(label: 'School', value: school),
+            _InfoRow(
+              label: 'Level',
+              value: profile.educationLevel.name == 'preschool'
+                  ? 'Preschool'
+                  : profile.educationLevel.name == 'primary'
+                      ? 'Primary School'
+                      : 'Secondary School',
+            ),
             const SizedBox(height: 4),
-            _InfoRow(label: 'Grade / Class', value: grade),
+            _InfoRow(
+              label: 'Year / Grade',
+              value: profile.yearGrade.isEmpty ? '—' : profile.yearGrade,
+            ),
+            if (profile.studentId.isNotEmpty) ...<Widget>[
+              const SizedBox(height: 4),
+              _InfoRow(label: 'Student ID', value: profile.studentId),
+            ],
           ],
         ),
       ),

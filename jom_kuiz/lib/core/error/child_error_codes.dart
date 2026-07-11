@@ -20,4 +20,10 @@ abstract final class ChildErrorCodes {
 
   /// Achievement data could not be retrieved.
   static const String achievementUnavailable = 'CHILD-007';
+
+  /// The child account is disabled — login rejected.
+  static const String disabledAccount = 'CHILD-008';
+
+  /// The student ID, username, or password supplied for child login is wrong.
+  static const String invalidCredentials = 'CHILD-009';
 }

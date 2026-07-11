@@ -1,0 +1,397 @@
+# JOM KUIZ – PROMPT 12
+## Parent & Child Account Management 2.0 (Final Architecture)
+
+Continue from the latest checkpoint only.
+
+Do NOT recreate existing architecture.
+
+Do NOT modify completed modules unless required for integration.
+
+Use the existing Clean Architecture, Riverpod, Result<T>, GoRouter and Supabase conventions.
+
+Quiz Engine and Performance Summary are already complete.
+
+==================================================
+GOAL
+==================================================
+
+Upgrade the Parent & Child account system into the final production-ready architecture.
+
+This module becomes the official account management system for Jom Kuiz.
+
+==================================================
+ACCOUNT TYPES
+==================================================
+
+Support two account types.
+
+1. Parent Account
+2. Child Account
+
+Parent purchases the subscription.
+
+Children never purchase subscriptions.
+
+==================================================
+PARENT LOGIN
+==================================================
+
+Parent login remains:
+
+- Email
+- Password
+
+Parent profile contains:
+
+- Full Name
+- Email
+- Phone (optional)
+- Avatar (placeholder)
+- Subscription Status (placeholder)
+- Created Date
+
+==================================================
+CHILD ACCOUNT
+==================================================
+
+One parent can create multiple child accounts.
+
+Each child belongs to exactly one parent.
+
+Parent manages every child.
+
+==================================================
+STUDENT ID
+==================================================
+
+Every child automatically receives:
+
+Student ID
+
+Rules:
+
+- Exactly 8 digits
+- Numeric only
+- Auto generated
+- Unique
+- Indexed
+- Never changes
+- Cannot be edited
+
+Example:
+
+48392715
+
+==================================================
+CHILD LOGIN
+==================================================
+
+Child login DOES NOT use email.
+
+Child login requires:
+
+- Student ID
+- Username
+- Password
+
+Student ID + Username must match the same account.
+
+If either is incorrect:
+
+Return invalid credentials.
+
+==================================================
+CREATE CHILD
+==================================================
+
+Parent enters:
+
+- Child Name
+- Username
+- Password
+
+Education Level
+
+Options:
+
+- Preschool
+- Primary School
+- Secondary School
+
+Then choose:
+
+Preschool
+
+OR
+
+Year 1
+Year 2
+Year 3
+Year 4
+Year 5
+Year 6
+
+OR
+
+Form 1
+Form 2
+Form 3
+Form 4
+Form 5
+
+System generates Student ID automatically.
+
+==================================================
+EDIT CHILD
+==================================================
+
+Parent can edit:
+
+- Child Name
+- Username
+- Password
+- Education Level
+- Year / Grade
+- Avatar (placeholder)
+
+Parent CANNOT edit:
+
+- Student ID
+
+==================================================
+ACCOUNT STATUS
+==================================================
+
+Support:
+
+- Active
+- Disabled
+
+Disabled child:
+
+- Cannot login
+- History remains
+- Quiz results remain
+
+Never delete quiz history.
+
+==================================================
+QUESTION FILTER
+==================================================
+
+Quiz Engine must automatically filter questions based on:
+
+Education Level
+
+↓
+
+Year / Grade
+
+↓
+
+Subject
+
+↓
+
+Chapter
+
+↓
+
+Topic
+
+If Parent changes Year / Grade:
+
+Future quizzes immediately follow the new level.
+
+Previous quiz history remains unchanged.
+
+==================================================
+CHILD PROFILE
+==================================================
+
+Display:
+
+- Student ID
+- Child Name
+- Username
+- Education Level
+- Year / Grade
+- Created Date
+- Account Status
+
+==================================================
+PARENT DASHBOARD
+==================================================
+
+Display all linked children.
+
+Each child card displays:
+
+- Student Name
+- Student ID
+- Current Year / Grade
+- Total Quizzes
+- Average Score
+- Latest Score
+- Account Status
+
+Tap child opens:
+
+Full Performance Dashboard.
+
+==================================================
+PERFORMANCE LINK
+==================================================
+
+Each child profile links directly to:
+
+- Performance Dashboard
+- Quiz History
+- Weak Topics
+- Strong Topics
+- Recommended Revision
+
+==================================================
+PASSWORD MANAGEMENT
+==================================================
+
+Only Parent can:
+
+- Change Child Password
+- Reset Child Password
+
+Child cannot reset password.
+
+==================================================
+USERNAME
+==================================================
+
+Parent may choose:
+
+Option 1
+
+Auto Generate Username
+
+Example:
+
+aiman4839
+
+Option 2
+
+Custom Username
+
+Must be unique.
+
+==================================================
+DATABASE
+==================================================
+
+Prepare relationships for:
+
+Parent
+
+↓
+
+Children
+
+↓
+
+Quiz Sessions
+
+↓
+
+Quiz Results
+
+↓
+
+Performance Summary
+
+Use foreign keys.
+
+No duplicated user information.
+
+==================================================
+VALIDATION
+==================================================
+
+Handle:
+
+- Duplicate Username
+- Invalid Student ID
+- Duplicate Student ID
+- Invalid Year
+- Invalid Education Level
+- Disabled Account
+- Loading
+- Empty
+- Network Failure
+
+Return Result<T> consistently.
+
+==================================================
+SECURITY
+==================================================
+
+Passwords remain hashed.
+
+Student ID immutable.
+
+Username unique.
+
+Children cannot access another child's data.
+
+Parents can access only their own linked children.
+
+==================================================
+SUPABASE READY
+==================================================
+
+Prepare all tables, indexes and relationships.
+
+Optimise queries for:
+
+- Parent -> Children
+- Child -> Performance
+- Child -> Quiz History
+
+==================================================
+ROUTING
+==================================================
+
+Replace Parent/Child placeholders with the real implementation.
+
+Update routes.
+
+==================================================
+OUTPUT
+==================================================
+
+After completion provide ONLY:
+
+- Files Created
+- Files Modified
+- Providers
+- Controllers
+- Datasources
+- Repositories
+- Routes Updated
+- Database Changes
+- Supabase Readiness
+- Remaining TODO
+- Estimated Next Prompt
+
+==================================================
+DO NOT IMPLEMENT YET
+==================================================
+
+- Subscription
+- Payment
+- Rewards
+- Referral
+- Admin Panel
+- UI/UX redesign
+- Push Notifications
+
+Only complete Parent & Child Account Management 2.0.
+
+Create a checkpoint before finishing.

@@ -7,7 +7,6 @@ import '../../../core/routing/app_routes.dart';
 import '../../../domain/entities/parent_profile.dart';
 import '../../controllers/parent_controller.dart';
 import '../../controllers/session_controller.dart';
-import '../../providers/child_providers.dart';
 import '../../widgets/cards/placeholder_module_card.dart';
 import '../../widgets/feedback/app_error_widget.dart';
 import '../../widgets/feedback/loading_widget.dart';
@@ -145,15 +144,12 @@ class _ProfileCard extends StatelessWidget {
   }
 }
 
-/// Tappable card that navigates into the Child module.
-///
-/// Sets [currentChildIdProvider] to a demo ID so child controllers load.
-/// In a future "Children List" milestone this will navigate to a real picker.
-class _ChildrenCard extends ConsumerWidget {
+/// Tappable card that navigates to the Children List screen.
+class _ChildrenCard extends StatelessWidget {
   const _ChildrenCard({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return Card(
       child: ListTile(
         leading: Container(
@@ -170,15 +166,10 @@ class _ChildrenCard extends ConsumerWidget {
             color: Theme.of(context).colorScheme.primary,
           ),
         ),
-        title: const Text('Children'),
-        subtitle: const Text('Manage linked children'),
+        title: const Text('My Children'),
+        subtitle: const Text('Manage and monitor your children'),
         trailing: const Icon(Icons.chevron_right),
-        onTap: () {
-          // Set a placeholder child ID; the Children List module (future
-          // prompt) will replace this with a real selection flow.
-          ref.read(currentChildIdProvider.notifier).state = 'demo-child-id';
-          context.push(AppRoutes.childDashboard);
-        },
+        onTap: () => context.push(AppRoutes.childrenList),
       ),
     );
   }

@@ -1,0 +1,387 @@
+Continue from the latest checkpoint only.
+
+Do NOT recreate existing architecture.
+
+Do NOT modify completed modules.
+
+Implement the complete Admin Question Management Module using the existing Clean Architecture, Riverpod, Result<T>, and Supabase conventions.
+
+This module will only be accessible by Admin.
+
+Question Bank, Subject, Year, Chapter and Topic modules already exist.
+
+Reuse them.
+
+Replace any Admin Placeholder with the real implementation.
+
+==================================================
+DOMAIN
+==================================================
+
+Create repositories if not already implemented for Admin management.
+
+Reuse existing entities whenever possible.
+
+Do not duplicate models.
+
+==================================================
+DATA
+==================================================
+
+Create or extend datasource methods for:
+
+Subjects
+
+Years
+
+Chapters
+
+Topics
+
+Questions
+
+Support full CRUD.
+
+==================================================
+APPLICATION
+==================================================
+
+Create:
+
+AdminQuestionController
+
+AdminContentController
+
+Riverpod Providers
+
+Result<T> handling
+
+==================================================
+PRESENTATION
+==================================================
+
+Create a complete Admin CMS.
+
+Main Menu
+
+Dashboard
+
+Subjects
+
+Years
+
+Chapters
+
+Topics
+
+Questions
+
+==================================================
+SUBJECT MANAGEMENT
+==================================================
+
+Admin can:
+
+Create Subject
+
+Edit Subject
+
+Delete Subject
+
+Enable / Disable
+
+Search
+
+Sort
+
+==================================================
+YEAR MANAGEMENT
+==================================================
+
+Admin can:
+
+Create Year
+
+Edit
+
+Delete
+
+Enable / Disable
+
+==================================================
+CHAPTER MANAGEMENT
+==================================================
+
+Admin can:
+
+Select Subject
+
+Select Year
+
+Create Chapter
+
+Edit
+
+Delete
+
+Search
+
+==================================================
+TOPIC MANAGEMENT
+==================================================
+
+Admin can:
+
+Select Subject
+
+Select Year
+
+Select Chapter
+
+Create Topic
+
+Edit
+
+Delete
+
+Search
+
+==================================================
+QUESTION MANAGEMENT
+==================================================
+
+Admin can:
+
+Select Subject
+
+Select Year
+
+Select Chapter
+
+Select Topic
+
+Display all questions.
+
+Search questions.
+
+Sort questions.
+
+Duplicate question.
+
+Delete question.
+
+Enable / Disable.
+
+==================================================
+SUPPORTED QUESTION TYPES
+==================================================
+
+MCQ
+
+True / False
+
+Fill In Blank
+
+==================================================
+QUESTION FIELDS
+==================================================
+
+Question
+
+Options (MCQ)
+
+Correct Answer
+
+Difficulty
+
+Easy
+
+Medium
+
+Hard
+
+Explanation
+
+Explanation Image
+
+Explanation Video URL
+
+Reference
+
+==================================================
+MEDIA
+==================================================
+
+Support upload:
+
+Question Image
+
+Explanation Image
+
+Store inside Supabase Storage.
+
+Save URL only.
+
+==================================================
+PREVIEW
+==================================================
+
+Admin can preview exactly how students will see the question.
+
+==================================================
+IMPORT
+==================================================
+
+Support importing questions using CSV.
+
+CSV columns:
+
+Subject
+
+Year
+
+Chapter
+
+Topic
+
+Question
+
+Question Type
+
+Option A
+
+Option B
+
+Option C
+
+Option D
+
+Correct Answer
+
+Difficulty
+
+Explanation
+
+Explanation Image URL
+
+Reference
+
+Validate every row.
+
+Skip invalid rows.
+
+Show import summary.
+
+==================================================
+EXPORT
+==================================================
+
+Support exporting all questions into CSV.
+
+==================================================
+BULK ACTIONS
+==================================================
+
+Enable:
+
+Bulk Delete
+
+Bulk Activate
+
+Bulk Deactivate
+
+Bulk Export
+
+==================================================
+VALIDATION
+==================================================
+
+Prevent duplicate questions.
+
+Prevent orphan records.
+
+Validate required fields.
+
+Return Result<T> consistently.
+
+==================================================
+SEARCH
+==================================================
+
+Support searching by:
+
+Subject
+
+Year
+
+Chapter
+
+Topic
+
+Difficulty
+
+Question Text
+
+==================================================
+SUPABASE READY
+==================================================
+
+Optimize queries.
+
+Avoid duplicate requests.
+
+Support pagination.
+
+==================================================
+ROUTING
+==================================================
+
+Replace Admin Placeholder.
+
+Update routes.
+
+==================================================
+OUTPUT
+==================================================
+
+After completion provide:
+
+Files Created
+
+Files Modified
+
+Providers
+
+Controllers
+
+Repositories
+
+Datasources
+
+Routes Updated
+
+Supabase Readiness
+
+Remaining TODO
+
+Estimated Next Prompt
+
+==================================================
+DO NOT IMPLEMENT YET
+==================================================
+
+Subscription
+
+Payment
+
+Referral
+
+Reward Wallet
+
+Notifications
+
+UI/UX redesign
+
+Analytics dashboard
+
+Only complete the Admin Question Management Module.

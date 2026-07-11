@@ -77,6 +77,9 @@ class QuestionModel {
     this.optionD,
     this.explanation,
     this.explanationImageUrl,
+    this.explanationVideoUrl,
+    this.questionImageUrl,
+    this.reference,
   });
 
   final String questionId;
@@ -91,6 +94,9 @@ class QuestionModel {
   final String correctAnswer;
   final String? explanation;
   final String? explanationImageUrl;
+  final String? explanationVideoUrl;
+  final String? questionImageUrl;
+  final String? reference;
   final bool isActive;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -111,6 +117,9 @@ class QuestionModel {
       correctAnswer: json['correct_answer'] as String,
       explanation: json['explanation'] as String?,
       explanationImageUrl: json['explanation_image_url'] as String?,
+      explanationVideoUrl: json['explanation_video_url'] as String?,
+      questionImageUrl: json['question_image_url'] as String?,
+      reference: json['reference'] as String?,
       isActive: json['is_active'] as bool? ?? true,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
@@ -130,6 +139,9 @@ class QuestionModel {
         'correct_answer': correctAnswer,
         'explanation': explanation,
         'explanation_image_url': explanationImageUrl,
+        'explanation_video_url': explanationVideoUrl,
+        'question_image_url': questionImageUrl,
+        'reference': reference,
         'is_active': isActive,
         'created_at': createdAt.toIso8601String(),
         'updated_at': updatedAt.toIso8601String(),
@@ -149,6 +161,9 @@ class QuestionModel {
       correctAnswer: correctAnswer,
       explanation: explanation,
       explanationImageUrl: explanationImageUrl,
+      explanationVideoUrl: explanationVideoUrl,
+      questionImageUrl: questionImageUrl,
+      reference: reference,
       isActive: isActive,
       createdAt: createdAt,
       updatedAt: updatedAt,
@@ -170,6 +185,10 @@ class CreateQuestionRequest {
     this.optionC,
     this.optionD,
     this.explanation,
+    this.explanationImageUrl,
+    this.explanationVideoUrl,
+    this.questionImageUrl,
+    this.reference,
   });
 
   final String topicId;
@@ -182,6 +201,10 @@ class CreateQuestionRequest {
   final String? optionD;
   final String correctAnswer;
   final String? explanation;
+  final String? explanationImageUrl;
+  final String? explanationVideoUrl;
+  final String? questionImageUrl;
+  final String? reference;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
         'topic_id': topicId,
@@ -195,6 +218,13 @@ class CreateQuestionRequest {
         'correct_answer': correctAnswer,
         if (explanation != null && explanation!.isNotEmpty)
           'explanation': explanation,
+        if (explanationImageUrl != null && explanationImageUrl!.isNotEmpty)
+          'explanation_image_url': explanationImageUrl,
+        if (explanationVideoUrl != null && explanationVideoUrl!.isNotEmpty)
+          'explanation_video_url': explanationVideoUrl,
+        if (questionImageUrl != null && questionImageUrl!.isNotEmpty)
+          'question_image_url': questionImageUrl,
+        if (reference != null && reference!.isNotEmpty) 'reference': reference,
         'is_active': true,
       };
 }
@@ -212,6 +242,10 @@ class UpdateQuestionRequest {
     this.optionC,
     this.optionD,
     this.explanation,
+    this.explanationImageUrl,
+    this.explanationVideoUrl,
+    this.questionImageUrl,
+    this.reference,
   });
 
   final String topicId;
@@ -224,6 +258,10 @@ class UpdateQuestionRequest {
   final String? optionD;
   final String correctAnswer;
   final String? explanation;
+  final String? explanationImageUrl;
+  final String? explanationVideoUrl;
+  final String? questionImageUrl;
+  final String? reference;
   final bool isActive;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
@@ -238,6 +276,20 @@ class UpdateQuestionRequest {
         'correct_answer': correctAnswer,
         'explanation':
             (explanation != null && explanation!.isNotEmpty) ? explanation : null,
+        'explanation_image_url': (explanationImageUrl != null &&
+                explanationImageUrl!.isNotEmpty)
+            ? explanationImageUrl
+            : null,
+        'explanation_video_url': (explanationVideoUrl != null &&
+                explanationVideoUrl!.isNotEmpty)
+            ? explanationVideoUrl
+            : null,
+        'question_image_url':
+            (questionImageUrl != null && questionImageUrl!.isNotEmpty)
+                ? questionImageUrl
+                : null,
+        'reference':
+            (reference != null && reference!.isNotEmpty) ? reference : null,
         'is_active': isActive,
       };
 }

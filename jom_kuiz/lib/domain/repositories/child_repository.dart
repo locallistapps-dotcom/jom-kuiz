@@ -6,20 +6,19 @@ import '../entities/quiz.dart';
 
 /// Child module repository contract implemented by [ChildRepositoryImpl].
 ///
-/// API-facing only — no storage concerns leak into the domain layer.
-/// All endpoints are documented with their corresponding REST paths.
+/// Self-edit operations (name, bio, gender, date of birth, avatar) are
+/// available here. Education level / year-grade / username / password are
+/// managed by the parent via [AccountManagementRepository].
 abstract class ChildRepository {
   /// `GET /child/:childId/profile`
   Future<Result<ChildProfile>> getProfile({required String childId});
 
-  /// `PUT /child/:childId/profile`
+  /// `PUT /child/:childId/profile` — self-editable fields only.
   Future<Result<ChildProfile>> updateProfile({
     required String childId,
     required String fullName,
     String? dateOfBirth,
     String? gender,
-    String? school,
-    String? grade,
     String? bio,
   });
 

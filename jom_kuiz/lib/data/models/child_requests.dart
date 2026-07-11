@@ -1,30 +1,27 @@
 /// Request payloads for the Child REST endpoints.
 ///
-/// Plain classes — no codegen required.
+/// Self-edit fields (bio, gender, dateOfBirth) are child-editable.
+/// Education level, year/grade, username, and password are parent-only.
+/// School and grade fields have been removed — replaced by structured
+/// education level + year/grade managed via AccountManagementService.
 
 class UpdateChildProfileRequest {
   const UpdateChildProfileRequest({
     required this.fullName,
     this.dateOfBirth,
     this.gender,
-    this.school,
-    this.grade,
     this.bio,
   });
 
   final String fullName;
   final String? dateOfBirth; // ISO-8601 date string
   final String? gender;
-  final String? school;
-  final String? grade;
   final String? bio;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
         'full_name': fullName,
         'date_of_birth': dateOfBirth,
         'gender': gender,
-        'school': school,
-        'grade': grade,
         'bio': bio,
       };
 }

@@ -1,4 +1,5 @@
 import '../../domain/entities/child_profile.dart';
+import '../../domain/entities/education_level.dart';
 
 class LinkedParentModel {
   const LinkedParentModel({
@@ -49,7 +50,9 @@ class LinkedParentModel {
 
 /// Wire format for a child profile as returned by the Child API.
 ///
-/// Hand-written [fromJson]/[toJson] — no codegen required.
+/// Includes the new Prompt 12 fields: `student_id`, `education_level`,
+/// `year_grade`, `account_status`. The old free-text `school` / `grade`
+/// fields have been replaced by the structured education fields.
 class ChildProfileModel {
   const ChildProfileModel({
     required this.childId,
@@ -57,12 +60,13 @@ class ChildProfileModel {
     required this.username,
     required this.createdAt,
     required this.updatedAt,
-    this.email,
+    this.studentId = '',
+    this.educationLevel = 'primary',
+    this.yearGrade = '',
+    this.accountStatus = 'active',
     this.profilePhoto,
     this.dateOfBirth,
     this.gender,
-    this.school,
-    this.grade,
     this.bio,
     this.linkedParent,
   });
@@ -70,12 +74,13 @@ class ChildProfileModel {
   final String childId;
   final String fullName;
   final String username;
-  final String? email;
+  final String studentId;
+  final String educationLevel;
+  final String yearGrade;
+  final String accountStatus;
   final String? profilePhoto;
   final String? dateOfBirth;
   final String? gender;
-  final String? school;
-  final String? grade;
   final String? bio;
   final LinkedParentModel? linkedParent;
   final DateTime createdAt;
@@ -87,12 +92,13 @@ class ChildProfileModel {
       childId: json['child_id'] as String,
       fullName: json['full_name'] as String,
       username: json['username'] as String,
-      email: json['email'] as String?,
+      studentId: json['student_id'] as String? ?? '',
+      educationLevel: json['education_level'] as String? ?? 'primary',
+      yearGrade: json['year_grade'] as String? ?? '',
+      accountStatus: json['account_status'] as String? ?? 'active',
       profilePhoto: json['profile_photo'] as String?,
       dateOfBirth: json['date_of_birth'] as String?,
       gender: json['gender'] as String?,
-      school: json['school'] as String?,
-      grade: json['grade'] as String?,
       bio: json['bio'] as String?,
       linkedParent: linkedParentRaw == null
           ? null
@@ -107,12 +113,13 @@ class ChildProfileModel {
         'child_id': childId,
         'full_name': fullName,
         'username': username,
-        'email': email,
+        'student_id': studentId,
+        'education_level': educationLevel,
+        'year_grade': yearGrade,
+        'account_status': accountStatus,
         'profile_photo': profilePhoto,
         'date_of_birth': dateOfBirth,
         'gender': gender,
-        'school': school,
-        'grade': grade,
         'bio': bio,
         'linked_parent': linkedParent?.toJson(),
         'created_at': createdAt.toIso8601String(),
@@ -124,13 +131,13 @@ class ChildProfileModel {
       childId: childId,
       fullName: fullName,
       username: username,
-      email: email,
+      studentId: studentId,
+      educationLevel: EducationLevelHelper.fromString(educationLevel),
+      yearGrade: yearGrade,
+      accountStatus: EducationLevelHelper.statusFromString(accountStatus),
       profilePhoto: profilePhoto,
-      dateOfBirth:
-          dateOfBirth == null ? null : DateTime.tryParse(dateOfBirth!),
+      dateOfBirth: dateOfBirth == null ? null : DateTime.tryParse(dateOfBirth!),
       gender: gender,
-      school: school,
-      grade: grade,
       bio: bio,
       linkedParent: linkedParent?.toEntity(),
       createdAt: createdAt,

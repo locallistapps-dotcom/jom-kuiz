@@ -113,6 +113,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               onPressed: isLoading ? null : () => context.push('/register'),
               child: const Text("Don't have an account? Register"),
             ),
+            const Divider(height: 24),
+            TextButton.icon(
+              icon: const Icon(Icons.school_outlined, size: 18),
+              label: const Text('Login as Student'),
+              onPressed: isLoading
+                  ? null
+                  : () => context.push('/child-login'),
+            ),
           ],
         ),
       ),

@@ -95,6 +95,10 @@ class QuestionBankService {
     String? optionC,
     String? optionD,
     String? explanation,
+    String? explanationImageUrl,
+    String? explanationVideoUrl,
+    String? questionImageUrl,
+    String? reference,
   }) {
     final Result<void>? err = _validateMutation(
       topicId: topicId,
@@ -123,6 +127,10 @@ class QuestionBankService {
       optionC: c.c,
       optionD: c.d,
       explanation: _clean(explanation),
+      explanationImageUrl: _clean(explanationImageUrl),
+      explanationVideoUrl: _clean(explanationVideoUrl),
+      questionImageUrl: _clean(questionImageUrl),
+      reference: _clean(reference),
     );
   }
 
@@ -138,6 +146,10 @@ class QuestionBankService {
     String? optionC,
     String? optionD,
     String? explanation,
+    String? explanationImageUrl,
+    String? explanationVideoUrl,
+    String? questionImageUrl,
+    String? reference,
     required bool isActive,
   }) {
     if (questionId.trim().isEmpty) {
@@ -171,6 +183,10 @@ class QuestionBankService {
       optionC: c.c,
       optionD: c.d,
       explanation: _clean(explanation),
+      explanationImageUrl: _clean(explanationImageUrl),
+      explanationVideoUrl: _clean(explanationVideoUrl),
+      questionImageUrl: _clean(questionImageUrl),
+      reference: _clean(reference),
       isActive: isActive,
     );
   }

@@ -45,6 +45,10 @@ abstract interface class QuestionBankRepository {
     String? optionC,
     String? optionD,
     String? explanation,
+    String? explanationImageUrl,
+    String? explanationVideoUrl,
+    String? questionImageUrl,
+    String? reference,
   });
 
   /// Updates all mutable fields of an existing question.
@@ -60,6 +64,10 @@ abstract interface class QuestionBankRepository {
     String? optionC,
     String? optionD,
     String? explanation,
+    String? explanationImageUrl,
+    String? explanationVideoUrl,
+    String? questionImageUrl,
+    String? reference,
     required bool isActive,
   });
 

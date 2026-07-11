@@ -75,4 +75,20 @@ abstract final class Validators {
     }
     return null;
   }
+
+  /// Validates a Student ID: exactly 8 numeric digits, non-empty.
+  static String? studentId(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Student ID is required';
+    }
+    final String id = value.trim();
+    if (id.length != 8) {
+      return 'Student ID must be exactly 8 digits';
+    }
+    if (!RegExp(r'^\d{8}
+).hasMatch(id)) {
+      return 'Student ID must contain digits only';
+    }
+    return null;
+  }
 }
