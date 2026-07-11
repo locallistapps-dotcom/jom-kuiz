@@ -42,9 +42,23 @@ class ChildRemoteDataSourceImpl implements ChildRemoteDataSource {
   @override
   Future<ChildProfileModel> getProfile({required String childId}) async {
     try {
-      final Response<dynamic> res =
-          await _dio.get<dynamic>('$_childBase/$childId/profile');
-      return ChildProfileModel.fromJson(res.data as Map<String, dynamic>);
+      // Uses the get_child_profile RPC (SECURITY DEFINER) so the anon key
+      // can fetch the profile — children have no Supabase JWT.
+      final Response<dynamic> res = await _dio.post<dynamic>(
+        '/rpc/get_child_profile',
+        data: <String, String>{'p_child_id': childId},
+      );
+      final List<dynamic> rows = res.data as List<dynamic>;
+      if (rows.isEmpty) {
+        throw ServerException(
+          'Child not found',
+          ChildErrorCodes.profileNotFound,
+          null,
+        );
+      }
+      return ChildProfileModel.fromJson(rows.first as Map<String, dynamic>);
+    } on AppException {
+      rethrow;
     } on DioException catch (e) {
       throw _mapError(e, notFoundCode: ChildErrorCodes.profileNotFound);
     }
@@ -88,17 +102,9 @@ class ChildRemoteDataSourceImpl implements ChildRemoteDataSource {
 
   @override
   Future<List<HomeworkModel>> getHomework({required String childId}) async {
-    try {
-      final Response<dynamic> res =
-          await _dio.get<dynamic>('$_childBase/$childId/homework');
-      final List<dynamic> list = res.data as List<dynamic>;
-      return list
-          .map((dynamic e) =>
-              HomeworkModel.fromJson(e as Map<String, dynamic>))
-          .toList();
-    } on DioException catch (e) {
-      throw _mapError(e);
-    }
+    // Homework table not yet implemented — return empty list so the
+    // dashboard renders the "All caught up!" state instead of erroring.
+    return <HomeworkModel>[];
   }
 
   @override

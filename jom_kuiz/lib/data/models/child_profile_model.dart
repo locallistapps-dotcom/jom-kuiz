@@ -87,7 +87,24 @@ class ChildProfileModel {
   final DateTime updatedAt;
 
   factory ChildProfileModel.fromJson(Map<String, dynamic> json) {
+    // Support two response shapes:
+    //   1. Flat (PostgREST RPC get_child_profile): parent fields are top-level
+    //      keys (parent_id, parent_full_name, parent_email).
+    //   2. Nested (legacy custom API): parent data is a nested linked_parent map.
+    LinkedParentModel? linkedParent;
     final Object? linkedParentRaw = json['linked_parent'];
+    if (linkedParentRaw != null) {
+      linkedParent = LinkedParentModel.fromJson(
+          linkedParentRaw as Map<String, dynamic>);
+    } else if (json['parent_id'] != null && json['parent_full_name'] != null) {
+      linkedParent = LinkedParentModel(
+        parentId: json['parent_id'] as String,
+        fullName: json['parent_full_name'] as String,
+        email: json['parent_email'] as String? ?? '',
+        linkStatus: 'linked',
+      );
+    }
+
     return ChildProfileModel(
       childId: json['child_id'] as String,
       fullName: json['full_name'] as String,
@@ -100,10 +117,7 @@ class ChildProfileModel {
       dateOfBirth: json['date_of_birth'] as String?,
       gender: json['gender'] as String?,
       bio: json['bio'] as String?,
-      linkedParent: linkedParentRaw == null
-          ? null
-          : LinkedParentModel.fromJson(
-              linkedParentRaw as Map<String, dynamic>),
+      linkedParent: linkedParent,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
     );
