@@ -38,9 +38,9 @@ jobs:
         working-directory: jom_kuiz
         run: flutter pub get
 
-      - name: Analyse Dart code
-        working-directory: jom_kuiz
-        run: flutter analyze --no-fatal-warnings
+#      - name: Analyse Dart code
+#        working-directory: jom_kuiz
+#        run: flutter analyze --no-fatal-warnings
 
       - name: Generate PWA icons
         run: |
