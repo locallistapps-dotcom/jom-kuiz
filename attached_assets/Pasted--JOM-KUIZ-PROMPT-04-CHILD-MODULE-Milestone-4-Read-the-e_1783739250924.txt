@@ -1,0 +1,218 @@
+# JOM KUIZ - PROMPT 04
+## CHILD MODULE (Milestone 4)
+
+Read the existing repository first.
+
+Do NOT recreate existing architecture.
+Do NOT modify completed Foundation, Authentication, or Parent Module unless absolutely required.
+
+Use the existing architecture, providers, repositories, routing, theme, and coding standards.
+
+======================================================
+GOAL
+======================================================
+
+Implement the complete Child Module.
+
+The Child Module must integrate with the existing authentication system and dashboard.
+
+======================================================
+FEATURES
+======================================================
+
+Create:
+
+1. Child Dashboard
+- Welcome card
+- Student profile summary
+- Parent linked status
+- Class information
+- Quick actions
+
+2. Child Profile
+- View profile
+- Edit profile
+- Avatar
+- Birthday
+- Gender
+- School
+- Class
+- Bio
+
+3. Linked Parent
+- Show linked parent
+- Parent name
+- Parent email
+- Relationship
+- Link status
+
+4. Homework
+- Homework list
+- Homework details
+- Due date
+- Status
+- Completed indicator
+
+5. Quiz
+- Quiz list
+- Quiz details
+- Start quiz button
+- Score history
+- Progress indicator
+
+6. Achievement
+- Badges
+- Stars
+- Total points
+- Ranking
+- Achievement history
+
+======================================================
+DATA MODELS
+======================================================
+
+Create proper models for:
+
+ChildProfile
+Homework
+Quiz
+QuizResult
+Achievement
+Badge
+
+======================================================
+REPOSITORY
+======================================================
+
+Create:
+
+ChildRepository
+
+Methods:
+
+getProfile()
+
+updateProfile()
+
+getHomework()
+
+getHomeworkDetail()
+
+getQuizList()
+
+getQuizDetail()
+
+submitQuiz()
+
+getAchievements()
+
+======================================================
+SERVICE
+======================================================
+
+ChildService
+
+Validation
+
+Error handling
+
+Result<T>
+
+======================================================
+CONTROLLER
+======================================================
+
+ChildController
+
+Riverpod providers
+
+Loading state
+
+Error state
+
+Refresh methods
+
+======================================================
+ROUTES
+======================================================
+
+Register all Child routes.
+
+Protect routes with authentication.
+
+======================================================
+UI
+======================================================
+
+Material 3
+
+Responsive
+
+Dark mode compatible
+
+Loading
+
+Empty state
+
+Error state
+
+======================================================
+TESTING
+======================================================
+
+Create unit tests for:
+
+Repository
+
+Service
+
+Controller
+
+Validators
+
+Widget tests
+
+No skipped tests.
+
+======================================================
+QUALITY
+======================================================
+
+Run:
+
+flutter analyze
+
+flutter test
+
+Fix every warning and error.
+
+No duplicate files.
+
+No placeholder TODO left behind.
+
+======================================================
+AFTER COMPLETION PROVIDE
+
+Files Created
+
+Files Modified
+
+Controllers
+
+Providers
+
+Repositories
+
+Services
+
+Routes
+
+Tests Added
+
+flutter analyze result
+
+flutter test result
+
+Remaining TODO
+
+Next Milestone
