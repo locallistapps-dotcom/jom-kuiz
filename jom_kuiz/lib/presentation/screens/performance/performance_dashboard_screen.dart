@@ -112,7 +112,7 @@ class _DashboardBody extends StatelessWidget {
             Text(
               'OVERVIEW',
               style: theme.textTheme.labelSmall?.copyWith(
-                color: colors.onSurface.withOpacity(0.5),
+                color: colors.onSurface.withValues(alpha: 0.5),
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1.1,
               ),
@@ -126,7 +126,7 @@ class _DashboardBody extends StatelessWidget {
               Text(
                 'LAST 7 DAYS',
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: colors.onSurface.withOpacity(0.5),
+                  color: colors.onSurface.withValues(alpha: 0.5),
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.1,
                 ),
@@ -140,7 +140,7 @@ class _DashboardBody extends StatelessWidget {
             Text(
               'EXPLORE',
               style: theme.textTheme.labelSmall?.copyWith(
-                color: colors.onSurface.withOpacity(0.5),
+                color: colors.onSurface.withValues(alpha: 0.5),
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1.1,
               ),
@@ -181,7 +181,7 @@ class _DashboardBody extends StatelessWidget {
               Text(
                 'REVISION SUGGESTIONS',
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: colors.onSurface.withOpacity(0.5),
+                  color: colors.onSurface.withValues(alpha: 0.5),
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.1,
                 ),
@@ -229,7 +229,7 @@ class _ScoreHero extends StatelessWidget {
                   Text(
                     'Average Score',
                     style: theme.textTheme.labelMedium?.copyWith(
-                        color: colors.onPrimaryContainer.withOpacity(0.7)),
+                        color: colors.onPrimaryContainer.withValues(alpha: 0.7)),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -243,7 +243,7 @@ class _ScoreHero extends StatelessWidget {
                   Text(
                     '${data.totalQuizzes} quiz${data.totalQuizzes != 1 ? 'zes' : ''} completed',
                     style: theme.textTheme.bodySmall?.copyWith(
-                        color: colors.onPrimaryContainer.withOpacity(0.65)),
+                        color: colors.onPrimaryContainer.withValues(alpha: 0.65)),
                   ),
                 ],
               ),
@@ -259,7 +259,7 @@ class _ScoreHero extends StatelessWidget {
                 _MiniStat(
                     label: 'Lowest',
                     value: '${data.lowestScore.toStringAsFixed(0)} %',
-                    color: colors.onPrimaryContainer.withOpacity(0.7)),
+                    color: colors.onPrimaryContainer.withValues(alpha: 0.7)),
               ],
             ),
           ],
@@ -287,7 +287,7 @@ class _MiniStat extends StatelessWidget {
                   color: Theme.of(context)
                       .colorScheme
                       .onPrimaryContainer
-                      .withOpacity(0.6))),
+                      .withValues(alpha: 0.6))),
           Text(value,
               style: Theme.of(context)
                   .textTheme
@@ -391,7 +391,7 @@ class _GridTile extends StatelessWidget {
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: stat.color.withOpacity(0.12),
+              color: stat.color.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
             child: Icon(stat.icon, size: 16, color: stat.color),
@@ -405,7 +405,7 @@ class _GridTile extends StatelessWidget {
                 Text(stat.label,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color:
-                            colors.onSurface.withOpacity(0.55)),
+                            colors.onSurface.withValues(alpha: 0.55)),
                     overflow: TextOverflow.ellipsis),
                 Text(stat.value,
                     style: Theme.of(context)
@@ -479,7 +479,7 @@ class _SparklineChart extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: values[i] > 0
                                 ? colors.primary
-                                : colors.outlineVariant.withOpacity(0.3),
+                                : colors.outlineVariant.withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
@@ -499,7 +499,7 @@ class _SparklineChart extends StatelessWidget {
                   labels[i],
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: colors.onSurface.withOpacity(0.5),
+                      color: colors.onSurface.withValues(alpha: 0.5),
                       fontSize: 10),
                 ),
               ),
@@ -563,7 +563,7 @@ class _NavCard extends StatelessWidget {
                           ?.copyWith(fontWeight: FontWeight.w600)),
                   Text(subtitle,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: colors.onSurface.withOpacity(0.55))),
+                          color: colors.onSurface.withValues(alpha: 0.55))),
                 ],
               ),
             ),
@@ -589,7 +589,7 @@ class _RevisionCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: colors.errorContainer.withOpacity(0.3),
+        color: colors.errorContainer.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: colors.errorContainer),
       ),
@@ -610,7 +610,7 @@ class _RevisionCard extends StatelessWidget {
           Text(
             'Weak Topics:',
             style: theme.textTheme.labelSmall
-                ?.copyWith(color: colors.onSurface.withOpacity(0.6)),
+                ?.copyWith(color: colors.onSurface.withValues(alpha: 0.6)),
           ),
           const SizedBox(height: 4),
           Wrap(
@@ -632,7 +632,7 @@ class _RevisionCard extends StatelessWidget {
           Text(
             'Recommended: Repeat these topics before attempting another quiz.',
             style: theme.textTheme.bodySmall?.copyWith(
-                color: colors.onSurface.withOpacity(0.65),
+                color: colors.onSurface.withValues(alpha: 0.65),
                 fontStyle: FontStyle.italic),
           ),
         ],
@@ -656,7 +656,7 @@ class _EmptyView extends StatelessWidget {
             children: <Widget>[
               Icon(Icons.bar_chart_rounded,
                   size: 72,
-                  color: theme.colorScheme.outline.withOpacity(0.5)),
+                  color: theme.colorScheme.outline.withValues(alpha: 0.5)),
               const SizedBox(height: 20),
               Text('No quizzes yet',
                   style: theme.textTheme.titleMedium
@@ -666,7 +666,7 @@ class _EmptyView extends StatelessWidget {
                 'Complete a quiz in the Quiz Engine to see your performance analytics here.',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.55)),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.55)),
               ),
             ],
           ),

@@ -6,7 +6,7 @@ import 'package:equatable/equatable.dart';
 /// at the boundary) so the presentation layer never has to catch raw
 /// `DioException` / `PostgreSQLException` types directly.
 abstract class Failure extends Equatable {
-  const Failure(this.message, {this.code});
+  const Failure(this.message, [this.code]);
 
   final String message;
   final String? code;

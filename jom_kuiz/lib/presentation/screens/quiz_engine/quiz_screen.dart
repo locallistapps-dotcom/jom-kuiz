@@ -240,8 +240,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                           color: active
                               ? colors.primary
                               : answered
-                                  ? colors.primary.withOpacity(0.5)
-                                  : colors.outline.withOpacity(0.3),
+                                  ? colors.primary.withValues(alpha: 0.5)
+                                  : colors.outline.withValues(alpha: 0.3),
                         ),
                       ),
                     );

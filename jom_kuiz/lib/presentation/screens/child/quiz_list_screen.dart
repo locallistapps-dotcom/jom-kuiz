@@ -68,7 +68,7 @@ class _QuizCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 4),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: diffColor.withOpacity(0.15),
+          backgroundColor: diffColor.withValues(alpha: 0.15),
           child: Icon(Icons.quiz_outlined, color: diffColor),
         ),
         title: Text(quiz.title),
@@ -79,7 +79,7 @@ class _QuizCard extends StatelessWidget {
         trailing: Chip(
           label: Text(quiz.difficulty.name),
           visualDensity: VisualDensity.compact,
-          backgroundColor: diffColor.withOpacity(0.12),
+          backgroundColor: diffColor.withValues(alpha: 0.12),
           labelStyle: TextStyle(color: diffColor, fontSize: 11),
         ),
         onTap: () =>

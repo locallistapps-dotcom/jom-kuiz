@@ -2,7 +2,7 @@
 /// API layer). The [GlobalExceptionHandler] maps these into [Failure]s (or
 /// user-facing messages) at the boundary of the presentation layer.
 class AppException implements Exception {
-  const AppException(this.message, {this.code, this.cause});
+  const AppException(this.message, [this.code, this.cause]);
 
   final String message;
   final String? code;

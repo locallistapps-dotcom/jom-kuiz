@@ -134,7 +134,7 @@ class _QuizStartScreenState extends ConsumerState<QuizStartScreen> {
             Text(
               'Questions are randomized automatically.',
               style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colors.onSurface.withOpacity(0.55)),
+                  color: colors.onSurface.withValues(alpha: 0.55)),
             ),
             const SizedBox(height: 20),
 
@@ -199,7 +199,7 @@ class _QuizStartScreenState extends ConsumerState<QuizStartScreen> {
                                 ? FontWeight.bold
                                 : FontWeight.normal,
                             color: disabled
-                                ? colors.onSurface.withOpacity(0.35)
+                                ? colors.onSurface.withValues(alpha: 0.35)
                                 : selected
                                     ? colors.onPrimaryContainer
                                     : colors.onSurface,
@@ -210,15 +210,15 @@ class _QuizStartScreenState extends ConsumerState<QuizStartScreen> {
                         _labelFor(count),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: disabled
-                              ? colors.onSurface.withOpacity(0.35)
-                              : colors.onSurface.withOpacity(0.55),
+                              ? colors.onSurface.withValues(alpha: 0.35)
+                              : colors.onSurface.withValues(alpha: 0.55),
                         ),
                       ),
                       if (disabled) ...<Widget>[
                         const SizedBox(width: 6),
                         Icon(Icons.lock_outline,
                             size: 14,
-                            color: colors.onSurface.withOpacity(0.35)),
+                            color: colors.onSurface.withValues(alpha: 0.35)),
                       ],
                     ],
                   ),

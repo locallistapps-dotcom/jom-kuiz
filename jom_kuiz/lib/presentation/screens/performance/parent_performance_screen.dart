@@ -185,7 +185,7 @@ class _ChildCard extends StatelessWidget {
                             : 'No quizzes yet',
                         style: theme.textTheme.bodySmall?.copyWith(
                             color:
-                                colors.onSurface.withOpacity(0.55)),
+                                colors.onSurface.withValues(alpha: 0.55)),
                       ),
                     ],
                   ),
@@ -196,12 +196,12 @@ class _ChildCard extends StatelessWidget {
                       horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: hasData
-                        ? scoreColor.withOpacity(0.1)
+                        ? scoreColor.withValues(alpha: 0.1)
                         : colors.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                         color: hasData
-                            ? scoreColor.withOpacity(0.4)
+                            ? scoreColor.withValues(alpha: 0.4)
                             : colors.outlineVariant),
                   ),
                   child: Text(
@@ -280,7 +280,7 @@ class _InfoChip extends StatelessWidget {
                   color: Theme.of(context)
                       .colorScheme
                       .onSurface
-                      .withOpacity(0.5),
+                      .withValues(alpha: 0.5),
                   fontSize: 9)),
           Text(value,
               style: Theme.of(context)
@@ -313,7 +313,7 @@ class _EmptyBody extends StatelessWidget {
                   color: Theme.of(context)
                       .colorScheme
                       .outline
-                      .withOpacity(0.5)),
+                      .withValues(alpha: 0.5)),
               const SizedBox(height: 16),
               Text(message,
                   textAlign: TextAlign.center,
@@ -321,7 +321,7 @@ class _EmptyBody extends StatelessWidget {
                       color: Theme.of(context)
                           .colorScheme
                           .onSurface
-                          .withOpacity(0.55))),
+                          .withValues(alpha: 0.55))),
             ],
           ),
         ),

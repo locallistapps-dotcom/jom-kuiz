@@ -36,7 +36,7 @@ class ChapterPerformanceScreen extends StatelessWidget {
                 'No chapter data available.',
                 style: theme.textTheme.bodyMedium?.copyWith(
                     color:
-                        theme.colorScheme.onSurface.withOpacity(0.55)),
+                        theme.colorScheme.onSurface.withValues(alpha: 0.55)),
               ),
             )
           : ListView(
@@ -156,7 +156,7 @@ class _ChapterTile extends StatelessWidget {
           Text(
             '${chapter.totalQuizzes} quiz${chapter.totalQuizzes != 1 ? 'zes' : ''}',
             style: theme.textTheme.bodySmall
-                ?.copyWith(color: colors.onSurface.withOpacity(0.55)),
+                ?.copyWith(color: colors.onSurface.withValues(alpha: 0.55)),
           ),
         ],
       ),
@@ -174,7 +174,7 @@ class _SectionLabel extends StatelessWidget {
         label,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
               color: color ??
-                  Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                  Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
               fontWeight: FontWeight.w700,
               letterSpacing: 1.1,
             ),
@@ -199,8 +199,8 @@ class _SummaryChip extends StatelessWidget {
                 .textTheme
                 .labelSmall
                 ?.copyWith(color: color, fontWeight: FontWeight.w700)),
-        backgroundColor: color.withOpacity(0.1),
-        side: BorderSide(color: color.withOpacity(0.3)),
+        backgroundColor: color.withValues(alpha: 0.1),
+        side: BorderSide(color: color.withValues(alpha: 0.3)),
         padding: const EdgeInsets.symmetric(horizontal: 4),
       );
 }
@@ -215,7 +215,7 @@ class _InlineBadge extends StatelessWidget {
         padding:
             const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(

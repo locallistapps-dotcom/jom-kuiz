@@ -20,7 +20,7 @@ class PlaceholderScreen extends StatelessWidget {
             Icon(
               Icons.construction_rounded,
               size: 64,
-              color: theme.colorScheme.primary.withOpacity(0.4),
+              color: theme.colorScheme.primary.withValues(alpha: 0.4),
             ),
             const SizedBox(height: 16),
             Text(
@@ -33,7 +33,7 @@ class PlaceholderScreen extends StatelessWidget {
             Text(
               'Coming soon',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.55),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
               ),
             ),
           ],

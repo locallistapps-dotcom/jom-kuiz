@@ -111,7 +111,7 @@ class _HomeworkTile extends StatelessWidget {
         trailing: Chip(
           label: Text(homework.status.name),
           visualDensity: VisualDensity.compact,
-          backgroundColor: statusColor.withOpacity(0.12),
+          backgroundColor: statusColor.withValues(alpha: 0.12),
           labelStyle: TextStyle(color: statusColor, fontSize: 11),
         ),
         onTap: () => context.push(

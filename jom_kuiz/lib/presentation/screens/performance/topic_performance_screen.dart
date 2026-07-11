@@ -109,7 +109,7 @@ class _TopicPerformanceScreenState
                     child: Text('No topics match your search.',
                         style: theme.textTheme.bodyMedium?.copyWith(
                             color:
-                                colors.onSurface.withOpacity(0.55))))
+                                colors.onSurface.withValues(alpha: 0.55))))
                 : ListView.separated(
                     padding:
                         const EdgeInsets.fromLTRB(16, 8, 16, 32),
@@ -170,9 +170,9 @@ class _TopicCard extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: recColor.withOpacity(0.1),
+                  color: recColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: recColor.withOpacity(0.4)),
+                  border: Border.all(color: recColor.withValues(alpha: 0.4)),
                 ),
                 child: Text(
                   topic.recommendation,
@@ -186,7 +186,7 @@ class _TopicCard extends StatelessWidget {
           Text(
             '${topic.subjectName} › ${topic.chapterName} › ${topic.yearName}',
             style: theme.textTheme.bodySmall?.copyWith(
-                color: colors.onSurface.withOpacity(0.5)),
+                color: colors.onSurface.withValues(alpha: 0.5)),
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 10),
@@ -229,7 +229,7 @@ class _TopicCard extends StatelessWidget {
                   DateFormat('d MMM y').format(topic.lastAttempt!),
                   style: theme.textTheme.bodySmall?.copyWith(
                       color:
-                          colors.onSurface.withOpacity(0.45)),
+                          colors.onSurface.withValues(alpha: 0.45)),
                 ),
             ],
           ),
@@ -258,7 +258,7 @@ class _StatPill extends StatelessWidget {
                   color: Theme.of(context)
                       .colorScheme
                       .onSurface
-                      .withOpacity(0.5),
+                      .withValues(alpha: 0.5),
                   fontSize: 9)),
           Text(value,
               style: Theme.of(context).textTheme.labelMedium?.copyWith(

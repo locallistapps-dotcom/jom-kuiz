@@ -159,9 +159,7 @@ class PaymentStatusController
       success: (PaymentTransaction? t) => t,
       failure: (_) => state.valueOrNull,
     );
-    if (mounted) {
-      state = AsyncValue<PaymentTransaction?>.data(tx);
-    }
+    state = AsyncValue<PaymentTransaction?>.data(tx);
     return tx;
   }
 

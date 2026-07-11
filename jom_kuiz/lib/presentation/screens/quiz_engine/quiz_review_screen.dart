@@ -91,7 +91,7 @@ class _ReviewCard extends StatelessWidget {
                   alignment: Alignment.center,
                   child: skipped
                       ? Icon(Icons.remove,
-                          size: 14, color: colors.onSurface.withOpacity(0.5))
+                          size: 14, color: colors.onSurface.withValues(alpha: 0.5))
                       : Icon(
                           correct ? Icons.check : Icons.close,
                           size: 14,
@@ -127,7 +127,7 @@ class _ReviewCard extends StatelessWidget {
               _AnswerRow(
                 label: 'Your Answer',
                 value: '— skipped —',
-                color: colors.onSurface.withOpacity(0.45),
+                color: colors.onSurface.withValues(alpha: 0.45),
                 bg: colors.surfaceContainerLow,
               )
             else
@@ -160,7 +160,7 @@ class _ReviewCard extends StatelessWidget {
             Text(
               'EXPLANATION',
               style: theme.textTheme.labelSmall?.copyWith(
-                color: colors.onSurface.withOpacity(0.5),
+                color: colors.onSurface.withValues(alpha: 0.5),
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1.1,
               ),
@@ -201,7 +201,7 @@ class _ReviewCard extends StatelessWidget {
                 'No explanation provided.',
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontStyle: FontStyle.italic,
-                  color: colors.onSurface.withOpacity(0.45),
+                  color: colors.onSurface.withValues(alpha: 0.45),
                 ),
               ),
           ],
@@ -276,7 +276,7 @@ class _AnswerRow extends StatelessWidget {
               Text(
                 label,
                 style: theme.textTheme.labelSmall?.copyWith(
-                    color: color.withOpacity(0.75)),
+                    color: color.withValues(alpha: 0.75)),
               ),
               const SizedBox(height: 2),
               Text(

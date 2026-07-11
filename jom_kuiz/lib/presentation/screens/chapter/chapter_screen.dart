@@ -201,7 +201,7 @@ class _ChapterScreenState extends ConsumerState<ChapterScreen> {
                             color: Theme.of(context)
                                 .colorScheme
                                 .onPrimary
-                                .withOpacity(0.75),
+                                .withValues(alpha: 0.75),
                           ),
                     ),
                 ],
@@ -335,7 +335,7 @@ class _ChapterCard extends StatelessWidget {
                     Text(
                       chapter.description!,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: colors.onSurface.withOpacity(0.6),
+                        color: colors.onSurface.withValues(alpha: 0.6),
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -778,7 +778,7 @@ class _EmptyView extends StatelessWidget {
             Icon(
               isFiltered ? Icons.search_off : Icons.menu_book_outlined,
               size: 64,
-              color: theme.colorScheme.primary.withOpacity(0.35),
+              color: theme.colorScheme.primary.withValues(alpha: 0.35),
             ),
             const SizedBox(height: 16),
             Text(
@@ -793,7 +793,7 @@ class _EmptyView extends StatelessWidget {
               Text(
                 'Tap the button below to add the first chapter.',
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.55),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -835,7 +835,7 @@ class _ErrorView extends StatelessWidget {
             Icon(
               Icons.error_outline,
               size: 56,
-              color: theme.colorScheme.error.withOpacity(0.7),
+              color: theme.colorScheme.error.withValues(alpha: 0.7),
             ),
             const SizedBox(height: 16),
             Text(

@@ -313,7 +313,7 @@ class _SummaryRow extends StatelessWidget {
             child: Text(
               label,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: cs.onPrimaryContainer.withOpacity(0.7),
+                    color: cs.onPrimaryContainer.withValues(alpha: 0.7),
                   ),
             ),
           ),

@@ -256,7 +256,7 @@ class _StatTile extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.12),
+              color: color.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color, size: 20),
@@ -268,7 +268,7 @@ class _StatTile extends StatelessWidget {
               Text(label,
                   style: theme.textTheme.labelSmall?.copyWith(
                       color:
-                          colors.onSurface.withOpacity(0.55))),
+                          colors.onSurface.withValues(alpha: 0.55))),
               Text(value,
                   style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold)),

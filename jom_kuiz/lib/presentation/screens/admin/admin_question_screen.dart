@@ -658,7 +658,7 @@ class _QuestionCard extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 8),
       elevation: 0,
       color: isSelected
-          ? colorScheme.primaryContainer.withOpacity(0.5)
+          ? colorScheme.primaryContainer.withValues(alpha: 0.5)
           : colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),

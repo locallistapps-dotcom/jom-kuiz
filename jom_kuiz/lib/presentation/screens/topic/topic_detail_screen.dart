@@ -148,7 +148,7 @@ class TopicDetailScreen extends ConsumerWidget {
                     Text(
                       'Description',
                       style: theme.textTheme.labelMedium?.copyWith(
-                        color: colors.onSurface.withOpacity(0.55),
+                        color: colors.onSurface.withValues(alpha: 0.55),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -256,7 +256,7 @@ class _SectionTitle extends StatelessWidget {
     return Text(
       label.toUpperCase(),
       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
             fontWeight: FontWeight.w700,
             letterSpacing: 1.1,
           ),
@@ -289,7 +289,7 @@ class _MetaRow extends StatelessWidget {
             child: Text(
               label,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.55),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
               ),
             ),
           ),

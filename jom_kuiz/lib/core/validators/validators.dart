@@ -85,8 +85,7 @@ abstract final class Validators {
     if (id.length != 8) {
       return 'Student ID must be exactly 8 digits';
     }
-    if (!RegExp(r'^\d{8}
-).hasMatch(id)) {
+    if (!RegExp(r'^\d{8}$').hasMatch(id)) {
       return 'Student ID must contain digits only';
     }
     return null;

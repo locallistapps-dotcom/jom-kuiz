@@ -142,7 +142,7 @@ class _QuizHistoryScreenState
             Container(
               padding: const EdgeInsets.symmetric(
                   horizontal: 16, vertical: 6),
-              color: colors.primaryContainer.withOpacity(0.4),
+              color: colors.primaryContainer.withValues(alpha: 0.4),
               child: Row(
                 children: <Widget>[
                   Icon(Icons.calendar_today,
@@ -172,7 +172,7 @@ class _QuizHistoryScreenState
                       'No quiz history matches your filters.',
                       style: theme.textTheme.bodyMedium?.copyWith(
                           color:
-                              colors.onSurface.withOpacity(0.55)),
+                              colors.onSurface.withValues(alpha: 0.55)),
                     ),
                   )
                 : ListView.separated(
@@ -231,7 +231,7 @@ class _HistoryTile extends StatelessWidget {
               width: 52,
               height: 52,
               decoration: BoxDecoration(
-                color: scoreColor.withOpacity(0.1),
+                color: scoreColor.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
                 border: Border.all(color: scoreColor, width: 2),
               ),
@@ -259,7 +259,7 @@ class _HistoryTile extends StatelessWidget {
                   Text(
                     '${item.subjectName} › ${item.yearName} › ${item.chapterName}',
                     style: theme.textTheme.bodySmall?.copyWith(
-                        color: colors.onSurface.withOpacity(0.5)),
+                        color: colors.onSurface.withValues(alpha: 0.5)),
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
@@ -267,25 +267,25 @@ class _HistoryTile extends StatelessWidget {
                     children: <Widget>[
                       Icon(Icons.calendar_today_outlined,
                           size: 12,
-                          color: colors.onSurface.withOpacity(0.45)),
+                          color: colors.onSurface.withValues(alpha: 0.45)),
                       const SizedBox(width: 3),
                       Text(
                         DateFormat('d MMM y')
                             .format(item.completedAt),
                         style: theme.textTheme.bodySmall?.copyWith(
                             color:
-                                colors.onSurface.withOpacity(0.45)),
+                                colors.onSurface.withValues(alpha: 0.45)),
                       ),
                       const SizedBox(width: 10),
                       Icon(Icons.timer_outlined,
                           size: 12,
-                          color: colors.onSurface.withOpacity(0.45)),
+                          color: colors.onSurface.withValues(alpha: 0.45)),
                       const SizedBox(width: 3),
                       Text(
                         item.timeTakenFormatted,
                         style: theme.textTheme.bodySmall?.copyWith(
                             color:
-                                colors.onSurface.withOpacity(0.45)),
+                                colors.onSurface.withValues(alpha: 0.45)),
                       ),
                     ],
                   ),

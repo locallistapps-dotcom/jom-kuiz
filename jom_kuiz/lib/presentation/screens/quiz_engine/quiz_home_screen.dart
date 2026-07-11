@@ -169,7 +169,7 @@ class _QuizHomeScreenState extends ConsumerState<QuizHomeScreen> {
                             'Select a topic below to begin.',
                             style: theme.textTheme.bodySmall?.copyWith(
                                 color: colors.onPrimaryContainer
-                                    .withOpacity(0.75)),
+                                    .withValues(alpha: 0.75)),
                           ),
                         ],
                       ),
@@ -183,7 +183,7 @@ class _QuizHomeScreenState extends ConsumerState<QuizHomeScreen> {
             // ── Filter section ─────────────────────────────────────────────
             Text('SELECT TOPIC',
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: colors.onSurface.withOpacity(0.5),
+                  color: colors.onSurface.withValues(alpha: 0.5),
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.1,
                 )),
@@ -224,7 +224,7 @@ class _QuizHomeScreenState extends ConsumerState<QuizHomeScreen> {
             Text(
               'Linked dropdowns will be available in a future release.',
               style: theme.textTheme.bodySmall
-                  ?.copyWith(color: colors.onSurface.withOpacity(0.45)),
+                  ?.copyWith(color: colors.onSurface.withValues(alpha: 0.45)),
             ),
             const SizedBox(height: 20),
 

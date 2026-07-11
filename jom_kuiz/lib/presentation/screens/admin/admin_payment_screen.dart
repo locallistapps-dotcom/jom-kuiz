@@ -276,10 +276,10 @@ class _AdminTransactionCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.12),
+                    color: statusColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(12),
                     border:
-                        Border.all(color: statusColor.withOpacity(0.4)),
+                        Border.all(color: statusColor.withValues(alpha: 0.4)),
                   ),
                   child: Text(
                     transaction.status.displayLabel,

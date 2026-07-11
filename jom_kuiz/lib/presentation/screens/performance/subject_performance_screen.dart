@@ -23,7 +23,7 @@ class SubjectPerformanceScreen extends StatelessWidget {
               child: Text(
                 'No subject data available.',
                 style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.55)),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.55)),
               ),
             )
           : ListView.separated(
@@ -115,13 +115,13 @@ class _SubjectCard extends StatelessWidget {
                 Text(
                   '${subject.totalQuizzes} quiz${subject.totalQuizzes != 1 ? 'zes' : ''}',
                   style: theme.textTheme.bodySmall?.copyWith(
-                      color: colors.onSurface.withOpacity(0.55)),
+                      color: colors.onSurface.withValues(alpha: 0.55)),
                 ),
                 const Spacer(),
                 Text(
                   '${subject.chapters.length} chapter${subject.chapters.length != 1 ? 's' : ''}',
                   style: theme.textTheme.bodySmall?.copyWith(
-                      color: colors.onSurface.withOpacity(0.55)),
+                      color: colors.onSurface.withValues(alpha: 0.55)),
                 ),
                 const SizedBox(width: 4),
                 Icon(Icons.chevron_right, size: 16, color: colors.outline),
@@ -143,7 +143,7 @@ class _Badge extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.12),
+          color: color.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
