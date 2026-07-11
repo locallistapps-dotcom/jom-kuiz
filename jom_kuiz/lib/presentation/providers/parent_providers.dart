@@ -14,7 +14,10 @@ import '../../domain/repositories/parent_repository.dart';
 
 final Provider<ParentRemoteDataSource> parentRemoteDataSourceProvider =
     Provider<ParentRemoteDataSource>(
-  (Ref ref) => ParentRemoteDataSourceImpl(ref.watch(dioProvider)),
+  (Ref ref) => ParentRemoteDataSourceImpl(
+    ref.watch(dioProvider),      // PostgREST → /rest/v1/parents
+    ref.watch(authDioProvider),  // GoTrue   → /auth/v1/user (password update)
+  ),
 );
 
 final Provider<ParentRepository> parentRepositoryProvider = Provider<ParentRepository>(

@@ -17,9 +17,13 @@ abstract final class ApiClient {
         connectTimeout: AppConstants.networkTimeout,
         receiveTimeout: AppConstants.networkTimeout,
         sendTimeout: AppConstants.networkTimeout,
-        headers: const <String, String>{
+        headers: <String, String>{
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          // Supabase requires the anon key on every PostgREST request.
+          // Without it Supabase returns 401 "No API key found in request"
+          // before even evaluating RLS policies.
+          'apikey': AppConfig.supabaseAnonKey,
         },
       ),
     );

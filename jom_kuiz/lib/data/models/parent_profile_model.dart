@@ -47,9 +47,15 @@ class ParentProfileModel {
   final String? timezone;
   final String? bio;
 
+  /// Parses the PostgREST row returned from `GET /rest/v1/parents`.
+  ///
+  /// PostgREST uses the actual column names from the `parents` table:
+  ///   • primary key → `id`  (NOT `parent_id` — that was the custom-API name)
+  ///   • all other columns → exact snake_case column names
   factory ParentProfileModel.fromJson(Map<String, dynamic> json) {
     return ParentProfileModel(
-      parentId: json['parent_id'] as String,
+      // PostgREST returns the PK as `id`, not `parent_id`.
+      parentId: (json['id'] ?? json['parent_id']) as String,
       fullName: json['full_name'] as String,
       email: json['email'] as String,
       emailVerified: json['email_verified'] as bool? ?? false,
