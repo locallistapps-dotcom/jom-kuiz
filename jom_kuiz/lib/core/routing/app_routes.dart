@@ -28,6 +28,45 @@ abstract final class AppRoutes {
   static const String childQuizDetail = '/child/quiz/detail';
   static const String childAchievements = '/child/achievements';
 
+  // ── Subject ───────────────────────────────────────────────────────────────
+  static const String subject = '/subject';
+
+  // ── Year ──────────────────────────────────────────────────────────────────
+  static const String year = '/year';
+
+  // ── Chapter ───────────────────────────────────────────────────────────────
+  static const String chapter = '/chapter';
+
+  // ── Topic ─────────────────────────────────────────────────────────────────
+  static const String topic = '/topic';
+
+  // ── Question Bank ─────────────────────────────────────────────────────────
+  static const String questionBank = '/question-bank';
+
+  // ── Quiz Engine ───────────────────────────────────────────────────────────
+  static const String quizEngine = '/quiz-engine';
+
+  // ── Quiz Result ───────────────────────────────────────────────────────────
+  static const String quizResult = '/quiz-result';
+
+  // ── Performance Summary ───────────────────────────────────────────────────
+  static const String performanceSummary = '/performance';
+
+  // ── Subscription ──────────────────────────────────────────────────────────
+  static const String subscription = '/subscription';
+
+  // ── Referral ──────────────────────────────────────────────────────────────
+  static const String referral = '/referral';
+
+  // ── Reward Wallet ─────────────────────────────────────────────────────────
+  static const String rewardWallet = '/reward-wallet';
+
+  // ── Payment ───────────────────────────────────────────────────────────────
+  static const String payment = '/payment';
+
+  // ── Admin CMS ─────────────────────────────────────────────────────────────
+  static const String adminCms = '/admin';
+
   // ── Route names ───────────────────────────────────────────────────────────
   static const String splashName = 'splash';
   static const String loginName = 'login';
@@ -48,6 +87,19 @@ abstract final class AppRoutes {
   static const String childQuizName = 'childQuiz';
   static const String childQuizDetailName = 'childQuizDetail';
   static const String childAchievementsName = 'childAchievements';
+  static const String subjectName = 'subject';
+  static const String yearName = 'year';
+  static const String chapterName = 'chapter';
+  static const String topicName = 'topic';
+  static const String questionBankName = 'questionBank';
+  static const String quizEngineName = 'quizEngine';
+  static const String quizResultName = 'quizResult';
+  static const String performanceSummaryName = 'performanceSummary';
+  static const String subscriptionName = 'subscription';
+  static const String referralName = 'referral';
+  static const String rewardWalletName = 'rewardWallet';
+  static const String paymentName = 'payment';
+  static const String adminCmsName = 'adminCms';
 
   /// Routes reachable while signed out. Every other route requires an
   /// authenticated session — see [RouteGuard].
