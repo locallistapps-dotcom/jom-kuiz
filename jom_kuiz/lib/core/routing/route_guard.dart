@@ -42,7 +42,9 @@ class RouteGuard {
         final bool authenticated = status == SessionStatus.authenticated;
 
         if (!authenticated) {
-          // Allow child-login and all public routes while signed out.
+          // Session check complete: always leave the splash screen now.
+          if (isSplash) return AppRoutes.login;
+          // Allow child-login and other public routes while signed out.
           if (isPublicRoute || isChildLogin) return null;
           return AppRoutes.login;
         }

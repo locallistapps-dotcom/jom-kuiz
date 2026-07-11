@@ -1,3 +1,4 @@
+import '../../core/logger/app_logger.dart';
 import '../../core/utils/result.dart';
 import '../../domain/entities/auth_tokens.dart';
 import '../../domain/entities/session_status.dart';
@@ -87,14 +88,52 @@ class AuthService {
 
   /// Determines the current [SessionStatus] for the splash screen / route
   /// guard, silently refreshing an expired access token when possible.
+  ///
+  /// Guaranteed to complete within 8 seconds — times out to
+  /// [SessionStatus.unauthenticated] so the splash screen never hangs
+  /// forever (e.g. when flutter_secure_storage or the network stalls on web).
   Future<SessionStatus> checkSession() async {
+    try {
+      return await _doCheckSession().timeout(
+        const Duration(seconds: 8),
+        onTimeout: () {
+          AppLogger.instance.warning(
+            'checkSession timed out after 8 s — continuing as unauthenticated',
+          );
+          return SessionStatus.unauthenticated;
+        },
+      );
+    } catch (e, st) {
+      AppLogger.instance.error(
+        'checkSession threw unexpectedly — continuing as unauthenticated',
+        error: e,
+        stackTrace: st,
+      );
+      return SessionStatus.unauthenticated;
+    }
+  }
+
+  Future<SessionStatus> _doCheckSession() async {
     final bool hasSession = await _tokenManager.hasValidSession;
-    if (!hasSession) return SessionStatus.unauthenticated;
+    if (!hasSession) {
+      AppLogger.instance.debug('checkSession: no stored session');
+      return SessionStatus.unauthenticated;
+    }
 
     final bool expired = await _tokenManager.isAccessTokenExpired();
-    if (!expired) return SessionStatus.authenticated;
+    if (!expired) {
+      AppLogger.instance.debug('checkSession: access token still valid');
+      return SessionStatus.authenticated;
+    }
 
-    final String refreshToken = (await _tokenManager.readRefreshToken())!;
+    AppLogger.instance.debug('checkSession: access token expired, attempting silent refresh');
+    final String? refreshToken = await _tokenManager.readRefreshToken();
+    if (refreshToken == null) {
+      AppLogger.instance.warning('checkSession: no refresh token, ending session');
+      await _sessionManager.endSession();
+      return SessionStatus.unauthenticated;
+    }
+
     final Result<AuthTokens> refreshResult = await _repository.refreshSession(
       refreshToken: refreshToken,
     );
@@ -106,9 +145,11 @@ class AuthService {
           refreshToken: tokens.refreshToken,
           expiresAt: tokens.accessTokenExpiresAt,
         );
+        AppLogger.instance.debug('checkSession: silent refresh succeeded');
         return SessionStatus.authenticated;
       },
-      failure: (_) async {
+      failure: (f) async {
+        AppLogger.instance.warning('checkSession: silent refresh failed — ${f.message}');
         await _sessionManager.endSession();
         return SessionStatus.unauthenticated;
       },

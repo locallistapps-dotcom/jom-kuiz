@@ -17,7 +17,14 @@ import '../storage/token_storage.dart';
 /// live in `presentation/providers/<feature>_providers.dart`.
 
 final Provider<FlutterSecureStorage> secureStorageProvider = Provider<FlutterSecureStorage>(
-  (Ref ref) => const FlutterSecureStorage(),
+  (Ref ref) => const FlutterSecureStorage(
+    // Web: explicit db/key names ensure consistent localStorage keys across
+    // page refreshes and prevent the crypto.subtle key-lookup from hanging.
+    webOptions: WebOptions(
+      dbName: 'JomKuizStorage',
+      publicKey: 'JomKuizStorageKey',
+    ),
+  ),
 );
 
 final Provider<TokenStorage> tokenStorageProvider = Provider<TokenStorage>(
