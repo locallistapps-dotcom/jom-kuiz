@@ -1,0 +1,4 @@
+- [No-codegen rule](no-codegen.md) — all models/DTOs hand-written; no json_serializable/freezed/riverpod_generator (build_runner can't run in this workspace)
+- [Test provider overrides](test-provider-overrides.md) — any test reaching sessionManagerProvider must also override tokenStorageProvider with FakeTokenStorage to avoid MissingPluginException
+- [Controller mutation pattern](controller-mutation-pattern.md) — mutation methods return Result<T>, only update AsyncNotifier state on success; failure leaves prior state intact
+- [deleteAccount session rule](delete-account-session-rule.md) — local session is cleared ONLY on server-confirmed deletion; failed delete must leave the parent signed in

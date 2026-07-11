@@ -60,7 +60,9 @@ class ParentController extends AsyncNotifier<ParentProfile?> {
         );
 
     result.when(
-      success: (ParentProfile profile) => this.state = AsyncValue<ParentProfile?>.data(profile),
+      success: (ParentProfile profile) {
+        this.state = AsyncValue<ParentProfile?>.data(profile);
+      },
       failure: (_) {}, // Keep the previously loaded profile; caller shows the error.
     );
     return result;
@@ -71,7 +73,9 @@ class ParentController extends AsyncNotifier<ParentProfile?> {
         await ref.read(parentServiceProvider).updateAvatar(localFilePath: localFilePath);
 
     result.when(
-      success: (ParentProfile profile) => state = AsyncValue<ParentProfile?>.data(profile),
+      success: (ParentProfile profile) {
+        state = AsyncValue<ParentProfile?>.data(profile);
+      },
       failure: (_) {},
     );
     return result;
@@ -94,7 +98,9 @@ class ParentController extends AsyncNotifier<ParentProfile?> {
         );
 
     result.when(
-      success: (ParentProfile profile) => state = AsyncValue<ParentProfile?>.data(profile),
+      success: (ParentProfile profile) {
+        state = AsyncValue<ParentProfile?>.data(profile);
+      },
       failure: (_) {},
     );
     return result;
