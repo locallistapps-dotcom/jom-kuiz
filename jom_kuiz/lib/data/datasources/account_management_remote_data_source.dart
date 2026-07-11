@@ -184,7 +184,7 @@ class AccountManagementRemoteDataSourceImpl
       final Response<dynamic> res = await _dio.post<dynamic>(
         _rpcUpdate,
         data: <String, dynamic>{
-          'child_id': childId,
+          'p_child_id': childId, // update_child function uses p_ prefix
           ...request.toJson(),
         },
       );
