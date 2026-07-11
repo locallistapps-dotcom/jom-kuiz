@@ -1,9 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/di/providers.dart';
 import '../../core/error/failure.dart';
 import '../../core/utils/result.dart';
 import '../../domain/entities/user.dart';
 import '../providers/account_management_providers.dart';
+import '../providers/admin_providers.dart';
 import '../providers/auth_providers.dart';
 import '../providers/child_providers.dart';
 import 'session_controller.dart';
@@ -20,8 +22,17 @@ class AuthController extends AsyncNotifier<void> {
   @override
   Future<void> build() async {}
 
-  // ── Parent login ──────────────────────────────────────────────────────────
+  // ── Parent / Admin login ───────────────────────────────────────────────────
 
+  /// Authenticates via email + password, then resolves the user's role.
+  ///
+  /// After saving tokens, the method queries the `admin_users` table to
+  /// check whether the authenticated user is an admin:
+  /// - Sets [userRoleProvider] to `'admin'` when the user is in the table.
+  /// - Falls back to `'parent'` on any error or when not found.
+  ///
+  /// [userRoleProvider] is updated before [markAuthenticated] so [RouteGuard]
+  /// sees the correct role on the first redirect.
   Future<bool> login({
     required String email,
     required String password,
@@ -34,19 +45,37 @@ class AuthController extends AsyncNotifier<void> {
           rememberMe: rememberMe,
         );
 
-    return result.when(
-      success: (_) {
-        // Mark as parent session.
-        ref.read(userRoleProvider.notifier).state = 'parent';
-        state = const AsyncValue<void>.data(null);
-        ref.read(sessionControllerProvider.notifier).markAuthenticated();
-        return true;
-      },
+    // Separate the sync outcome from the async admin check to keep `when()`
+    // callbacks typed uniformly (both return `bool`).
+    bool loginSucceeded = false;
+    result.when(
+      success: (_) => loginSucceeded = true,
       failure: (Failure failure) {
         state = AsyncValue<void>.error(failure, StackTrace.current);
-        return false;
       },
     );
+
+    if (!loginSucceeded) return false;
+
+    // Determine role: admin takes precedence over parent.
+    String role = 'parent';
+    try {
+      final String? userId =
+          await ref.read(tokenManagerProvider).getUserId();
+      if (userId != null && userId.isNotEmpty) {
+        final bool isAdmin = await ref
+            .read(adminCheckRemoteDataSourceProvider)
+            .isAdmin(userId: userId);
+        if (isAdmin) role = 'admin';
+      }
+    } catch (_) {
+      // Any failure in role-check → fall back to parent.
+    }
+
+    ref.read(userRoleProvider.notifier).state = role;
+    state = const AsyncValue<void>.data(null);
+    ref.read(sessionControllerProvider.notifier).markAuthenticated();
+    return true;
   }
 
   // ── Child login ───────────────────────────────────────────────────────────

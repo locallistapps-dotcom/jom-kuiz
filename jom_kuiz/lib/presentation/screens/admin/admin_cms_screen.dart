@@ -104,9 +104,9 @@ class AdminCmsScreen extends ConsumerWidget {
               Text('CMS Content', style: textTheme.titleMedium),
               const Spacer(),
               TextButton.icon(
-                icon: const Icon(Icons.add_rounded, size: 18),
-                label: const Text('Coming soon'),
-                onPressed: null,
+                icon: const Icon(Icons.open_in_new_rounded, size: 18),
+                label: const Text('Manage'),
+                onPressed: () => context.push(AppRoutes.adminContent),
               ),
             ],
           ),

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import '../../core/constants/app_constants.dart';
 import '../../core/storage/token_storage.dart';
 
@@ -68,6 +70,36 @@ class TokenManager {
     if (expiresAt == null) return true;
 
     return DateTime.now().isAfter(expiresAt);
+  }
+
+  /// Decodes the stored JWT access token and returns the `sub` claim (user UUID).
+  ///
+  /// Returns `null` when no token is present or the payload cannot be decoded.
+  /// Does NOT verify the signature — only used to extract the identity of the
+  /// already-authenticated user for an admin role check.
+  Future<String?> getUserId() async {
+    final String? token = await readAccessToken();
+    if (token == null || token.isEmpty) return null;
+    try {
+      final List<String> parts = token.split('.');
+      if (parts.length != 3) return null;
+      String payload = parts[1];
+      // Restore base64 padding removed by JWT encoding.
+      switch (payload.length % 4) {
+        case 2:
+          payload += '==';
+        case 3:
+          payload += '=';
+        default:
+          break;
+      }
+      final String decoded = utf8.decode(base64Url.decode(payload));
+      final Map<String, dynamic> claims =
+          jsonDecode(decoded) as Map<String, dynamic>;
+      return claims['sub'] as String?;
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<void> clear() async {

@@ -50,6 +50,13 @@ final StateProvider<QuestionType?> adminQTypeFilterProvider =
 final StateProvider<QuestionDifficulty?> adminQDifficultyFilterProvider =
     StateProvider<QuestionDifficulty?>((Ref ref) => null);
 
+// ── Pagination state ─────────────────────────────────────────────────────────
+
+/// Whether the admin question list has more pages available to load.
+/// Updated by [AdminQuestionController] after each fetch.
+final StateProvider<bool> adminQHasMoreProvider =
+    StateProvider<bool>((Ref ref) => false);
+
 // ── Bulk-selection state ──────────────────────────────────────────────────────
 
 /// Whether the question list is in multi-select mode.

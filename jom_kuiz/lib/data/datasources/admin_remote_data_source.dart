@@ -6,7 +6,7 @@ import '../../domain/entities/admin_content.dart';
 
 // ── Model ─────────────────────────────────────────────────────────────────────
 
-/// Wire-format DTO for an AdminContent row from Supabase REST.
+/// Wire-format DTO for an admin_content row from Supabase REST.
 class AdminContentModel {
   const AdminContentModel({
     required this.contentId,
@@ -98,6 +98,20 @@ class AdminContentModel {
 abstract class AdminRemoteDataSource {
   Future<List<AdminContentModel>> getContent({AdminContentType? type});
   Future<AdminContentModel> getContentById({required String contentId});
+  Future<AdminContentModel> createContent({
+    required AdminContentType type,
+    required String title,
+    required String body,
+    String? imageUrl,
+  });
+  Future<AdminContentModel> updateContent({
+    required String contentId,
+    required AdminContentType type,
+    required String title,
+    required String body,
+    String? imageUrl,
+  });
+  Future<void> deleteContent({required String contentId});
   Future<AdminContentModel> publishContent({required String contentId});
   Future<AdminContentModel> unpublishContent({required String contentId});
 }
@@ -115,6 +129,11 @@ class AdminRemoteDataSourceImpl implements AdminRemoteDataSource {
   final Dio _dio;
 
   static const String _base = '/admin_content';
+  static const Options _returnRepresentation = Options(
+    headers: <String, String>{'Prefer': 'return=representation'},
+  );
+
+  // ── Read ──────────────────────────────────────────────────────────────────
 
   @override
   Future<List<AdminContentModel>> getContent({
@@ -162,6 +181,88 @@ class AdminRemoteDataSourceImpl implements AdminRemoteDataSource {
     }
   }
 
+  // ── Create ────────────────────────────────────────────────────────────────
+
+  @override
+  Future<AdminContentModel> createContent({
+    required AdminContentType type,
+    required String title,
+    required String body,
+    String? imageUrl,
+  }) async {
+    try {
+      final Map<String, dynamic> payload = <String, dynamic>{
+        'type': AdminContentModel._typeToJson(type),
+        'title': title,
+        'body': body,
+        if (imageUrl != null && imageUrl.isNotEmpty) 'image_url': imageUrl,
+      };
+      final Response<dynamic> res = await _dio.post<dynamic>(
+        _base,
+        data: payload,
+        options: _returnRepresentation,
+      );
+      final List<dynamic> list = res.data as List<dynamic>;
+      if (list.isEmpty) {
+        throw ServerException(
+            'Create content returned empty response', AdminErrorCodes.operationFailed);
+      }
+      return AdminContentModel.fromJson(list.first as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw _mapError(e);
+    }
+  }
+
+  // ── Update ────────────────────────────────────────────────────────────────
+
+  @override
+  Future<AdminContentModel> updateContent({
+    required String contentId,
+    required AdminContentType type,
+    required String title,
+    required String body,
+    String? imageUrl,
+  }) async {
+    try {
+      final Map<String, dynamic> payload = <String, dynamic>{
+        'type': AdminContentModel._typeToJson(type),
+        'title': title,
+        'body': body,
+        // Explicitly set to null to clear an existing image.
+        'image_url': (imageUrl != null && imageUrl.isNotEmpty) ? imageUrl : null,
+      };
+      final Response<dynamic> res = await _dio.patch<dynamic>(
+        _base,
+        queryParameters: <String, dynamic>{'id': 'eq.$contentId'},
+        data: payload,
+        options: _returnRepresentation,
+      );
+      final List<dynamic> list = res.data as List<dynamic>;
+      if (list.isEmpty) {
+        throw ServerException('Content not found', AdminErrorCodes.notFound);
+      }
+      return AdminContentModel.fromJson(list.first as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw _mapError(e, notFoundCode: AdminErrorCodes.notFound);
+    }
+  }
+
+  // ── Delete ────────────────────────────────────────────────────────────────
+
+  @override
+  Future<void> deleteContent({required String contentId}) async {
+    try {
+      await _dio.delete<dynamic>(
+        _base,
+        queryParameters: <String, dynamic>{'id': 'eq.$contentId'},
+      );
+    } on DioException catch (e) {
+      throw _mapError(e, notFoundCode: AdminErrorCodes.notFound);
+    }
+  }
+
+  // ── Publish toggles ───────────────────────────────────────────────────────
+
   @override
   Future<AdminContentModel> publishContent({
     required String contentId,
@@ -174,8 +275,7 @@ class AdminRemoteDataSourceImpl implements AdminRemoteDataSource {
           'is_published': true,
           'published_at': DateTime.now().toUtc().toIso8601String(),
         },
-        options: Options(
-            headers: <String, String>{'Prefer': 'return=representation'}),
+        options: _returnRepresentation,
       );
       final List<dynamic> list = res.data as List<dynamic>;
       if (list.isEmpty) {
@@ -199,8 +299,7 @@ class AdminRemoteDataSourceImpl implements AdminRemoteDataSource {
           'is_published': false,
           'published_at': null,
         },
-        options: Options(
-            headers: <String, String>{'Prefer': 'return=representation'}),
+        options: _returnRepresentation,
       );
       final List<dynamic> list = res.data as List<dynamic>;
       if (list.isEmpty) {
@@ -214,10 +313,7 @@ class AdminRemoteDataSourceImpl implements AdminRemoteDataSource {
 
   // ── Error mapping ──────────────────────────────────────────────────────────
 
-  AppException _mapError(
-    DioException e, {
-    String? notFoundCode,
-  }) {
+  AppException _mapError(DioException e, {String? notFoundCode}) {
     final bool isTransport = e.type == DioExceptionType.connectionTimeout ||
         e.type == DioExceptionType.sendTimeout ||
         e.type == DioExceptionType.receiveTimeout ||

@@ -1,16 +1,21 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../core/error/failure.dart';
 import '../../../core/utils/result.dart';
 import '../../../data/services/admin_question_service.dart';
+import '../../../data/services/storage_service.dart';
 import '../../../domain/entities/chapter.dart';
 import '../../../domain/entities/question.dart';
 import '../../../domain/entities/subject.dart';
 import '../../../domain/entities/topic.dart';
 import '../../../domain/entities/year.dart';
 import '../../controllers/admin_question_controller.dart';
+import '../../providers/admin_providers.dart';
 import '../../providers/admin_question_providers.dart';
 
 /// Full-featured admin question management screen.
@@ -542,13 +547,45 @@ class _QuestionList extends ConsumerWidget {
         if (questions.isEmpty) {
           return const _EmptyView();
         }
+        final bool hasMore = ref.watch(adminQHasMoreProvider);
+        // Add 1 extra slot for the Load More button when more pages exist.
+        final int itemCount = questions.length + (hasMore ? 1 : 0);
         return ListView.builder(
           padding: const EdgeInsets.fromLTRB(12, 8, 12, 80),
-          itemCount: questions.length,
-          itemBuilder: (BuildContext context, int index) =>
-              _QuestionCard(question: questions[index]),
+          itemCount: itemCount,
+          itemBuilder: (BuildContext context, int index) {
+            if (index == questions.length) {
+              return _LoadMoreButton(
+                onTap: () => ref
+                    .read(adminQuestionControllerProvider.notifier)
+                    .loadMore(),
+              );
+            }
+            return _QuestionCard(question: questions[index]);
+          },
         );
       },
+    );
+  }
+}
+
+// ── Load More button ──────────────────────────────────────────────────────────
+
+class _LoadMoreButton extends StatelessWidget {
+  const _LoadMoreButton({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Center(
+        child: OutlinedButton.icon(
+          icon: const Icon(Icons.expand_more_rounded),
+          label: const Text('Load More'),
+          onPressed: onTap,
+        ),
+      ),
     );
   }
 }
@@ -1042,6 +1079,7 @@ class _AdminQuestionFormSheetState
   late bool _isActive;
 
   bool _saving = false;
+  bool _uploading = false;
 
   @override
   void initState() {
@@ -1313,14 +1351,11 @@ class _AdminQuestionFormSheetState
                               : null,
                     ),
                     const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _questionImageCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Question Image URL',
-                        hintText: 'https://...',
-                        border: OutlineInputBorder(),
-                        isDense: true,
-                      ),
+                    _mediaUrlField(
+                      ctrl: _questionImageCtrl,
+                      label: 'Question Image URL',
+                      hint: 'https://...',
+                      isVideo: false,
                     ),
                     const SizedBox(height: 16),
 
@@ -1427,24 +1462,18 @@ class _AdminQuestionFormSheetState
                       ),
                     ),
                     const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _explanationImageCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Explanation Image URL',
-                        hintText: 'https://...',
-                        border: OutlineInputBorder(),
-                        isDense: true,
-                      ),
+                    _mediaUrlField(
+                      ctrl: _explanationImageCtrl,
+                      label: 'Explanation Image URL',
+                      hint: 'https://...',
+                      isVideo: false,
                     ),
                     const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _explanationVideoCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Explanation Video URL',
-                        hintText: 'https://youtube.com/...',
-                        border: OutlineInputBorder(),
-                        isDense: true,
-                      ),
+                    _mediaUrlField(
+                      ctrl: _explanationVideoCtrl,
+                      label: 'Explanation Video URL',
+                      hint: 'https://...',
+                      isVideo: true,
                     ),
                     const SizedBox(height: 16),
 
@@ -1495,6 +1524,97 @@ class _AdminQuestionFormSheetState
         ),
       ),
     );
+  }
+
+  /// Builds a URL text field with an adjacent gallery picker icon button.
+  ///
+  /// Tapping the icon opens the device gallery, uploads the selected file to
+  /// Supabase Storage, and populates [ctrl] with the returned public URL.
+  Widget _mediaUrlField({
+    required TextEditingController ctrl,
+    required String label,
+    required String hint,
+    required bool isVideo,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: <Widget>[
+        Expanded(
+          child: TextFormField(
+            controller: ctrl,
+            decoration: InputDecoration(
+              labelText: label,
+              hintText: hint,
+              border: const OutlineInputBorder(),
+              isDense: true,
+            ),
+          ),
+        ),
+        const SizedBox(width: 4),
+        SizedBox(
+          height: 40,
+          child: IconButton.outlined(
+            tooltip: isVideo
+                ? 'Pick video from gallery'
+                : 'Pick image from gallery',
+            icon: Icon(
+              isVideo
+                  ? Icons.video_library_rounded
+                  : Icons.photo_library_rounded,
+              size: 20,
+            ),
+            onPressed: (_uploading || _saving)
+                ? null
+                : () => _pickMedia(ctrl, isVideo: isVideo),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Opens the device gallery, uploads the selected file, and sets the URL.
+  Future<void> _pickMedia(
+    TextEditingController ctrl, {
+    required bool isVideo,
+  }) async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? file = isVideo
+        ? await picker.pickVideo(source: ImageSource.gallery)
+        : await picker.pickImage(
+            source: ImageSource.gallery, imageQuality: 85);
+    if (file == null || !mounted) return;
+
+    setState(() => _uploading = true);
+    try {
+      final Uint8List bytes = await file.readAsBytes();
+      final StorageService storage = ref.read(storageServiceProvider);
+      final String url = isVideo
+          ? await storage.uploadVideo(
+              bucket: 'question-media',
+              bytes: bytes,
+              fileName: file.name,
+            )
+          : await storage.uploadImage(
+              bucket: 'question-media',
+              bytes: bytes,
+              fileName: file.name,
+            );
+      ctrl.text = url;
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(isVideo ? 'Video uploaded' : 'Image uploaded')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Upload failed: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _uploading = false);
+    }
   }
 
   Widget _optionField(String label, TextEditingController ctrl,

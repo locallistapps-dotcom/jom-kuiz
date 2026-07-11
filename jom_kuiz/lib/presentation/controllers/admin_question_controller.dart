@@ -16,12 +16,30 @@ import '../providers/topic_providers.dart';
 import '../providers/year_providers.dart';
 
 /// Admin-only question controller — extends the base question capabilities
-/// with bulk operations, CSV import/export, and question duplication.
+/// with bulk operations, CSV import/export, question duplication, and
+/// server-side pagination.
 ///
 /// Filter state is driven by the `adminQ*` [StateProvider]s defined in
 /// [admin_question_providers.dart] so the admin screen has independent state
 /// from the existing [QuestionBankScreen].
+///
+/// Pagination:
+/// - Page size is [_pageSize] (20).
+/// - Each filter change resets to page 1 (via [build]).
+/// - Call [loadMore] to append the next page.
+/// - [hasMore] / [adminQHasMoreProvider] indicate whether another page exists.
 class AdminQuestionController extends AsyncNotifier<List<Question>> {
+  static const int _pageSize = 20;
+
+  /// Current fetch offset — reset to 0 on each [build] (filter change).
+  int _offset = 0;
+
+  /// Whether more questions are available beyond the currently loaded set.
+  bool _hasMore = false;
+
+  /// Reactive getter — also reflected in [adminQHasMoreProvider].
+  bool get hasMore => _hasMore;
+
   QuestionBankService get _service =>
       ref.read(questionBankServiceProvider);
 
@@ -30,6 +48,14 @@ class AdminQuestionController extends AsyncNotifier<List<Question>> {
 
   @override
   Future<List<Question>> build() async {
+    // Listen to own state changes to keep adminQHasMoreProvider in sync.
+    ref.listenSelf((_, AsyncValue<List<Question>> next) {
+      if (next is AsyncData<List<Question>>) {
+        ref.read(adminQHasMoreProvider.notifier).state = _hasMore;
+      }
+    });
+
+    // Watch filter providers — any change triggers a rebuild (reset to page 1).
     final String subjectId = ref.watch(adminQSubjectFilterProvider);
     final String yearId = ref.watch(adminQYearFilterProvider);
     final String chapterId = ref.watch(adminQChapterFilterProvider);
@@ -39,6 +65,10 @@ class AdminQuestionController extends AsyncNotifier<List<Question>> {
     final QuestionType? typeFilter = ref.watch(adminQTypeFilterProvider);
     final QuestionDifficulty? diffFilter =
         ref.watch(adminQDifficultyFilterProvider);
+
+    // Reset pagination on every filter change.
+    _offset = 0;
+    _hasMore = false;
 
     final Result<List<Question>> result = await _service.getQuestions(
       subjectId: subjectId.isEmpty ? null : subjectId,
@@ -50,15 +80,67 @@ class AdminQuestionController extends AsyncNotifier<List<Question>> {
       questionType: typeFilter,
       difficulty: diffFilter,
       isActive: null, // admin sees all (active + inactive)
+      limit: _pageSize,
+      offset: 0,
     );
 
     return result.when(
-      success: (List<Question> list) => list,
+      success: (List<Question> list) {
+        _hasMore = list.length >= _pageSize;
+        _offset = list.length;
+        return list;
+      },
       failure: (f) => throw f,
     );
   }
 
-  /// Re-evaluates the build() function by invalidating this provider.
+  /// Appends the next page of questions to the current list.
+  ///
+  /// No-op when [hasMore] is false or the state is not [AsyncData].
+  Future<void> loadMore() async {
+    if (!_hasMore) return;
+    final AsyncData<List<Question>>? data =
+        state.asData;
+    if (data == null) return;
+    final List<Question> current = data.value;
+
+    // Read current filter values (ref.read — don't watch inside a method).
+    final String subjectId = ref.read(adminQSubjectFilterProvider);
+    final String yearId = ref.read(adminQYearFilterProvider);
+    final String chapterId = ref.read(adminQChapterFilterProvider);
+    final String topicId = ref.read(adminQTopicFilterProvider);
+    final String search = ref.read(adminQSearchQueryProvider);
+    final QuestionSortOrder sortOrder = ref.read(adminQSortOrderProvider);
+    final QuestionType? typeFilter = ref.read(adminQTypeFilterProvider);
+    final QuestionDifficulty? diffFilter =
+        ref.read(adminQDifficultyFilterProvider);
+
+    final Result<List<Question>> result = await _service.getQuestions(
+      subjectId: subjectId.isEmpty ? null : subjectId,
+      yearId: yearId.isEmpty ? null : yearId,
+      chapterId: chapterId.isEmpty ? null : chapterId,
+      topicId: topicId.isEmpty ? null : topicId,
+      search: search.isEmpty ? null : search,
+      sortOrder: sortOrder,
+      questionType: typeFilter,
+      difficulty: diffFilter,
+      isActive: null,
+      limit: _pageSize,
+      offset: _offset,
+    );
+
+    result.when(
+      success: (List<Question> nextPage) {
+        _hasMore = nextPage.length >= _pageSize;
+        _offset += nextPage.length;
+        ref.read(adminQHasMoreProvider.notifier).state = _hasMore;
+        state = AsyncData<List<Question>>(<Question>[...current, ...nextPage]);
+      },
+      failure: (_) {},
+    );
+  }
+
+  /// Re-evaluates build() by invalidating this provider.
   Future<void> refresh() async {
     ref.invalidateSelf();
     await future;
@@ -295,8 +377,8 @@ class AdminQuestionController extends AsyncNotifier<List<Question>> {
   Future<AdminImportSummary> importFromCsv({
     required String csvContent,
   }) async {
-    // Fetch lookup data concurrently.
-    final List<dynamic> lookupResults = await Future.wait<dynamic>(<Future<dynamic>>[
+    final List<dynamic> lookupResults =
+        await Future.wait<dynamic>(<Future<dynamic>>[
       _fetchSubjects(),
       _fetchYears(),
       _fetchChapters(),

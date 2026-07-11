@@ -10,11 +10,18 @@ import 'app_routes.dart';
 /// Decides whether a navigation should be redirected, based on session state
 /// and user role.
 ///
-/// - While the session check is in flight → Splash.
-/// - Unauthenticated user on a protected route → Login.
-/// - Authenticated **parent** on a public/splash route → /dashboard.
-/// - Authenticated **child** on a public/splash route → /child/dashboard.
-/// - Authenticated user already on the correct home screen → no redirect.
+/// Redirect rules (evaluated in order):
+/// 1. Session loading → [AppRoutes.splash].
+/// 2. Unauthenticated on a protected route → [AppRoutes.login].
+/// 3. Authenticated on a public/splash/child-login route → role home.
+/// 4. Non-admin attempting any `/admin/*` route → role home.
+/// 5. Child attempting parent dashboard → [AppRoutes.childDashboard].
+/// 6. Otherwise → no redirect (allow navigation).
+///
+/// Role → home mapping:
+/// - `'admin'`  → [AppRoutes.adminCms]
+/// - `'child'`  → [AppRoutes.childDashboard]
+/// - `'parent'` → [AppRoutes.dashboard]
 class RouteGuard {
   RouteGuard(this._ref);
 
@@ -27,29 +34,34 @@ class RouteGuard {
     final bool isPublicRoute = AppRoutes.publicRoutes.contains(location);
     final bool isSplash = location == AppRoutes.splash;
     final bool isChildLogin = location == AppRoutes.childLogin;
+    // Treat any path that starts with /admin as an admin-only area.
+    final bool isAdminRoute = location.startsWith('/admin');
 
     return session.when(
       data: (SessionStatus status) {
         final bool authenticated = status == SessionStatus.authenticated;
 
         if (!authenticated) {
-          // Always allow child-login and public routes.
+          // Allow child-login and all public routes while signed out.
           if (isPublicRoute || isChildLogin) return null;
           return AppRoutes.login;
         }
 
-        // Authenticated — determine the home screen by role.
+        // Authenticated — determine home screen by role.
         final String role = _ref.read(userRoleProvider);
-        final String homeRoute = role == 'child'
-            ? AppRoutes.childDashboard
-            : AppRoutes.dashboard;
+        final String homeRoute = switch (role) {
+          'admin' => AppRoutes.adminCms,
+          'child' => AppRoutes.childDashboard,
+          _ => AppRoutes.dashboard,
+        };
 
-        // Keep authenticated users out of public / splash / child-login screens.
-        if (isPublicRoute || isChildLogin) {
-          return homeRoute;
-        }
+        // Keep authenticated users off public / splash / child-login screens.
+        if (isPublicRoute || isChildLogin) return homeRoute;
 
-        // Prevent a child from accidentally landing on the parent dashboard.
+        // Block non-admins from all /admin/* routes.
+        if (isAdminRoute && role != 'admin') return homeRoute;
+
+        // Prevent a child from landing on the parent dashboard.
         if (role == 'child' && location == AppRoutes.dashboard) {
           return AppRoutes.childDashboard;
         }
@@ -57,7 +69,8 @@ class RouteGuard {
         return null;
       },
       loading: () => isSplash ? null : AppRoutes.splash,
-      error: (_, __) => isPublicRoute || isChildLogin ? null : AppRoutes.login,
+      error: (_, __) =>
+          isPublicRoute || isChildLogin ? null : AppRoutes.login,
     );
   }
 }

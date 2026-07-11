@@ -34,6 +34,8 @@ class QuestionBankService {
     QuestionDifficulty? difficulty,
     bool? isActive,
     QuestionSortOrder sortOrder = QuestionSortOrder.createdAtDesc,
+    int limit = 1000,
+    int offset = 0,
   }) {
     return _repository.getQuestions(
       topicId: _clean(topicId),
@@ -45,6 +47,8 @@ class QuestionBankService {
       difficulty: difficulty,
       isActive: isActive,
       sortOrder: sortOrder,
+      limit: limit,
+      offset: offset,
     );
   }
 

@@ -26,6 +26,8 @@ class QuestionBankRepositoryImpl implements QuestionBankRepository {
     QuestionDifficulty? difficulty,
     bool? isActive,
     QuestionSortOrder sortOrder = QuestionSortOrder.createdAtDesc,
+    int limit = 1000,
+    int offset = 0,
   }) async {
     try {
       final List<QuestionModel> models =
@@ -39,6 +41,8 @@ class QuestionBankRepositoryImpl implements QuestionBankRepository {
         difficulty: difficulty,
         isActive: isActive,
         sortOrder: sortOrder,
+        limit: limit,
+        offset: offset,
       );
       return Result<List<Question>>.success(
         models.map((QuestionModel m) => m.toEntity()).toList(),

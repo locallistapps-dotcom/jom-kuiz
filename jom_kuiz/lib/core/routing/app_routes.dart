@@ -76,9 +76,11 @@ abstract final class AppRoutes {
   // ── Admin CMS ─────────────────────────────────────────────────────────────
   static const String adminCms = '/admin';
 
-  /// Admin-only enhanced question management screen (distinct from the
-  /// standard [questionBank] screen; has bulk ops, CSV, and rich dropdowns).
+  /// Admin-only enhanced question management screen.
   static const String adminQuestions = '/admin/questions';
+
+  /// Admin-only CMS content management screen (full CRUD).
+  static const String adminContent = '/admin/content';
 
   // ── Route names ───────────────────────────────────────────────────────────
   static const String splashName = 'splash';
@@ -114,16 +116,16 @@ abstract final class AppRoutes {
   static const String paymentName = 'payment';
   static const String adminCmsName = 'adminCms';
   static const String adminQuestionsName = 'adminQuestions';
+  static const String adminContentName = 'adminContent';
 
-  // ── Route names (new) ─────────────────────────────────────────────────────
+  // ── Route names (child/parent management) ─────────────────────────────────
   static const String childLoginName = 'childLogin';
   static const String childrenListName = 'childrenList';
   static const String addChildName = 'addChild';
   static const String editChildName = 'editChild';
   static const String childManagementName = 'childManagement';
 
-  /// Routes reachable while signed out. Every other route requires an
-  /// authenticated session — see [RouteGuard].
+  /// Routes reachable while signed out.
   static const List<String> publicRoutes = <String>[
     splash,
     login,
@@ -131,4 +133,12 @@ abstract final class AppRoutes {
     forgotPassword,
     resetPassword,
   ];
+
+  /// Routes accessible only by users with role `'admin'`.
+  /// Every route that starts with `/admin` is enforced by [RouteGuard].
+  static const Set<String> adminRoutes = <String>{
+    adminCms,
+    adminQuestions,
+    adminContent,
+  };
 }

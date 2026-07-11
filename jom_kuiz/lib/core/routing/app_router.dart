@@ -15,6 +15,7 @@ import '../../presentation/screens/child/achievement_screen.dart';
 import '../../presentation/screens/child/child_dashboard_screen.dart';
 import '../../presentation/screens/placeholder/placeholder_screen.dart';
 import '../../presentation/screens/admin/admin_cms_screen.dart';
+import '../../presentation/screens/admin/admin_content_screen.dart';
 import '../../presentation/screens/admin/admin_question_screen.dart';
 import '../../presentation/screens/subject/subject_screen.dart';
 import '../../presentation/screens/chapter/chapter_screen.dart';
@@ -292,6 +293,11 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((Ref ref) {
         path: AppRoutes.adminQuestions,
         name: AppRoutes.adminQuestionsName,
         builder: (context, state) => const AdminQuestionScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminContent,
+        name: AppRoutes.adminContentName,
+        builder: (context, state) => const AdminContentScreen(),
       ),
     ],
     errorBuilder: (context, state) => const NotFoundScreen(),

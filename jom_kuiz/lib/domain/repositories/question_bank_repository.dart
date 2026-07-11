@@ -21,6 +21,8 @@ abstract interface class QuestionBankRepository {
     QuestionDifficulty? difficulty,
     bool? isActive,
     QuestionSortOrder sortOrder,
+    int limit,
+    int offset,
   });
 
   /// Returns a single question by primary key.

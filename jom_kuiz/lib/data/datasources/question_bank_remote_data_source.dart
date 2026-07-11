@@ -26,6 +26,8 @@ abstract class QuestionBankRemoteDataSource {
     QuestionDifficulty? difficulty,
     bool? isActive,
     QuestionSortOrder sortOrder,
+    int limit,
+    int offset,
   });
 
   Future<QuestionModel> getQuestionById({required String questionId});
@@ -88,6 +90,8 @@ class QuestionBankRemoteDataSourceImpl implements QuestionBankRemoteDataSource {
     QuestionDifficulty? difficulty,
     bool? isActive,
     QuestionSortOrder sortOrder = QuestionSortOrder.createdAtDesc,
+    int limit = 1000,
+    int offset = 0,
   }) async {
     try {
       // Build select clause based on which hierarchy filters are in use.
@@ -106,6 +110,8 @@ class QuestionBankRemoteDataSourceImpl implements QuestionBankRemoteDataSource {
       final Map<String, dynamic> params = <String, dynamic>{
         'select': selectClause,
         'order': _orderParam(sortOrder),
+        'limit': limit,
+        'offset': offset,
       };
 
       // Direct filters
