@@ -42,42 +42,7 @@ jobs:
 #        working-directory: jom_kuiz
 #        run: flutter analyze --no-fatal-warnings
 
-      - name: Generate PWA icons
-        run: |
-          ICONS_DIR="jom_kuiz/web/icons"
-          mkdir -p "$ICONS_DIR"
-
-          generate_icon() {
-            local dest="$1"
-            local size="$2"
-            local font_size="$3"
-            if [ -f "$dest" ]; then
-              echo "  skipping $dest (already exists)"
-              return
-            fi
-            echo "  generating $dest (${size}x${size})"
-            magick -size "${size}x${size}" \
-              radial-gradient:"#1976D2"-"#0D47A1" \
-              -fill white \
-              -font DejaVu-Sans-Bold \
-              -pointsize "$font_size" \
-              -gravity center \
-              -annotate 0 "JK" \
-              "$dest"
-          }
-
-          generate_icon "$ICONS_DIR/Icon-192.png"          192  72
-          generate_icon "$ICONS_DIR/Icon-512.png"          512 192
-          generate_icon "$ICONS_DIR/Icon-maskable-192.png" 192  60
-          generate_icon "$ICONS_DIR/Icon-maskable-512.png" 512 160
-
-          if [ ! -f "jom_kuiz/web/favicon.png" ]; then
-            magick -size 32x32 \
-              radial-gradient:"#1976D2"-"#0D47A1" \
-              -fill white -font DejaVu-Sans-Bold -pointsize 16 \
-              -gravity center -annotate 0 "J" \
-              "jom_kuiz/web/favicon.png"
-          fi
+      
 
       - name: Build Flutter web (release)
         working-directory: jom_kuiz
