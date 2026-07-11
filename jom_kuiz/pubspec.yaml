@@ -34,6 +34,9 @@ dependencies:
   # Media picking — images / videos from device gallery or camera
   image_picker: ^1.1.2
 
+  # Payment — opens ToyyibPay page in the device browser
+  url_launcher: ^6.3.0
+
   # Utilities
   intl: ^0.19.0
   logger: ^2.4.0

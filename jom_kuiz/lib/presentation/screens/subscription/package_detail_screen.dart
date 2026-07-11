@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../core/routing/app_routes.dart';
 import '../../../domain/entities/parent_subscription.dart';
 import '../../../domain/entities/subject.dart';
 import '../../../domain/entities/subscription_package.dart';
@@ -138,24 +140,17 @@ class PackageDetailScreen extends ConsumerWidget {
               label: const Text('Currently Subscribed'),
             )
           else
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                FilledButton.icon(
-                  onPressed: null, // Payment module not yet implemented
-                  icon: const Icon(Icons.payment_outlined),
-                  label: const Text('Subscribe — Coming Soon'),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Payment integration is coming soon. Contact support to '
-                  'activate this package manually.',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
-                ),
-              ],
+            FilledButton.icon(
+              onPressed: package.priceCents > 0
+                  ? () => context.push(
+                        AppRoutes.paymentCheckout,
+                        extra: package,
+                      )
+                  : null,
+              icon: const Icon(Icons.payment_outlined),
+              label: Text(package.priceCents > 0
+                  ? 'Subscribe — ${package.priceDisplay}'
+                  : 'Contact support to activate'),
             ),
           const SizedBox(height: 16),
         ],

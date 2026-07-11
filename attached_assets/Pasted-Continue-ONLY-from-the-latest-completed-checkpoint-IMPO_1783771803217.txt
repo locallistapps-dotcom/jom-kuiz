@@ -1,0 +1,150 @@
+Continue ONLY from the latest completed checkpoint.
+
+IMPORTANT
+
+Before implementing:
+
+- Review ONLY the existing Subscription, Parent, Routing and Admin Package files.
+- Reuse existing architecture.
+- Do NOT recreate completed modules.
+- Modify only files required for Payment integration.
+- Fix compilation errors introduced by this module before continuing.
+
+==================================================
+GOAL
+==================================================
+
+Implement the complete ToyyibPay Payment Module for Parent Subscription according to the approved Jom Kuiz Blueprint.
+
+Reuse the existing Subscription module.
+
+==================================================
+PAYMENT PROVIDER
+==================================================
+
+Use ToyyibPay.
+
+The API Key and configuration will be added later through environment variables.
+
+Do NOT hardcode any secret.
+
+==================================================
+PAYMENT FLOW
+==================================================
+
+Parent selects a subscription package.
+
+↓
+
+Create ToyyibPay Bill.
+
+↓
+
+Open ToyyibPay payment page.
+
+↓
+
+Wait for payment callback.
+
+↓
+
+Verify payment with ToyyibPay.
+
+↓
+
+Activate subscription.
+
+↓
+
+Grant subject access automatically.
+
+==================================================
+DATABASE
+==================================================
+
+Create ONLY if missing:
+
+payment_transactions
+
+Fields:
+
+- Parent ID
+- Package ID
+- Bill Code
+- Transaction ID
+- Amount
+- Status
+- Payment Method
+- Paid At
+- Created At
+
+Reuse existing subscription tables.
+
+==================================================
+APPLICATION
+==================================================
+
+Create ONLY if missing:
+
+PaymentRepository
+
+PaymentDatasource
+
+PaymentController
+
+Payment Providers
+
+==================================================
+PARENT
+==================================================
+
+Parent can:
+
+- Purchase Subscription
+- View Payment Status
+- View Payment History
+- Retry Failed Payment
+
+==================================================
+ADMIN
+==================================================
+
+Admin can:
+
+- View Payments
+- Search Payments
+- Filter Payments
+- View Failed Payments
+
+==================================================
+SECURITY
+==================================================
+
+Never trust client payment status.
+
+Subscription activation MUST happen ONLY after successful verification with ToyyibPay.
+
+==================================================
+SUPABASE
+==================================================
+
+Create RLS policies.
+
+Optimize queries.
+
+==================================================
+OUTPUT
+==================================================
+
+After completion provide ONLY:
+
+- Files Created
+- Files Modified
+- Controllers
+- Providers
+- Routes Updated
+- Supabase Changes
+- Migration Files
+- Remaining TODO
+
+Create a new checkpoint.

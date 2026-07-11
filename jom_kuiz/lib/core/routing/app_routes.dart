@@ -75,6 +75,9 @@ abstract final class AppRoutes {
 
   // ── Payment ───────────────────────────────────────────────────────────────
   static const String payment = '/payment';
+  static const String paymentCheckout = '/payment/checkout';
+  static const String paymentStatus = '/payment/status';
+  static const String paymentHistory = '/payment/history';
 
   // ── Admin CMS ─────────────────────────────────────────────────────────────
   static const String adminCms = '/admin';
@@ -90,6 +93,9 @@ abstract final class AppRoutes {
 
   /// Admin-only Subscriber & Subject Access viewer.
   static const String adminSubjectAccess = '/admin/subject-access';
+
+  /// Admin-only Payment transactions viewer.
+  static const String adminPayments = '/admin/payments';
 
   // ── Route names ───────────────────────────────────────────────────────────
   static const String splashName = 'splash';
@@ -126,11 +132,15 @@ abstract final class AppRoutes {
   static const String referralName = 'referral';
   static const String rewardWalletName = 'rewardWallet';
   static const String paymentName = 'payment';
+  static const String paymentCheckoutName = 'paymentCheckout';
+  static const String paymentStatusName = 'paymentStatus';
+  static const String paymentHistoryName = 'paymentHistory';
   static const String adminCmsName = 'adminCms';
   static const String adminQuestionsName = 'adminQuestions';
   static const String adminContentName = 'adminContent';
   static const String adminPackagesName = 'adminPackages';
   static const String adminSubjectAccessName = 'adminSubjectAccess';
+  static const String adminPaymentsName = 'adminPayments';
 
   // ── Route names (child/parent management) ─────────────────────────────────
   static const String childLoginName = 'childLogin';
@@ -156,5 +166,6 @@ abstract final class AppRoutes {
     adminContent,
     adminPackages,
     adminSubjectAccess,
+    adminPayments,
   };
 }

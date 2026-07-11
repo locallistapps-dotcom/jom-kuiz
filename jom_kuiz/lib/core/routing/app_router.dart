@@ -16,14 +16,18 @@ import '../../presentation/screens/child/child_dashboard_screen.dart';
 import '../../presentation/screens/placeholder/placeholder_screen.dart';
 import '../../presentation/screens/admin/admin_cms_screen.dart';
 import '../../presentation/screens/admin/admin_content_screen.dart';
+import '../../domain/entities/subscription_package.dart';
 import '../../presentation/screens/admin/admin_package_screen.dart';
+import '../../presentation/screens/admin/admin_payment_screen.dart';
 import '../../presentation/screens/admin/admin_question_screen.dart';
 import '../../presentation/screens/admin/admin_subject_access_screen.dart';
+import '../../presentation/screens/payment/payment_checkout_screen.dart';
+import '../../presentation/screens/payment/payment_history_screen.dart';
+import '../../presentation/screens/payment/payment_status_screen.dart';
 import '../../presentation/screens/subscription/locked_subjects_screen.dart';
 import '../../presentation/screens/subscription/package_detail_screen.dart';
 import '../../presentation/screens/subscription/purchased_subjects_screen.dart';
 import '../../presentation/screens/subscription/subscription_screen.dart';
-import '../../domain/entities/subscription_package.dart';
 import '../../presentation/screens/subject/subject_screen.dart';
 import '../../presentation/screens/chapter/chapter_screen.dart';
 import '../../presentation/screens/question_bank/question_bank_screen.dart';
@@ -316,6 +320,32 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((Ref ref) {
             const PlaceholderScreen(moduleName: 'Payment'),
       ),
       GoRoute(
+        path: AppRoutes.paymentCheckout,
+        name: AppRoutes.paymentCheckoutName,
+        builder: (context, state) {
+          final SubscriptionPackage package =
+              state.extra as SubscriptionPackage;
+          return PaymentCheckoutScreen(package: package);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.paymentStatus,
+        name: AppRoutes.paymentStatusName,
+        builder: (context, state) {
+          final PaymentStatusArgs args =
+              state.extra as PaymentStatusArgs;
+          return PaymentStatusScreen(
+            transaction: args.transaction,
+            package: args.package,
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.paymentHistory,
+        name: AppRoutes.paymentHistoryName,
+        builder: (context, state) => const PaymentHistoryScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.adminCms,
         name: AppRoutes.adminCmsName,
         builder: (context, state) => const AdminCmsScreen(),
@@ -339,6 +369,11 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((Ref ref) {
         path: AppRoutes.adminSubjectAccess,
         name: AppRoutes.adminSubjectAccessName,
         builder: (context, state) => const AdminSubjectAccessScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminPayments,
+        name: AppRoutes.adminPaymentsName,
+        builder: (context, state) => const AdminPaymentScreen(),
       ),
     ],
     errorBuilder: (context, state) => const NotFoundScreen(),
