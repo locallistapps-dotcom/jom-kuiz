@@ -62,7 +62,7 @@ final AsyncNotifierProvider<PerformanceController, PerformanceData>
 final AutoDisposeFutureProviderFamily<List<QuizAnswerReview>, String>
     sessionAnswersProvider =
     FutureProvider.autoDispose.family<List<QuizAnswerReview>, String>(
-  (AutoDisposeFutureProviderFamilyRef<List<QuizAnswerReview>, String> ref, String sessionId) async {
+  (ref, String sessionId) async {
     final PerformanceRepository repo =
         ref.watch(performanceRepositoryProvider);
     final result = await repo.getSessionAnswers(sessionId: sessionId);

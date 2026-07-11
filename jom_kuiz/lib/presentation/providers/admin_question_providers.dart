@@ -71,7 +71,7 @@ final StateProvider<Set<String>> adminSelectedQuestionsProvider =
 
 /// All subjects (active + inactive) for the admin dropdown.
 final AutoDisposeFutureProvider<List<Subject>> adminSubjectsDropdownProvider =
-    FutureProvider.autoDispose<List<Subject>>((AutoDisposeFutureProviderRef<List<Subject>> ref) async {
+    FutureProvider.autoDispose<List<Subject>>((ref) async {
   final result = await ref.watch(subjectServiceProvider).getSubjects();
   return result.when(
     success: (List<Subject> list) => list,
@@ -81,7 +81,7 @@ final AutoDisposeFutureProvider<List<Subject>> adminSubjectsDropdownProvider =
 
 /// All years (active + inactive) for the admin dropdown.
 final AutoDisposeFutureProvider<List<Year>> adminYearsDropdownProvider =
-    FutureProvider.autoDispose<List<Year>>((AutoDisposeFutureProviderRef<List<Year>> ref) async {
+    FutureProvider.autoDispose<List<Year>>((ref) async {
   final result = await ref.watch(yearServiceProvider).getYears();
   return result.when(
     success: (List<Year> list) => list,
@@ -95,8 +95,7 @@ final AutoDisposeFutureProviderFamily<List<Chapter>,
     adminChaptersDropdownProvider =
     FutureProvider.autoDispose.family<List<Chapter>,
         ({String subjectId, String yearId})>(
-  (AutoDisposeFutureProviderFamilyRef<List<Chapter>, ({String subjectId, String yearId})> ref,
-      ({String subjectId, String yearId}) arg) async {
+  (ref, ({String subjectId, String yearId}) arg) async {
     final result = await ref.watch(chapterServiceProvider).getChapters(
           subjectId: arg.subjectId.isEmpty ? null : arg.subjectId,
           yearId: arg.yearId.isEmpty ? null : arg.yearId,
@@ -112,7 +111,7 @@ final AutoDisposeFutureProviderFamily<List<Chapter>,
 final AutoDisposeFutureProviderFamily<List<Topic>, String>
     adminTopicsDropdownProvider =
     FutureProvider.autoDispose.family<List<Topic>, String>(
-  (AutoDisposeFutureProviderFamilyRef<List<Topic>, String> ref, String chapterId) async {
+  (ref, String chapterId) async {
     if (chapterId.isEmpty) return <Topic>[];
     final result = await ref
         .watch(topicServiceProvider)
