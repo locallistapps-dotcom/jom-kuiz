@@ -340,10 +340,22 @@ class QuestionBankRemoteDataSourceImpl implements QuestionBankRemoteDataSource {
       return ValidationException('Validation failed', validationCode, e);
     }
     if (status == 401 || status == 403) {
-      return const UnauthorizedException('Unauthorized');
+      // Include the actual Supabase error detail so issues are diagnosable.
+      final dynamic body = e.response?.data;
+      final String detail = body is Map
+          ? (body['message'] as String? ??
+              body['error'] as String? ??
+              body.toString())
+          : body?.toString() ?? e.message ?? 'no detail';
+      return UnauthorizedException('HTTP $status — $detail');
     }
+    // Include status + body on generic server errors too.
+    final dynamic body = e.response?.data;
+    final String detail = body is Map
+        ? (body['message'] as String? ?? body.toString())
+        : body?.toString() ?? e.message ?? 'unknown error';
     return ServerException(
-      'Something went wrong',
+      'HTTP ${e.response?.statusCode ?? '?'}: $detail',
       fallbackCode ?? QuestionBankErrorCodes.questionOperationFailed,
       e,
     );

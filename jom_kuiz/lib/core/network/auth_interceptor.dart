@@ -17,12 +17,24 @@ class AuthInterceptor extends Interceptor {
   final TokenManager _tokenManager;
 
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
-    final String? accessToken = await _tokenManager.readAccessToken();
-    if (accessToken != null && accessToken.isNotEmpty) {
-      options.headers['Authorization'] = 'Bearer $accessToken';
-    }
-    handler.next(options);
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    // Use .then() instead of async/await so handler.next() is guaranteed to
+    // be called from a chained Future — not from an `async void` body whose
+    // Future is silently discarded by Dio's interceptor caller.  On Flutter
+    // Web the JS event loop can dispatch the HTTP request before an
+    // `async void` microtask runs, causing the Authorization header to be
+    // missing and Supabase to treat the request as anonymous (no JWT → RLS
+    // blocks writes that require is_admin()).
+    _tokenManager.readAccessToken().then((String? accessToken) {
+      if (accessToken != null && accessToken.isNotEmpty) {
+        options.headers['Authorization'] = 'Bearer $accessToken';
+      }
+      handler.next(options);
+    }).catchError((Object _) {
+      // Token read failed — proceed without auth header rather than
+      // leaving the chain hanging.
+      handler.next(options);
+    });
   }
 
   @override
