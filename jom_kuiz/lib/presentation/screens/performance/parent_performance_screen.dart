@@ -107,7 +107,7 @@ final AutoDisposeFutureProviderFamily<List<ChildPerformanceOverview>,
         List<String>> _childrenOverviewProvider =
     FutureProvider.autoDispose
         .family<List<ChildPerformanceOverview>, List<String>>(
-  (AutoDisposeProviderRef<List<ChildPerformanceOverview>> ref,
+  (AutoDisposeFutureProviderFamilyRef<List<ChildPerformanceOverview>, List<String>> ref,
       List<String> childIds) async {
     final PerformanceRepository repo =
         ref.watch(performanceRepositoryProvider);

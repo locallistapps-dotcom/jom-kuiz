@@ -46,7 +46,7 @@ class ChildrenListController extends AsyncNotifier<List<ChildCardData>> {
         try {
           allResults = await ref
               .read(performanceRemoteDataSourceProvider)
-              .getRawResultsForChildren(childIds);
+              .getRawResultsForChildren(childIds: childIds);
         } catch (_) {
           // Performance data is best-effort: show children even if it fails.
         }
