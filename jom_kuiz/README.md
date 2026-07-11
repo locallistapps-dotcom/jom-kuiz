@@ -110,3 +110,5 @@ widgets, logging, global error/exception handling.
 Explicitly **not** included yet: child module, education/quiz module,
 wallet, referral, payment, admin dashboard, analytics, AI, OCR,
 notifications. These arrive in future prompts.
+
+<!-- Last deployment trigger: 2026-07-11 -->
