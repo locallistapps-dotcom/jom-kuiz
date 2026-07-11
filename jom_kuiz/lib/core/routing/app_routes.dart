@@ -63,6 +63,9 @@ abstract final class AppRoutes {
 
   // ── Subscription ──────────────────────────────────────────────────────────
   static const String subscription = '/subscription';
+  static const String packageDetail = '/subscription/package-detail';
+  static const String purchasedSubjects = '/subscription/purchased-subjects';
+  static const String lockedSubjects = '/subscription/locked-subjects';
 
   // ── Referral ──────────────────────────────────────────────────────────────
   static const String referral = '/referral';
@@ -81,6 +84,12 @@ abstract final class AppRoutes {
 
   /// Admin-only CMS content management screen (full CRUD).
   static const String adminContent = '/admin/content';
+
+  /// Admin-only Subscription Package CRUD screen.
+  static const String adminPackages = '/admin/packages';
+
+  /// Admin-only Subscriber & Subject Access viewer.
+  static const String adminSubjectAccess = '/admin/subject-access';
 
   // ── Route names ───────────────────────────────────────────────────────────
   static const String splashName = 'splash';
@@ -111,12 +120,17 @@ abstract final class AppRoutes {
   static const String quizResultName = 'quizResult';
   static const String performanceSummaryName = 'performanceSummary';
   static const String subscriptionName = 'subscription';
+  static const String packageDetailName = 'packageDetail';
+  static const String purchasedSubjectsName = 'purchasedSubjects';
+  static const String lockedSubjectsName = 'lockedSubjects';
   static const String referralName = 'referral';
   static const String rewardWalletName = 'rewardWallet';
   static const String paymentName = 'payment';
   static const String adminCmsName = 'adminCms';
   static const String adminQuestionsName = 'adminQuestions';
   static const String adminContentName = 'adminContent';
+  static const String adminPackagesName = 'adminPackages';
+  static const String adminSubjectAccessName = 'adminSubjectAccess';
 
   // ── Route names (child/parent management) ─────────────────────────────────
   static const String childLoginName = 'childLogin';
@@ -140,5 +154,7 @@ abstract final class AppRoutes {
     adminCms,
     adminQuestions,
     adminContent,
+    adminPackages,
+    adminSubjectAccess,
   };
 }

@@ -16,7 +16,14 @@ import '../../presentation/screens/child/child_dashboard_screen.dart';
 import '../../presentation/screens/placeholder/placeholder_screen.dart';
 import '../../presentation/screens/admin/admin_cms_screen.dart';
 import '../../presentation/screens/admin/admin_content_screen.dart';
+import '../../presentation/screens/admin/admin_package_screen.dart';
 import '../../presentation/screens/admin/admin_question_screen.dart';
+import '../../presentation/screens/admin/admin_subject_access_screen.dart';
+import '../../presentation/screens/subscription/locked_subjects_screen.dart';
+import '../../presentation/screens/subscription/package_detail_screen.dart';
+import '../../presentation/screens/subscription/purchased_subjects_screen.dart';
+import '../../presentation/screens/subscription/subscription_screen.dart';
+import '../../domain/entities/subscription_package.dart';
 import '../../presentation/screens/subject/subject_screen.dart';
 import '../../presentation/screens/chapter/chapter_screen.dart';
 import '../../presentation/screens/question_bank/question_bank_screen.dart';
@@ -263,8 +270,32 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((Ref ref) {
       GoRoute(
         path: AppRoutes.subscription,
         name: AppRoutes.subscriptionName,
-        builder: (context, state) =>
-            const PlaceholderScreen(moduleName: 'Subscription'),
+        builder: (context, state) => const SubscriptionScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.packageDetail,
+        name: AppRoutes.packageDetailName,
+        builder: (context, state) {
+          final SubscriptionPackage package =
+              state.extra as SubscriptionPackage;
+          return PackageDetailScreen(package: package);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.purchasedSubjects,
+        name: AppRoutes.purchasedSubjectsName,
+        builder: (context, state) {
+          final String parentId = state.extra as String? ?? '';
+          return PurchasedSubjectsScreen(parentId: parentId);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.lockedSubjects,
+        name: AppRoutes.lockedSubjectsName,
+        builder: (context, state) {
+          final String parentId = state.extra as String? ?? '';
+          return LockedSubjectsScreen(parentId: parentId);
+        },
       ),
       GoRoute(
         path: AppRoutes.referral,
@@ -298,6 +329,16 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((Ref ref) {
         path: AppRoutes.adminContent,
         name: AppRoutes.adminContentName,
         builder: (context, state) => const AdminContentScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminPackages,
+        name: AppRoutes.adminPackagesName,
+        builder: (context, state) => const AdminPackageScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminSubjectAccess,
+        name: AppRoutes.adminSubjectAccessName,
+        builder: (context, state) => const AdminSubjectAccessScreen(),
       ),
     ],
     errorBuilder: (context, state) => const NotFoundScreen(),

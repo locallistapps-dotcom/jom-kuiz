@@ -69,8 +69,7 @@ class DashboardScreen extends ConsumerWidget {
                 // Children card — wired to the Child module.
                 const _ChildrenCard(),
                 const SizedBox(height: 8),
-                const PlaceholderModuleCard(
-                    module: PlaceholderModule.subscription),
+                const _SubscriptionCard(),
                 const SizedBox(height: 8),
                 const PlaceholderModuleCard(module: PlaceholderModule.wallet),
                 const SizedBox(height: 8),
@@ -170,6 +169,37 @@ class _ChildrenCard extends StatelessWidget {
         subtitle: const Text('Manage and monitor your children'),
         trailing: const Icon(Icons.chevron_right),
         onTap: () => context.push(AppRoutes.childrenList),
+      ),
+    );
+  }
+}
+
+/// Tappable card that navigates to the Subscription screen.
+class _SubscriptionCard extends StatelessWidget {
+  const _SubscriptionCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: ListTile(
+        leading: Container(
+          width: 40,
+          height: 40,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.secondaryContainer,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            Icons.card_membership_outlined,
+            size: 20,
+            color: Theme.of(context).colorScheme.onSecondaryContainer,
+          ),
+        ),
+        title: const Text('Subscription Status'),
+        subtitle: const Text('View or upgrade your current plan'),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => context.push(AppRoutes.subscription),
       ),
     );
   }

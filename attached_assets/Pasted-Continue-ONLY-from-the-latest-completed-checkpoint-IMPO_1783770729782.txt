@@ -1,0 +1,224 @@
+Continue ONLY from the latest completed checkpoint.
+
+IMPORTANT
+
+This project MUST continue following the approved Jom Kuiz Blueprint.
+
+Before implementing:
+
+- Review ONLY the files directly related to Parent, Child, Subscription, Subject Access, Routing and existing Admin CMS.
+- Reuse the existing architecture.
+- Do NOT audit unrelated completed modules.
+- Do NOT recreate completed modules.
+- Modify only the minimum files required for integration.
+- Fix any compile errors introduced by this module before continuing.
+
+==================================================
+GOAL
+==================================================
+
+Implement the complete Subscription, Package and Subject Access Foundation according to the approved Jom Kuiz Blueprint.
+
+This module prepares the application for Premium Parents.
+
+Do NOT implement Payment Gateway yet.
+
+==================================================
+DATABASE
+==================================================
+
+Reuse existing tables whenever possible.
+
+Create ONLY if missing:
+
+subscription_packages
+
+parent_subscriptions
+
+parent_subject_access
+
+Do NOT duplicate existing tables.
+
+==================================================
+SUBSCRIPTION PACKAGE
+==================================================
+
+Each package contains:
+
+- Package Name
+- Description
+- Maximum Children
+- Included Subjects
+- Price
+- Duration (Days)
+- Status
+- Created At
+- Updated At
+
+==================================================
+PARENT SUBSCRIPTION
+==================================================
+
+Each Parent may have ONE active subscription.
+
+Fields:
+
+- Parent
+- Package
+- Start Date
+- Expiry Date
+- Status
+- Auto Renew (Reserved)
+- Created At
+- Updated At
+
+==================================================
+SUBJECT ACCESS
+==================================================
+
+Implement parent_subject_access.
+
+Requirements:
+
+When a Parent owns a Subject:
+
+- Every linked Child automatically inherits access.
+- Subject access must be validated before starting any Quiz.
+- No duplicate access records.
+- Support future renewal.
+- Support future upgrades.
+- Support future additional Subjects.
+
+Do NOT implement Payment yet.
+
+==================================================
+ADMIN CMS
+==================================================
+
+Admin can:
+
+- Create Package
+- Edit Package
+- Delete Package
+- Enable Package
+- Disable Package
+- Assign Included Subjects
+- View Subscribers
+- View Parent Subject Access
+
+==================================================
+PARENT FEATURES
+==================================================
+
+Parent can:
+
+- View Current Subscription
+- View Subscription Expiry
+- View Package Benefits
+- View Purchased Subjects
+- View Locked Subjects
+- View Available Packages
+
+==================================================
+CHILD FEATURES
+==================================================
+
+Child cannot purchase anything.
+
+Child automatically receives access to every Subject owned by Parent.
+
+Locked Subjects must display as locked.
+
+==================================================
+VALIDATION
+==================================================
+
+Prevent:
+
+- Duplicate subscriptions
+- Overlapping subscriptions
+- Duplicate subject access
+- Invalid package assignment
+
+Automatically inherit Subject Access to all linked Children.
+
+Return Result<T> consistently.
+
+==================================================
+APPLICATION
+==================================================
+
+Create ONLY if missing:
+
+SubscriptionRepository
+
+SubscriptionDatasource
+
+SubscriptionController
+
+SubjectAccessRepository
+
+SubjectAccessDatasource
+
+SubjectAccessController
+
+Riverpod Providers
+
+Reuse existing Result<T> implementation.
+
+==================================================
+PRESENTATION
+==================================================
+
+Create:
+
+Subscription Screen
+
+Package Detail Screen
+
+Purchased Subjects Screen
+
+Locked Subjects Screen
+
+Admin Package Management
+
+Admin Subject Access Management
+
+Reuse existing UI components whenever possible.
+
+==================================================
+ROUTING
+==================================================
+
+Integrate all routes.
+
+Do NOT break existing routing.
+
+==================================================
+SUPABASE
+==================================================
+
+Create RLS Policies if needed.
+
+Optimize queries.
+
+Avoid duplicate requests.
+
+==================================================
+OUTPUT
+==================================================
+
+After completion provide ONLY:
+
+- Files Created
+- Files Modified
+- Repositories
+- Datasources
+- Controllers
+- Providers
+- Routes Updated
+- Supabase Changes
+- Migration Files
+- Remaining TODO
+
+Create a new checkpoint after successful completion.

@@ -93,6 +93,22 @@ class AdminCmsScreen extends ConsumerWidget {
                 badge: 'Admin',
                 onTap: () => context.push(AppRoutes.adminQuestions),
               ),
+              _ModuleCard(
+                icon: Icons.card_membership_rounded,
+                label: 'Packages',
+                color: const Color(0xFFE8EAF6),
+                iconColor: const Color(0xFF3949AB),
+                badge: 'Admin',
+                onTap: () => context.push(AppRoutes.adminPackages),
+              ),
+              _ModuleCard(
+                icon: Icons.lock_open_rounded,
+                label: 'Subject Access',
+                color: const Color(0xFFE0F2F1),
+                iconColor: const Color(0xFF00695C),
+                badge: 'Admin',
+                onTap: () => context.push(AppRoutes.adminSubjectAccess),
+              ),
             ],
           ),
 
