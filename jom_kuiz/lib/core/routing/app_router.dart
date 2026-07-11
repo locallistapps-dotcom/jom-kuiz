@@ -21,6 +21,7 @@ import '../../presentation/screens/admin/admin_package_screen.dart';
 import '../../presentation/screens/admin/admin_payment_screen.dart';
 import '../../presentation/screens/admin/admin_question_screen.dart';
 import '../../presentation/screens/admin/admin_subject_access_screen.dart';
+import '../../presentation/screens/admin/admin_subscription_screen.dart';
 import '../../presentation/screens/payment/payment_checkout_screen.dart';
 import '../../presentation/screens/payment/payment_history_screen.dart';
 import '../../presentation/screens/payment/payment_status_screen.dart';
@@ -399,6 +400,11 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((Ref ref) {
         path: AppRoutes.adminPackages,
         name: AppRoutes.adminPackagesName,
         builder: (context, state) => const AdminPackageScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminSubscriptions,
+        name: AppRoutes.adminSubscriptionsName,
+        builder: (context, state) => const AdminSubscriptionScreen(),
       ),
       GoRoute(
         path: AppRoutes.adminSubjectAccess,

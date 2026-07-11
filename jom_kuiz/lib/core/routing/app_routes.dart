@@ -97,6 +97,7 @@ abstract final class AppRoutes {
   static const String adminPackages = '/admin/packages';
 
   /// Admin-only Subscriber & Subject Access viewer.
+  static const String adminSubscriptions = '/admin/subscriptions';
   static const String adminSubjectAccess = '/admin/subject-access';
 
   /// Admin-only Payment transactions viewer.
@@ -144,6 +145,7 @@ abstract final class AppRoutes {
   static const String adminQuestionsName = 'adminQuestions';
   static const String adminContentName = 'adminContent';
   static const String adminPackagesName = 'adminPackages';
+  static const String adminSubscriptionsName = 'adminSubscriptions';
   static const String adminSubjectAccessName = 'adminSubjectAccess';
   static const String adminPaymentsName = 'adminPayments';
 
@@ -175,6 +177,7 @@ abstract final class AppRoutes {
     adminQuestions,
     adminContent,
     adminPackages,
+    adminSubscriptions,
     adminSubjectAccess,
     adminPayments,
   };
