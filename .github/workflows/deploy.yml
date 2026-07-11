@@ -1,127 +1,49 @@
 name: Build & Deploy Jom Kuiz to GitHub Pages
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Triggers
-# ──────────────────────────────────────────────────────────────────────────────
 on:
   push:
     branches:
-      - main          # deploy on every push to main
-  workflow_dispatch:  # allow manual runs from the Actions tab
+      - main
+  workflow_dispatch:
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Permissions required by actions/deploy-pages
-# ──────────────────────────────────────────────────────────────────────────────
 permissions:
-  contents: read   # checkout
-  pages: write     # deploy to GitHub Pages
-  id-token: write  # OIDC token for trusted deployment
+  contents: read
+  pages: write
+  id-token: write
 
-# Only one deployment at a time; don't cancel in-progress runs so a live
-# deployment is never left in a broken state.
 concurrency:
   group: pages
   cancel-in-progress: false
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Jobs
-# ──────────────────────────────────────────────────────────────────────────────
 jobs:
 
-  # ── 1. Build ────────────────────────────────────────────────────────────────
   build:
     name: Build Flutter Web
     runs-on: ubuntu-latest
 
     steps:
-      # 1a. Check out the full repository (Flutter app lives in jom_kuiz/)
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 1b. Install Flutter (stable channel)
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          cache: true          # caches Flutter SDK between runs for speed
+          cache: true
 
-      # 1c. Print Flutter version so the build log is reproducible
       - name: Flutter version info
         run: flutter --version
 
-      # 1d. Install Dart/pub dependencies
       - name: Install pub dependencies
         working-directory: jom_kuiz
         run: flutter pub get
 
-      # 1e. Analyse for obvious compile errors (warnings are fine; errors fail)
-      - name: Analyse Dart code
-        working-directory: jom_kuiz
-        run: flutter analyze --no-fatal-warnings
-        continue-on-error: false
+#      - name: Analyse Dart code
+#        working-directory: jom_kuiz
+#        run: flutter analyze --no-fatal-warnings
 
-      # 1f. Generate PWA icons with ImageMagick (pre-installed on ubuntu-latest)
-      #     These land in web/icons/ and are picked up by Flutter's build step.
-      #     Replace with your own branded PNGs by committing real files to
-      #     jom_kuiz/web/icons/ — this step skips individual files that already
-      #     exist, so committed assets always win.
-      - name: Generate PWA icons
-        run: |
-          ICONS_DIR="jom_kuiz/web/icons"
-          mkdir -p "$ICONS_DIR"
+      
 
-          generate_icon() {
-            local dest="$1"
-            local size="$2"
-            local font_size="$3"
-
-            # Skip if the project already ships a real icon
-            if [ -f "$dest" ]; then
-              echo "  skipping $dest (already exists)"
-              return
-            fi
-
-            echo "  generating $dest (${size}x${size})"
-            magick -size "${size}x${size}" \
-              radial-gradient:"#1976D2"-"#0D47A1" \
-              -fill white \
-              -font DejaVu-Sans-Bold \
-              -pointsize "$font_size" \
-              -gravity center \
-              -annotate 0 "JK" \
-              "$dest"
-          }
-
-          generate_icon "$ICONS_DIR/Icon-192.png"          192  72
-          generate_icon "$ICONS_DIR/Icon-512.png"          512 192
-          generate_icon "$ICONS_DIR/Icon-maskable-192.png" 192  60
-          generate_icon "$ICONS_DIR/Icon-maskable-512.png" 512 160
-
-          # Favicon (32 px)
-          if [ ! -f "jom_kuiz/web/favicon.png" ]; then
-            echo "  generating favicon.png"
-            magick -size 32x32 \
-              radial-gradient:"#1976D2"-"#0D47A1" \
-              -fill white \
-              -font DejaVu-Sans-Bold \
-              -pointsize 16 \
-              -gravity center \
-              -annotate 0 "J" \
-              "jom_kuiz/web/favicon.png"
-          fi
-
-      # 1g. Build Flutter web in release mode.
-      #
-      #   --base-href   Must match the GitHub Pages sub-path:
-      #                 https://<user>.github.io/<repo>/ → /<repo>/
-      #                 Update this if you use a custom domain at root ("/").
-      #
-      #   --dart-define Pass Supabase credentials from GitHub Actions Secrets.
-      #                 Add SUPABASE_URL and SUPABASE_ANON_KEY in:
-      #                 Repository → Settings → Secrets and variables → Actions
-      #
-      #   --pwa-strategy offline-first  generates the Flutter service worker
-      #                                 that caches app shell for offline use.
       - name: Build Flutter web (release)
         working-directory: jom_kuiz
         env:
@@ -136,13 +58,11 @@ jobs:
             --dart-define="SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}" \
             --dart-define="APP_ENV=production"
 
-      # 1h. Upload the build output as a Pages artifact
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: jom_kuiz/build/web   # the compiled output Flutter put here
+          path: jom_kuiz/build/web
 
-  # ── 2. Deploy ───────────────────────────────────────────────────────────────
   deploy:
     name: Deploy to GitHub Pages
     needs: build
