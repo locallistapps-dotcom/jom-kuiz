@@ -122,14 +122,38 @@ class AccountManagementRemoteDataSourceImpl
   }) async {
     try {
       final Response<dynamic> res = await _dio.post<dynamic>(
-        '/auth/child/login',
+        '/rpc/verify_child_credentials',
         data: <String, String>{
-          'student_id': studentId,
-          'username': username,
-          'password': password,
+          'p_student_id': studentId,
+          'p_username': username,
+          'p_password': password,
         },
       );
-      return res.data as Map<String, dynamic>;
+
+      // PostgREST RPC returns an array of rows.
+      final List<dynamic> rows = res.data as List<dynamic>;
+      if (rows.isEmpty) {
+        throw UnauthorizedException('Invalid student ID or username', null, null);
+      }
+      final Map<String, dynamic> row = rows.first as Map<String, dynamic>;
+
+      final bool isValid = row['is_valid'] as bool? ?? false;
+      if (!isValid) {
+        throw UnauthorizedException('Invalid credentials', null, null);
+      }
+
+      final String status = (row['account_status'] as String?) ?? '';
+      if (status != 'active') {
+        throw ValidationException(
+          'Account is disabled',
+          AccountManagementErrorCodes.disabledAccount,
+          null,
+        );
+      }
+
+      return <String, dynamic>{'child_id': row['child_id'] as String};
+    } on AppException {
+      rethrow;
     } on DioException catch (e) {
       throw _mapError(
         e,

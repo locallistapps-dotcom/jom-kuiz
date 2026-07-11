@@ -34,18 +34,10 @@ class ChildAuthService {
         password: password,
       );
 
-      final String accessToken = data['access_token'] as String;
-      final String refreshToken = data['refresh_token'] as String;
-      final int expiresIn = (data['expires_in'] as int?) ?? 3600;
+      // Children authenticate via bcrypt (verify_child_credentials RPC) —
+      // they do not have Supabase auth accounts and therefore receive no JWT.
+      // The session is tracked by [currentChildIdProvider] alone.
       final String childId = data['child_id'] as String;
-
-      await _tokenManager.saveTokens(
-        accessToken: accessToken,
-        refreshToken: refreshToken,
-        expiresAt: DateTime.now().add(Duration(seconds: expiresIn)),
-        persistRefreshToken: true,
-      );
-
       return Result<String>.success(childId);
     } on AppException catch (e) {
       return Result<String>.failure(GlobalExceptionHandler.toFailure(e));
