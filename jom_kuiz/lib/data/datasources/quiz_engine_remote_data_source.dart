@@ -29,7 +29,7 @@ class QuizEngineRemoteDataSourceImpl implements QuizEngineRemoteDataSource {
 
   final Dio _dio;
 
-  static const Options _minimalReturn = Options(
+  static final Options _minimalReturn = Options(
     headers: <String, String>{'Prefer': 'return=minimal'},
   );
 

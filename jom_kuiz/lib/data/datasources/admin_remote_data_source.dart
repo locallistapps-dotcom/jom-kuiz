@@ -129,7 +129,7 @@ class AdminRemoteDataSourceImpl implements AdminRemoteDataSource {
   final Dio _dio;
 
   static const String _base = '/admin_content';
-  static const Options _returnRepresentation = Options(
+  static final Options _returnRepresentation = Options(
     headers: <String, String>{'Prefer': 'return=representation'},
   );
 

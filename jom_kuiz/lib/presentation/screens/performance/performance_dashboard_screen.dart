@@ -81,23 +81,18 @@ class _PerformanceDashboardScreenState
 
 // ── Dashboard body ────────────────────────────────────────────────────────────
 
-class _DashboardBody extends StatelessWidget {
+class _DashboardBody extends ConsumerWidget {
   const _DashboardBody({super.key, required this.data});
   final PerformanceData data;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colors = theme.colorScheme;
 
     return RefreshIndicator(
-      onRefresh: () async {
-        final ref = (context as Element)
-            .getInheritedWidgetOfExactType<ProviderScope>()
-            ?.key; // fallback handled below
-        // Pull-to-refresh via InheritedWidget lookup is complex;
-        // the FAB handles this; pull-to-refresh triggers same route reload.
-      },
+      onRefresh: () =>
+          ref.read(performanceControllerProvider.notifier).refresh(),
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
