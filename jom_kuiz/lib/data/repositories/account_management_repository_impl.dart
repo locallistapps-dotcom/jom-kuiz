@@ -127,4 +127,14 @@ class AccountManagementRepositoryImpl implements AccountManagementRepository {
       return Result<bool>.failure(GlobalExceptionHandler.toFailure(e));
     }
   }
+
+  @override
+  Future<Result<void>> deleteChild({required String childId}) async {
+    try {
+      await _ds.deleteChild(childId);
+      return const Result<void>.success(null);
+    } on AppException catch (e) {
+      return Result<void>.failure(GlobalExceptionHandler.toFailure(e));
+    }
+  }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -92,7 +93,7 @@ class _ChildManagementBody extends ConsumerWidget {
         _InfoCard(
           title: 'Profile',
           children: <Widget>[
-            _InfoRow(label: 'Student ID', value: model.studentId),
+            _StudentIdRow(studentId: model.studentId),
             _InfoRow(label: 'Username', value: '@${model.username}'),
             _InfoRow(
               label: 'Education',
@@ -150,6 +151,11 @@ class _ChildManagementBody extends ConsumerWidget {
 
         // ── Password reset ────────────────────────────────────────────────
         _PasswordResetCard(childId: childId),
+        const SizedBox(height: 16),
+
+        // ── Danger zone ───────────────────────────────────────────────────
+        _DeleteChildCard(childId: childId, childName: model.fullName),
+        const SizedBox(height: 24),
       ],
     );
   }
@@ -456,6 +462,223 @@ class _InfoRow extends StatelessWidget {
     );
   }
 }
+
+// ── _StudentIdRow ─────────────────────────────────────────────────────────────
+
+/// Displays the student ID with a clipboard copy button.
+///
+/// Tapping the copy icon copies the bare 8-digit ID to the system clipboard
+/// and shows a brief SnackBar confirmation.
+class _StudentIdRow extends StatelessWidget {
+  const _StudentIdRow({super.key, required this.studentId});
+  final String studentId;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: <Widget>[
+          SizedBox(
+            width: 110,
+            child: Text(
+              'Student ID',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              studentId,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+          InkWell(
+            borderRadius: BorderRadius.circular(20),
+            onTap: () async {
+              await Clipboard.setData(ClipboardData(text: studentId));
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Student ID copied to clipboard'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: Icon(
+                Icons.copy_outlined,
+                size: 18,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── _DeleteChildCard ──────────────────────────────────────────────────────────
+
+/// Danger-zone card that lets the parent permanently delete a child account.
+///
+/// Shows a two-step confirmation dialog before calling [deleteChild]. On
+/// success the children-list controller is refreshed and the navigator pops
+/// back to the list screen.
+class _DeleteChildCard extends ConsumerStatefulWidget {
+  const _DeleteChildCard({
+    super.key,
+    required this.childId,
+    required this.childName,
+  });
+
+  final String childId;
+  final String childName;
+
+  @override
+  ConsumerState<_DeleteChildCard> createState() => _DeleteChildCardState();
+}
+
+class _DeleteChildCardState extends ConsumerState<_DeleteChildCard> {
+  bool _isDeleting = false;
+
+  Future<void> _confirmAndDelete(BuildContext context) async {
+    // ── First dialog: explain consequences ──────────────────────────────
+    final bool? proceed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext ctx) => AlertDialog(
+        icon: Icon(Icons.warning_amber_rounded,
+            color: Theme.of(ctx).colorScheme.error, size: 32),
+        title: const Text('Delete Account?'),
+        content: Text(
+          'Permanently delete ${widget.childName}\'s account?\n\n'
+          'All quiz history, achievements and progress data will be '
+          'removed and cannot be recovered.',
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+              foregroundColor: Theme.of(ctx).colorScheme.onError,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (proceed != true || !context.mounted) return;
+
+    setState(() => _isDeleting = true);
+
+    final result = await ref
+        .read(childManagementControllerProvider(widget.childId).notifier)
+        .deleteChild();
+
+    if (!mounted) return;
+    setState(() => _isDeleting = false);
+
+    result.when(
+      success: (_) {
+        // Refresh the children list so the deleted entry disappears.
+        ref.read(childrenListControllerProvider.notifier).refresh();
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${widget.childName}\'s account has been deleted'),
+            ),
+          );
+          // Pop back to children list.
+          context.pop();
+        }
+      },
+      failure: (f) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(f.toString())),
+          );
+        }
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme cs = Theme.of(context).colorScheme;
+
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: cs.errorContainer),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Icon(Icons.warning_amber_outlined,
+                    color: cs.error, size: 18),
+                const SizedBox(width: 6),
+                Text(
+                  'Danger Zone',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: cs.error,
+                      ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Permanently delete this account and all associated data. '
+              'This action cannot be undone.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: cs.outline,
+                  ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: cs.error,
+                  side: BorderSide(color: cs.error),
+                ),
+                onPressed: _isDeleting
+                    ? null
+                    : () => _confirmAndDelete(context),
+                icon: _isDeleting
+                    ? SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: cs.error,
+                        ),
+                      )
+                    : const Icon(Icons.delete_forever_outlined),
+                label: Text(_isDeleting ? 'Deleting…' : 'Delete Account'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── _NavTile ──────────────────────────────────────────────────────────────────
 
 class _NavTile extends StatelessWidget {
   const _NavTile({

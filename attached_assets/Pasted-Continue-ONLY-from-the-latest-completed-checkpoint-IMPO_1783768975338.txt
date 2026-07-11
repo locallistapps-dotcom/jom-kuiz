@@ -1,0 +1,210 @@
+Continue ONLY from the latest completed checkpoint.
+
+IMPORTANT
+
+This project MUST follow the approved Jom Kuiz Blueprint.
+
+DO NOT:
+- recreate architecture
+- recreate authentication
+- recreate Question Bank
+- recreate Admin CMS
+- recreate Admin Question Management
+- recreate Admin Content
+- modify completed modules unless required for integration
+
+Reuse:
+
+- Clean Architecture
+- Riverpod
+- Result<T>
+- Existing Repositories
+- Existing Entities
+- Existing Routes
+- Existing Supabase conventions
+- Existing Authentication
+
+==================================================
+GOAL
+==================================================
+
+Implement the complete Parent & Child Management Module according to the approved Blueprint.
+
+This module becomes the foundation for Subscription, Subject Access, Quiz History, Parent Dashboard and Payment.
+
+==================================================
+PARENT AUTHENTICATION
+==================================================
+
+Keep the existing Email + Password authentication as the PRIMARY login method.
+
+Prepare the authentication architecture to support Google Sign-In in the future without breaking existing users.
+
+Requirements:
+
+- Existing Email + Password users must continue to work without migration.
+- Do NOT replace Email + Password.
+- Do NOT remove existing authentication.
+- Google Sign-In must be implemented as an OPTIONAL login provider for future use.
+- If a Google account uses the same email as an existing Parent account, automatically link it to the existing Parent profile instead of creating a duplicate Parent account.
+- Do NOT create duplicate Parent records.
+- Preserve backward compatibility.
+- Design the authentication layer so additional providers (Google, Apple, Microsoft, etc.) can be added later with minimal changes.
+
+==================================================
+DATABASE
+==================================================
+
+Reuse existing tables whenever possible.
+
+Create only if missing:
+
+parents
+
+children
+
+Do NOT duplicate user tables.
+
+==================================================
+PARENT
+==================================================
+
+Each authenticated Parent must have:
+
+- Parent ID (auto generated)
+- Full Name
+- Email
+- Phone Number (optional)
+- Avatar
+- Referral Code (reserved for future module)
+- Created At
+- Updated At
+
+==================================================
+CHILD
+==================================================
+
+Each Child belongs to ONE Parent.
+
+Fields:
+
+- Child ID (8 digits auto generated)
+- Display Name
+- Username
+- Password
+- School Year
+- Avatar
+- Status
+- Created At
+- Updated At
+
+==================================================
+PARENT FEATURES
+==================================================
+
+Parent can:
+
+- View all children
+- Add child
+- Edit child
+- Delete child (only when allowed)
+- Disable child
+- Enable child
+- Reset child password
+- Change school year
+- View Child ID
+- Copy Child ID
+
+==================================================
+CHILD LOGIN
+==================================================
+
+Child Login uses:
+
+- Username
+- Password
+
+Do NOT use Google Login for Child accounts.
+
+Reuse existing authentication architecture.
+
+==================================================
+VALIDATION
+==================================================
+
+- Prevent duplicate usernames
+- Prevent duplicate Child IDs
+- Validate school year
+- Validate parent ownership
+- Return Result<T> consistently
+
+==================================================
+APPLICATION
+==================================================
+
+Create if missing:
+
+- Parent Repository
+- Child Repository
+- Parent Datasource
+- Child Datasource
+- Parent Controller
+- Child Controller
+- Riverpod Providers
+
+==================================================
+PRESENTATION
+==================================================
+
+Create screens:
+
+- Children List
+- Add Child
+- Edit Child
+- Child Details
+- Reset Password
+- Change School Year
+- Delete Confirmation
+
+==================================================
+ROUTING
+==================================================
+
+Integrate all routes.
+
+Do NOT break existing routing.
+
+==================================================
+SECURITY
+==================================================
+
+- Parent can ONLY manage their own children.
+- Child cannot access Parent pages.
+- Admin still has full access.
+
+==================================================
+SUPABASE
+==================================================
+
+- Create RLS policies if needed.
+- Optimize queries.
+- Avoid duplicate requests.
+
+==================================================
+OUTPUT
+==================================================
+
+After completion provide ONLY:
+
+- Files Created
+- Files Modified
+- Repositories
+- Datasources
+- Controllers
+- Providers
+- Routes Updated
+- Supabase Changes
+- Migration Files
+- Remaining TODO
+
+Create a new checkpoint after successful completion.

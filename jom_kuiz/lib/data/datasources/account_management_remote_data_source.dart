@@ -23,6 +23,13 @@ abstract class AccountManagementRemoteDataSource {
   Future<void> resetChildPassword(ResetChildPasswordRequest request);
   Future<bool> isUsernameAvailable(String username);
 
+  /// Permanently deletes a child account.
+  ///
+  /// Uses a direct `DELETE /children?id=eq.{childId}` PostgREST call guarded
+  /// by the "Parents delete own children" RLS policy so only the linked parent
+  /// can remove the record.
+  Future<void> deleteChild(String childId);
+
   /// Authenticates a child via Student ID + username + password.
   ///
   /// Returns a map with keys: `access_token`, `refresh_token`, `expires_in`
@@ -87,6 +94,22 @@ class AccountManagementRemoteDataSourceImpl
       throw _mapError(
         e,
         notFoundCode: AccountManagementErrorCodes.childNotFound,
+      );
+    }
+  }
+
+  @override
+  Future<void> deleteChild(String childId) async {
+    try {
+      await _dio.delete<dynamic>(
+        _table,
+        queryParameters: <String, String>{'id': 'eq.$childId'},
+      );
+    } on DioException catch (e) {
+      throw _mapError(
+        e,
+        notFoundCode: AccountManagementErrorCodes.childNotFound,
+        fallbackCode: AccountManagementErrorCodes.deleteChildFailed,
       );
     }
   }

@@ -89,4 +89,9 @@ class ChildManagementController
             childId: arg,
             newPassword: newPassword,
           );
+
+  /// Permanently deletes this child account. The parent must confirm before
+  /// calling this; no undo is possible after success.
+  Future<Result<void>> deleteChild() =>
+      ref.read(accountManagementServiceProvider).deleteChild(childId: arg);
 }

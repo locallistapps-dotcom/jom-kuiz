@@ -29,4 +29,7 @@ abstract final class AccountManagementErrorCodes {
 
   /// Password reset failed on the server.
   static const String resetPasswordFailed = 'ACCT-010';
+
+  /// The delete-child request was rejected by the server.
+  static const String deleteChildFailed = 'ACCT-011';
 }

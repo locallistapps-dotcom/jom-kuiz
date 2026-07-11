@@ -50,4 +50,11 @@ abstract class AccountManagementRepository {
 
   /// Returns `true` if [username] is not already taken.
   Future<Result<bool>> isUsernameAvailable(String username);
+
+  /// Permanently deletes a child account.
+  ///
+  /// The server verifies that the caller is the child's parent before
+  /// performing the hard delete. Quiz history and related data will be
+  /// removed according to the database cascade rules.
+  Future<Result<void>> deleteChild({required String childId});
 }

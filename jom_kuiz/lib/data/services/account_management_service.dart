@@ -145,6 +145,12 @@ class AccountManagementService {
   Future<Result<bool>> isUsernameAvailable(String username) =>
       _repo.isUsernameAvailable(username);
 
+  /// Permanently deletes a child account after server-side ownership
+  /// verification. Callers (controllers / screens) must show a confirmation
+  /// dialog before invoking this method.
+  Future<Result<void>> deleteChild({required String childId}) =>
+      _repo.deleteChild(childId: childId);
+
   // ── Auto-generate username ───────────────────────────────────────────────
 
   /// Generates a candidate username from [name] + 4 random digits.
