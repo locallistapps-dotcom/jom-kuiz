@@ -77,12 +77,25 @@ class ParentRemoteDataSourceImpl implements ParentRemoteDataSource {
 
   // ── Mutations ──────────────────────────────────────────────────────────────
 
+  // PostgREST requires at least one query-parameter filter on PATCH/DELETE
+  // operations (even when RLS already scopes the affected rows).  Without a
+  // filter the server responds with a 400 "You attempted to update/delete all
+  // rows in the table" error.
+  //
+  // Using `user_id=not.is.null` as a sentinel filter is safe: it evaluates to
+  // `WHERE user_id IS NOT NULL` at the SQL layer, and the RLS UPDATE policy
+  // (`user_id = auth.uid()`) further restricts it to exactly the caller's row.
+  static const Map<String, String> _rowFilter = <String, String>{
+    'user_id': 'not.is.null',
+  };
+
   @override
   Future<ParentProfileModel> updateProfile(UpdateProfileRequest request) async {
     try {
       final Response<dynamic> response = await _postgrestDio.patch<dynamic>(
         _table,
         data: request.toJson()..removeWhere((_, v) => v == null),
+        queryParameters: _rowFilter,
         options: Options(headers: <String, String>{'Prefer': 'return=representation'}),
       );
       final List<dynamic> rows = response.data as List<dynamic>;
@@ -104,6 +117,7 @@ class ParentRemoteDataSourceImpl implements ParentRemoteDataSource {
       final Response<dynamic> response = await _postgrestDio.patch<dynamic>(
         _table,
         data: <String, String>{'profile_photo': request.localFilePath},
+        queryParameters: _rowFilter,
         options: Options(headers: <String, String>{'Prefer': 'return=representation'}),
       );
       final List<dynamic> rows = response.data as List<dynamic>;
@@ -136,6 +150,7 @@ class ParentRemoteDataSourceImpl implements ParentRemoteDataSource {
       final Response<dynamic> response = await _postgrestDio.patch<dynamic>(
         _table,
         data: request.toJson()..removeWhere((_, v) => v == null),
+        queryParameters: _rowFilter,
         options: Options(headers: <String, String>{'Prefer': 'return=representation'}),
       );
       final List<dynamic> rows = response.data as List<dynamic>;
@@ -152,7 +167,7 @@ class ParentRemoteDataSourceImpl implements ParentRemoteDataSource {
       // Removes the parent row; the CASCADE from auth.users handles the
       // rest of the child data.  Deleting the auth.users record itself
       // requires a service-role Edge Function — left as a future task.
-      await _postgrestDio.delete<dynamic>(_table);
+      await _postgrestDio.delete<dynamic>(_table, queryParameters: _rowFilter);
     } on DioException catch (e) {
       _log('deleteAccount', e);
       throw _mapError(e);
