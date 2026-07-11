@@ -3,14 +3,17 @@ import '../../domain/entities/question.dart';
 // ── Enum helpers ──────────────────────────────────────────────────────────────
 
 extension QuestionTypeX on QuestionType {
+  /// Returns the canonical string value accepted by the PostgreSQL CHECK
+  /// constraint: questions_question_type_check
+  ///   ARRAY['multiple_choice', 'true_false', 'short_answer']
   String toJson() {
     switch (this) {
       case QuestionType.mcq:
-        return 'mcq';
+        return 'multiple_choice'; // was 'mcq' — DB requires 'multiple_choice'
       case QuestionType.trueFalse:
         return 'true_false';
       case QuestionType.fillInTheBlank:
-        return 'fill_in_blank';
+        return 'short_answer'; // was 'fill_in_blank' — DB requires 'short_answer'
     }
   }
 
