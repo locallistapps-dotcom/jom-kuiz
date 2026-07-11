@@ -1,24 +1,25 @@
 import '../../core/utils/result.dart';
-import '../entities/quiz_session.dart';
+import '../entities/quiz_engine.dart';
 
-/// Abstract contract for quiz-engine session management.
+/// Abstract contract for persisting Quiz Engine data to the backend.
+///
+/// All quiz business logic (shuffling, scoring, state machine) lives in
+/// [QuizEngineController] and [QuizEngineService]. This repository is
+/// responsible only for durability — it writes completed sessions, per-question
+/// answers, and aggregated results to Supabase.
+///
+/// Reading back results is intentionally omitted here; the Performance Summary
+/// module will own its own repository for historical data.
 abstract interface class QuizEngineRepository {
-  /// Starts a new quiz session for [childId] on [quizId].
-  Future<Result<QuizSession>> startSession({
-    required String quizId,
-    required String childId,
-  });
+  /// Persists a completed [QuizEngineSession] header row.
+  Future<Result<void>> saveSession({required QuizEngineSession session});
 
-  /// Records an answer for [questionId] within [sessionId].
-  Future<Result<QuizSession>> submitAnswer({
+  /// Bulk-inserts all [QuizEngineAnswer]s for a session.
+  Future<Result<void>> saveAnswers({
     required String sessionId,
-    required String questionId,
-    required String answer,
+    required List<QuizEngineAnswer> answers,
   });
 
-  /// Marks a session as completed and triggers result generation.
-  Future<Result<QuizSession>> endSession({required String sessionId});
-
-  /// Returns the current state of an in-progress session.
-  Future<Result<QuizSession>> getSession({required String sessionId});
+  /// Persists the aggregated [QuizEngineResult] row.
+  Future<Result<void>> saveResult({required QuizEngineResult result});
 }

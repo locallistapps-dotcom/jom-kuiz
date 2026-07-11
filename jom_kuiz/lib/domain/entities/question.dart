@@ -60,6 +60,7 @@ class Question extends Equatable {
     this.optionC,
     this.optionD,
     this.explanation,
+    this.explanationImageUrl,
   });
 
   /// Primary key — UUID supplied by Supabase.
@@ -86,8 +87,12 @@ class Question extends Equatable {
   ///   Fill Blank  → the expected answer text
   final String correctAnswer;
 
-  /// Optional explanation shown after answering.
+  /// Optional explanation shown after answering (only in Review screen).
   final String? explanation;
+
+  /// Optional URL to an image that supplements the explanation.
+  /// Displayed in the Review screen below the explanation text.
+  final String? explanationImageUrl;
 
   final bool isActive;
   final DateTime createdAt;
@@ -105,6 +110,7 @@ class Question extends Equatable {
     String? optionD,
     String? correctAnswer,
     String? explanation,
+    String? explanationImageUrl,
     bool? isActive,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -121,6 +127,7 @@ class Question extends Equatable {
       optionD: optionD ?? this.optionD,
       correctAnswer: correctAnswer ?? this.correctAnswer,
       explanation: explanation ?? this.explanation,
+      explanationImageUrl: explanationImageUrl ?? this.explanationImageUrl,
       isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -140,6 +147,7 @@ class Question extends Equatable {
         optionD,
         correctAnswer,
         explanation,
+        explanationImageUrl,
         isActive,
         createdAt,
         updatedAt,

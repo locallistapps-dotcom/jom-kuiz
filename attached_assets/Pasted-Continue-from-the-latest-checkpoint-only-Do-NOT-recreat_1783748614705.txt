@@ -1,0 +1,251 @@
+Continue from the latest checkpoint only.
+
+Do NOT recreate existing architecture.
+
+Do NOT modify completed modules.
+
+Implement the complete Quiz Engine Module using the existing Clean Architecture, Riverpod, Result<T>, and Supabase conventions.
+
+Question Bank is already complete.
+
+Use it as the only source of questions.
+
+Replace the Quiz Engine Placeholder with the real implementation.
+
+Implement:
+
+==================================================
+DOMAIN
+==================================================
+
+Create:
+
+- QuizSession
+- QuizAnswer
+- QuizResult
+- QuizEngineRepository
+
+==================================================
+DATA
+==================================================
+
+Create:
+
+- QuizEngineRemoteDatasource
+- QuizEngineRepositoryImpl
+
+==================================================
+APPLICATION
+==================================================
+
+Create:
+
+- QuizEngineController
+- All required Riverpod Providers
+
+==================================================
+PRESENTATION
+==================================================
+
+Create the following screens.
+
+--------------------------------------------------
+1. Quiz Home
+--------------------------------------------------
+
+Display:
+
+- Subject
+- Year
+- Chapter
+- Topic
+
+Allow user to choose available quiz.
+
+--------------------------------------------------
+2. Quiz Start
+--------------------------------------------------
+
+Allow user to choose:
+
+- 5 Questions
+- 10 Questions
+- 20 Questions
+- All Questions
+
+Questions must be randomized.
+
+--------------------------------------------------
+3. Quiz Screen
+--------------------------------------------------
+
+Display:
+
+- Question
+- MCQ options
+- True / False
+- Fill In Blank
+- Progress indicator
+- Question number
+- Previous button
+- Next button
+- Finish button
+
+Rules:
+
+Only one answer per question.
+
+Automatically save answer whenever user changes answer.
+
+Do NOT show explanation while quiz is running.
+
+--------------------------------------------------
+4. Quiz Result
+--------------------------------------------------
+
+Display:
+
+- Total Questions
+- Correct Answers
+- Wrong Answers
+- Score (%)
+- Time Taken
+
+Buttons:
+
+- Review Answers
+- Restart Quiz
+- Back
+
+--------------------------------------------------
+5. Review Answers
+--------------------------------------------------
+
+For every question display:
+
+- Question
+- User Answer
+- Correct Answer
+
+If explanation exists:
+
+Display:
+
+Explanation
+
+If explanation image exists:
+
+Display explanation image.
+
+If explanation does not exist:
+
+Display:
+
+"No explanation provided."
+
+Highlight:
+
+- Correct answer (green)
+- Wrong answer (red)
+
+Explanation is only available AFTER quiz has been submitted.
+
+Never show explanation before submission.
+
+==================================================
+QUESTION BANK SUPPORT
+==================================================
+
+Every question must support optional fields:
+
+- explanation
+- explanationImageUrl
+
+These fields are optional.
+
+They should be saved and retrieved from Supabase.
+
+==================================================
+QUIZ RULES
+==================================================
+
+Questions must come ONLY from Question Bank.
+
+Randomize question order.
+
+No duplicate questions.
+
+No empty quiz.
+
+Auto calculate:
+
+- Correct count
+- Wrong count
+- Percentage
+- Time taken
+
+Save:
+
+- QuizSession
+- QuizAnswer
+- QuizResult
+
+==================================================
+VALIDATION
+==================================================
+
+Handle:
+
+- Loading
+- Empty
+- Error
+- Network failure
+
+Return Result<T> consistently.
+
+==================================================
+SUPABASE READY
+==================================================
+
+Prepare datasource using Supabase PostgREST.
+
+Follow existing repository pattern.
+
+==================================================
+ROUTING
+==================================================
+
+Replace Quiz Engine Placeholder with real screen.
+
+Update routing.
+
+==================================================
+OUTPUT
+==================================================
+
+After completion provide:
+
+- Files Created
+- Files Modified
+- Providers
+- Controllers
+- Datasources
+- Repositories
+- Routes Updated
+- Supabase Readiness
+- Remaining TODO
+- Estimated Next Prompt
+
+==================================================
+DO NOT IMPLEMENT YET
+==================================================
+
+- Rewards
+- Coins
+- Leaderboard
+- Subscription
+- Payment
+- Referral
+- Analytics
+
+Only complete the Quiz Engine Module.

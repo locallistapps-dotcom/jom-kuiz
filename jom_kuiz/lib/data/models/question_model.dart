@@ -76,6 +76,7 @@ class QuestionModel {
     this.optionC,
     this.optionD,
     this.explanation,
+    this.explanationImageUrl,
   });
 
   final String questionId;
@@ -89,6 +90,7 @@ class QuestionModel {
   final String? optionD;
   final String correctAnswer;
   final String? explanation;
+  final String? explanationImageUrl;
   final bool isActive;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -108,6 +110,7 @@ class QuestionModel {
       optionD: json['option_d'] as String?,
       correctAnswer: json['correct_answer'] as String,
       explanation: json['explanation'] as String?,
+      explanationImageUrl: json['explanation_image_url'] as String?,
       isActive: json['is_active'] as bool? ?? true,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
@@ -126,6 +129,7 @@ class QuestionModel {
         'option_d': optionD,
         'correct_answer': correctAnswer,
         'explanation': explanation,
+        'explanation_image_url': explanationImageUrl,
         'is_active': isActive,
         'created_at': createdAt.toIso8601String(),
         'updated_at': updatedAt.toIso8601String(),
@@ -144,6 +148,7 @@ class QuestionModel {
       optionD: optionD,
       correctAnswer: correctAnswer,
       explanation: explanation,
+      explanationImageUrl: explanationImageUrl,
       isActive: isActive,
       createdAt: createdAt,
       updatedAt: updatedAt,
