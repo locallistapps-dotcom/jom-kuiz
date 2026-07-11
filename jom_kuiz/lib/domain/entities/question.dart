@@ -1,48 +1,147 @@
 import 'package:equatable/equatable.dart';
 
-/// The format of a question.
-enum QuestionType { multipleChoice, trueFalse, shortAnswer }
+/// The format / interaction type of a question.
+enum QuestionType {
+  /// Multiple-choice with up to four labelled options (A–D).
+  /// At least two options are required.
+  mcq,
 
-/// A single item in the question bank.
+  /// Binary choice — the answer is either `true` or `false`.
+  trueFalse,
+
+  /// The learner types a free-text answer; no MCQ options are stored.
+  fillInTheBlank,
+}
+
+/// Difficulty level of a question.
+enum QuestionDifficulty {
+  easy,
+  medium,
+  hard,
+}
+
+/// Sort options available in the Question Bank screen.
+enum QuestionSortOrder {
+  /// Newest first by [Question.createdAt].
+  createdAtDesc,
+
+  /// Alphabetical A → Z by [Question.questionText].
+  textAsc,
+
+  /// Easy → Medium → Hard.
+  difficultyAsc,
+}
+
+/// A single question in the question bank.
+///
+/// Hierarchy:  Question → Topic → Chapter → (Subject, Year)
+///
+/// Type rules enforced at the service layer:
+/// • [QuestionType.mcq]           — [optionA] and [optionB] required;
+///                                   [optionC] and [optionD] optional;
+///                                   [correctAnswer] = 'A' | 'B' | 'C' | 'D'
+/// • [QuestionType.trueFalse]     — options ignored;
+///                                   [correctAnswer] = 'true' | 'false'
+/// • [QuestionType.fillInTheBlank]— options ignored;
+///                                   [correctAnswer] = any non-empty string
 class Question extends Equatable {
   const Question({
     required this.questionId,
     required this.topicId,
-    required this.text,
-    required this.type,
+    required this.questionText,
+    required this.questionType,
     required this.difficulty,
     required this.correctAnswer,
-    this.options = const <String>[],
+    required this.isActive,
+    required this.createdAt,
+    required this.updatedAt,
+    this.optionA,
+    this.optionB,
+    this.optionC,
+    this.optionD,
     this.explanation,
   });
 
+  /// Primary key — UUID supplied by Supabase.
   final String questionId;
+
+  /// Foreign key → topics.id
   final String topicId;
-  final String text;
-  final QuestionType type;
 
-  /// Mirrors [QuizDifficulty] from quiz.dart — kept separate to avoid coupling
-  /// the question bank to the quiz presentation layer.
-  final String difficulty;
+  /// The full text of the question.
+  final String questionText;
 
-  /// The correct answer string (option text or short-answer value).
+  final QuestionType questionType;
+  final QuestionDifficulty difficulty;
+
+  // MCQ options — null for non-MCQ types.
+  final String? optionA;
+  final String? optionB;
+  final String? optionC;
+  final String? optionD;
+
+  /// Correct answer:
+  ///   MCQ         → 'A' | 'B' | 'C' | 'D'
+  ///   True/False  → 'true' | 'false'
+  ///   Fill Blank  → the expected answer text
   final String correctAnswer;
-
-  /// Answer options for [QuestionType.multipleChoice].
-  final List<String> options;
 
   /// Optional explanation shown after answering.
   final String? explanation;
+
+  final bool isActive;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  Question copyWith({
+    String? questionId,
+    String? topicId,
+    String? questionText,
+    QuestionType? questionType,
+    QuestionDifficulty? difficulty,
+    String? optionA,
+    String? optionB,
+    String? optionC,
+    String? optionD,
+    String? correctAnswer,
+    String? explanation,
+    bool? isActive,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return Question(
+      questionId: questionId ?? this.questionId,
+      topicId: topicId ?? this.topicId,
+      questionText: questionText ?? this.questionText,
+      questionType: questionType ?? this.questionType,
+      difficulty: difficulty ?? this.difficulty,
+      optionA: optionA ?? this.optionA,
+      optionB: optionB ?? this.optionB,
+      optionC: optionC ?? this.optionC,
+      optionD: optionD ?? this.optionD,
+      correctAnswer: correctAnswer ?? this.correctAnswer,
+      explanation: explanation ?? this.explanation,
+      isActive: isActive ?? this.isActive,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
 
   @override
   List<Object?> get props => <Object?>[
         questionId,
         topicId,
-        text,
-        type,
+        questionText,
+        questionType,
         difficulty,
+        optionA,
+        optionB,
+        optionC,
+        optionD,
         correctAnswer,
-        options,
         explanation,
+        isActive,
+        createdAt,
+        updatedAt,
       ];
 }

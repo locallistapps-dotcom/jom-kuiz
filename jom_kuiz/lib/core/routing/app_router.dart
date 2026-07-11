@@ -16,6 +16,7 @@ import '../../presentation/screens/child/child_dashboard_screen.dart';
 import '../../presentation/screens/placeholder/placeholder_screen.dart';
 import '../../presentation/screens/subject/subject_screen.dart';
 import '../../presentation/screens/chapter/chapter_screen.dart';
+import '../../presentation/screens/question_bank/question_bank_screen.dart';
 import '../../presentation/screens/topic/topic_screen.dart';
 import '../../presentation/screens/year/year_screen.dart';
 import '../../presentation/screens/child/child_profile_screen.dart';
@@ -190,11 +191,11 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((Ref ref) {
         name: AppRoutes.topicName,
         builder: (context, state) => const TopicScreen(),
       ),
+      // ── Question Bank ────────────────────────────────────────────────────────
       GoRoute(
         path: AppRoutes.questionBank,
         name: AppRoutes.questionBankName,
-        builder: (context, state) =>
-            const PlaceholderScreen(moduleName: 'Question Bank'),
+        builder: (context, state) => const QuestionBankScreen(),
       ),
       GoRoute(
         path: AppRoutes.quizEngine,
