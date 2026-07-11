@@ -14,6 +14,9 @@ abstract final class AppRoutes {
   static const String editProfile = '/parent/edit-profile';
   static const String security = '/parent/security';
 
+  // ── Teacher ───────────────────────────────────────────────────────────────
+  static const String teacherDashboard = '/teacher/dashboard';
+
   // ── Child ─────────────────────────────────────────────────────────────────
   static const String childDashboard = '/child/dashboard';
   static const String childProfile = '/child/profile';
@@ -35,6 +38,7 @@ abstract final class AppRoutes {
   static const String settingsName = 'settings';
   static const String editProfileName = 'editProfile';
   static const String securityName = 'security';
+  static const String teacherDashboardName = 'teacherDashboard';
   static const String childDashboardName = 'childDashboard';
   static const String childProfileName = 'childProfile';
   static const String childEditProfileName = 'childEditProfile';

@@ -5,3 +5,4 @@
 - [Badge entity vs Flutter widget](badge-name-conflict.md) — domain Badge entity conflicts with Flutter Material 3 Badge widget; use `hide Badge` on material import in any screen that uses the entity
 - [currentChildIdProvider pattern](current-child-id-provider.md) — StateProvider<String> set before navigating to child screens; all child controllers react reactively; tests override with overrideWith((ref) => childId)
 - [Strict lint config](strict-lint-config.md) — strict-casts/inference/raw-types + use_key_in_widget_constructors; all private widget classes need super.key in their constructor
+- [Teacher module layout](teacher-module-layout.md) — Prompt 05A only adds the dashboard; classes/attendance/homework/quiz/announcements are future prompts

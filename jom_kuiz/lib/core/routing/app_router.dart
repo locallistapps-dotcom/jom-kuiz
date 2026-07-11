@@ -8,6 +8,7 @@ import '../../presentation/screens/auth/login_screen.dart';
 import '../../presentation/screens/auth/register_parent_screen.dart';
 import '../../presentation/screens/auth/reset_password_screen.dart';
 import '../../presentation/screens/child/achievement_screen.dart';
+import '../../presentation/screens/teacher/teacher_dashboard_screen.dart';
 import '../../presentation/screens/child/child_dashboard_screen.dart';
 import '../../presentation/screens/child/child_profile_screen.dart';
 import '../../presentation/screens/child/edit_child_profile_screen.dart';
@@ -100,6 +101,13 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((Ref ref) {
         path: AppRoutes.security,
         name: AppRoutes.securityName,
         builder: (context, state) => const SecurityScreen(),
+      ),
+
+      // ── Teacher ────────────────────────────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.teacherDashboard,
+        name: AppRoutes.teacherDashboardName,
+        builder: (context, state) => const TeacherDashboardScreen(),
       ),
 
       // ── Child ──────────────────────────────────────────────────────────────
