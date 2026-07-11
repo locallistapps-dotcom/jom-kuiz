@@ -1,0 +1,1 @@
+- [Jom Kuiz Flutter project](jom-kuiz-project.md) — key facts: auth, DB schema, RPC functions, known bugs fixed, quiz flow

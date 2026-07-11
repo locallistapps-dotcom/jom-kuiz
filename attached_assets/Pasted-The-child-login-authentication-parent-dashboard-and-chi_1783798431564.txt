@@ -1,0 +1,243 @@
+The child login, authentication, parent dashboard, and child dashboard are now working correctly.
+
+The next objective is to prepare the application for real-world testing by populating the PostgreSQL (Supabase) database with high-quality sample data.
+
+====================================================
+GENERAL REQUIREMENTS
+====================================================
+
+1. Use the EXISTING PostgreSQL (Supabase) database.
+
+2. Insert all data DIRECTLY into PostgreSQL.
+
+3. DO NOT create JSON files, CSV files, mock files, or temporary data.
+
+4. DO NOT modify the existing database schema.
+
+5. DO NOT rename tables or columns.
+
+6. Reuse existing Subjects, Years, Chapters, and Topics whenever possible.
+
+7. Maintain all existing foreign key relationships.
+
+8. Ensure all inserted data is compatible with the current Flutter application.
+
+9. All generated content must be written in Bahasa Melayu.
+
+====================================================
+CURRICULUM
+====================================================
+
+Curriculum:
+KSSR Malaysia
+
+Subject:
+Matematik
+
+Year:
+Tahun 1
+
+Chapter:
+Nombor
+
+Topic:
+Tambah
+
+If these records do not exist, automatically create:
+
+• Subject
+• Year
+• Chapter
+• Topic
+
+====================================================
+QUESTION REQUIREMENTS
+====================================================
+
+Generate 100 UNIQUE multiple-choice questions.
+
+Difficulty:
+
+• 40 Mudah
+• 40 Sederhana
+• 20 Sukar
+
+Every question MUST include:
+
+• question_text
+• option_a
+• option_b
+• option_c
+• option_d
+• correct_answer
+• explanation
+• difficulty
+
+Question Rules:
+
+• Written completely in Bahasa Melayu.
+• Follow the official Malaysian KSSR Mathematics Year 1 syllabus.
+• Suitable for murid Tahun 1.
+• No duplicate questions.
+• Correct answer must always be accurate.
+• Explanation must help the student understand the answer.
+• Use proper Bahasa Melayu grammar and spelling.
+
+====================================================
+DATABASE INSERTION
+====================================================
+
+Insert every Subject, Year, Chapter, Topic, and Question directly into PostgreSQL.
+
+Do NOT leave the generated questions only inside memory.
+
+Verify every INSERT operation.
+
+If any SQL error occurs:
+
+• Detect the exact error.
+• Fix the issue.
+• Retry automatically until every record is successfully inserted.
+
+====================================================
+CREATE SQL SEEDERS
+====================================================
+
+Inside the project create this folder structure:
+
+database/
+└── seeds/
+      ├── seed_matematik_tahun1.sql
+      └── seed_all.sql
+
+Requirements:
+
+seed_matematik_tahun1.sql
+- Can be executed multiple times safely.
+- Does not create duplicate records.
+- Automatically creates missing Subjects, Years, Chapters, Topics.
+- Inserts all Mathematics Year 1 sample questions.
+
+seed_all.sql
+- Executes every available Seeder automatically.
+- Easy to use when setting up a new PostgreSQL database.
+
+====================================================
+END-TO-END APPLICATION TEST
+====================================================
+
+After inserting the data, perform a complete application test.
+
+Verify:
+
+✓ Parent Login
+
+✓ Parent Dashboard
+
+✓ Child Account
+
+✓ Student Login
+
+✓ Student Dashboard
+
+✓ Subject List
+
+✓ Year Selection
+
+✓ Chapter Selection
+
+✓ Topic Selection
+
+✓ Quiz Loading
+
+✓ Questions Display
+
+✓ Answer Submission
+
+✓ Score Calculation
+
+✓ Explanation Display
+
+✓ Quiz Result
+
+✓ Progress Saving
+
+✓ Student History
+
+✓ Logout
+
+If any API, SQL, PostgreSQL, Supabase, RPC, RLS, Flutter, or UI issue is found:
+
+• Diagnose the exact cause.
+• Fix it.
+• Test again.
+• Continue until every feature works correctly.
+
+====================================================
+QUALITY CHECK
+====================================================
+
+Confirm:
+
+✓ No duplicate questions.
+
+✓ No broken foreign keys.
+
+✓ No missing relationships.
+
+✓ No orphan records.
+
+✓ Every question belongs to:
+Subject → Year → Chapter → Topic.
+
+✓ The Flutter app loads all data without errors.
+
+====================================================
+FINAL REPORT
+====================================================
+
+Provide a final report containing:
+
+• Total Subjects
+• Total Years
+• Total Chapters
+• Total Topics
+• Total Questions Inserted
+• Easy Questions
+• Medium Questions
+• Hard Questions
+
+Also report:
+
+• SQL issues fixed
+• PostgreSQL issues fixed
+• RPC issues fixed
+• API issues fixed
+• RLS issues fixed
+• Flutter/UI issues fixed
+
+Finally confirm:
+
+✓ All data has been inserted successfully into PostgreSQL (Supabase).
+
+✓ SQL Seeder files have been created.
+
+✓ The Flutter application can complete the full flow:
+
+Parent Login
+→ Child Account
+→ Student Login
+→ Student Dashboard
+→ Subject
+→ Year
+→ Chapter
+→ Topic
+→ Quiz
+→ Submit Answers
+→ Score
+→ Result
+→ Save Progress
+
+without any errors.
+
+Do not stop until every step above has been completed and verified successfully.
