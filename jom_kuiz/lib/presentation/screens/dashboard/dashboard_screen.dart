@@ -7,7 +7,7 @@ import '../../../core/routing/app_routes.dart';
 import '../../../domain/entities/parent_profile.dart';
 import '../../controllers/parent_controller.dart';
 import '../../controllers/session_controller.dart';
-import '../../providers/child_providers.dart';
+import '../../providers/admin_providers.dart';
 import '../../widgets/cards/placeholder_module_card.dart';
 import '../../widgets/feedback/app_error_widget.dart';
 import '../../widgets/feedback/loading_widget.dart';
@@ -54,7 +54,9 @@ class DashboardScreen extends ConsumerWidget {
           if (profile == null) {
             return const AppErrorWidget(message: 'Profile unavailable');
           }
-          final bool isAdmin = ref.watch(isAdminProvider);
+          // FutureProvider: false while the check is in-flight, true once resolved.
+          final bool isAdmin =
+              ref.watch(isAdminProvider).valueOrNull ?? false;
           return RefreshIndicator(
             onRefresh: () =>
                 ref.read(parentControllerProvider.notifier).refresh(),

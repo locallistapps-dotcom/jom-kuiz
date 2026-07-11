@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../domain/entities/session_status.dart';
 import '../../presentation/controllers/session_controller.dart';
+import '../../presentation/providers/admin_providers.dart';
 import '../../presentation/providers/child_providers.dart';
 import 'app_routes.dart';
 
@@ -51,7 +52,9 @@ class RouteGuard {
 
         // Authenticated — determine home screen by role.
         final String role = _ref.read(userRoleProvider);
-        final bool isAdmin = _ref.read(isAdminProvider);
+        // FutureProvider: valueOrNull is false while loading, true once resolved.
+        final bool isAdmin =
+            _ref.read(isAdminProvider).valueOrNull ?? false;
         final String homeRoute = switch (role) {
           'child' => AppRoutes.childDashboard,
           _ => AppRoutes.dashboard, // parent (including admin-parents) land on dashboard

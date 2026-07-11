@@ -5,7 +5,6 @@ import '../../core/error/failure.dart';
 import '../../core/utils/result.dart';
 import '../../domain/entities/user.dart';
 import '../providers/account_management_providers.dart';
-import '../providers/admin_providers.dart';
 import '../providers/auth_providers.dart';
 import '../providers/child_providers.dart';
 import 'session_controller.dart';
@@ -57,24 +56,10 @@ class AuthController extends AsyncNotifier<void> {
 
     if (!loginSucceeded) return false;
 
-    // Determine admin flag: parent role is always 'parent' so the user
-    // lands on the parent dashboard.  isAdminProvider tracks admin privilege
-    // separately for route access and the Admin CMS entry-point in the UI.
-    bool isAdminUser = false;
-    try {
-      final String? userId =
-          await ref.read(tokenManagerProvider).getUserId();
-      if (userId != null && userId.isNotEmpty) {
-        isAdminUser = await ref
-            .read(adminCheckRemoteDataSourceProvider)
-            .isAdmin(userId: userId);
-      }
-    } catch (_) {
-      // Any failure in role-check → fall back to plain parent.
-    }
-
+    // Always set role to 'parent' — admin privilege is tracked separately by
+    // isAdminProvider (FutureProvider) which auto-queries admin_users whenever
+    // the dashboard watches it. No manual state update needed here.
     ref.read(userRoleProvider.notifier).state = 'parent';
-    ref.read(isAdminProvider.notifier).state = isAdminUser;
     state = const AsyncValue<void>.data(null);
     ref.read(sessionControllerProvider.notifier).markAuthenticated();
     return true;

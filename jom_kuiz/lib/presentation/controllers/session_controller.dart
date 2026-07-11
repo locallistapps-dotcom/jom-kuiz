@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/session_status.dart';
+import '../providers/admin_providers.dart';
 import '../providers/auth_providers.dart';
 import '../providers/child_providers.dart';
 
@@ -33,9 +34,11 @@ class SessionController extends AsyncNotifier<SessionStatus> {
   Future<void> logout() async {
     state = const AsyncValue<SessionStatus>.loading();
     await ref.read(authServiceProvider).logout();
-    // Clear role, admin flag, and selected child so the next login starts fresh.
+    // Clear role and selected child so the next login starts fresh.
+    // Invalidate isAdminProvider so the cached admin-check result is discarded;
+    // it will re-run (returning false) the next time any widget watches it.
     ref.read(userRoleProvider.notifier).state = '';
-    ref.read(isAdminProvider.notifier).state = false;
+    ref.invalidate(isAdminProvider);
     ref.read(currentChildIdProvider.notifier).state = '';
     state = const AsyncValue<SessionStatus>.data(SessionStatus.unauthenticated);
   }
