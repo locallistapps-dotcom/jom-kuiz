@@ -252,13 +252,18 @@ class _QuickActions extends StatelessWidget {
       runSpacing: 8,
       children: <Widget>[
         ActionChip(
+          avatar: const Icon(Icons.play_circle_outline, size: 18),
+          label: const Text('Start Quiz'),
+          onPressed: () => context.push(AppRoutes.studentStudySubjects),
+        ),
+        ActionChip(
           avatar: const Icon(Icons.assignment_outlined, size: 18),
           label: const Text('Homework'),
           onPressed: () => context.push(AppRoutes.childHomework),
         ),
         ActionChip(
           avatar: const Icon(Icons.quiz_outlined, size: 18),
-          label: const Text('Quizzes'),
+          label: const Text('Quiz History'),
           onPressed: () => context.push(AppRoutes.childQuiz),
         ),
         ActionChip(

@@ -32,7 +32,14 @@ import '../../presentation/screens/subject/subject_screen.dart';
 import '../../presentation/screens/chapter/chapter_screen.dart';
 import '../../presentation/screens/question_bank/question_bank_screen.dart';
 import '../../presentation/screens/performance/performance_dashboard_screen.dart';
+import '../../domain/entities/chapter.dart';
+import '../../domain/entities/quiz_engine.dart';
+import '../../domain/entities/subject.dart';
+import '../../presentation/screens/child/student_chapter_screen.dart';
+import '../../presentation/screens/child/student_subject_screen.dart';
+import '../../presentation/screens/child/student_topic_screen.dart';
 import '../../presentation/screens/quiz_engine/quiz_home_screen.dart';
+import '../../presentation/screens/quiz_engine/quiz_result_screen.dart';
 import '../../presentation/screens/topic/topic_screen.dart';
 import '../../presentation/screens/year/year_screen.dart';
 import '../../presentation/screens/child/child_profile_screen.dart';
@@ -262,8 +269,36 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((Ref ref) {
       GoRoute(
         path: AppRoutes.quizResult,
         name: AppRoutes.quizResultName,
-        builder: (context, state) =>
-            const PlaceholderScreen(moduleName: 'Quiz Result'),
+        builder: (context, state) {
+          final QuizEngineResult result = state.extra as QuizEngineResult;
+          return QuizResultScreen(result: result);
+        },
+      ),
+      // ── Student Study Flow ───────────────────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.studentStudySubjects,
+        name: AppRoutes.studentStudySubjectsName,
+        builder: (context, state) => const StudentSubjectScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.studentStudyChapters,
+        name: AppRoutes.studentStudyChaptersName,
+        builder: (context, state) {
+          final Subject subject = state.extra as Subject;
+          return StudentChapterScreen(subject: subject);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.studentStudyTopics,
+        name: AppRoutes.studentStudyTopicsName,
+        builder: (context, state) {
+          final Map<String, dynamic> extra =
+              state.extra as Map<String, dynamic>;
+          return StudentTopicScreen(
+            chapter: extra['chapter'] as Chapter,
+            subjectName: extra['subjectName'] as String,
+          );
+        },
       ),
       // ── Performance Summary ──────────────────────────────────────────────────
       GoRoute(

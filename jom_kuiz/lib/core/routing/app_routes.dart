@@ -37,6 +37,11 @@ abstract final class AppRoutes {
   static const String childQuizDetail = '/child/quiz/detail';
   static const String childAchievements = '/child/achievements';
 
+  // ── Student Study Flow (Subject → Chapter → Topic → Quiz) ────────────────
+  static const String studentStudySubjects = '/child/study/subjects';
+  static const String studentStudyChapters = '/child/study/chapters';
+  static const String studentStudyTopics = '/child/study/topics';
+
   // ── Subject ───────────────────────────────────────────────────────────────
   static const String subject = '/subject';
 
@@ -141,6 +146,11 @@ abstract final class AppRoutes {
   static const String adminPackagesName = 'adminPackages';
   static const String adminSubjectAccessName = 'adminSubjectAccess';
   static const String adminPaymentsName = 'adminPayments';
+
+  // ── Student Study Flow names ───────────────────────────────────────────────
+  static const String studentStudySubjectsName = 'studentStudySubjects';
+  static const String studentStudyChaptersName = 'studentStudyChapters';
+  static const String studentStudyTopicsName = 'studentStudyTopics';
 
   // ── Route names (child/parent management) ─────────────────────────────────
   static const String childLoginName = 'childLogin';

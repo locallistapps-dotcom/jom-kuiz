@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/di/providers.dart';
+import '../../core/error/failure.dart';
+import '../../core/utils/result.dart';
 import '../../data/datasources/chapter_remote_data_source.dart';
 import '../../data/repositories/chapter_repository_impl.dart';
 import '../../data/services/chapter_service.dart';
@@ -51,3 +53,23 @@ final StateProvider<String> chapterSubjectFilterProvider =
 /// pre-scope the list to a specific year. Empty string = no filter (all).
 final StateProvider<String> chapterYearFilterProvider =
     StateProvider<String>((Ref ref) => '');
+
+// ── Student browse ─────────────────────────────────────────────────────────────
+
+/// Active chapters for a given subject ID — used by student chapter-browse screen.
+/// Keyed on subjectId; auto-disposes when the screen is closed.
+final AutoDisposeFutureProviderFamily<List<Chapter>, String>
+    chaptersBySubjectProvider =
+    FutureProvider.autoDispose.family<List<Chapter>, String>(
+        (Ref ref, String subjectId) async {
+  final Result<List<Chapter>> result =
+      await ref.watch(chapterServiceProvider).getChapters(
+            subjectId: subjectId,
+            isActive: true,
+            sortOrder: ChapterSortOrder.displayOrderAsc,
+          );
+  return result.when(
+    success: (List<Chapter> list) => list,
+    failure: (Failure f) => throw f,
+  );
+});

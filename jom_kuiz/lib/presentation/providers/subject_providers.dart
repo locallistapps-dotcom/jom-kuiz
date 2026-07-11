@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/di/providers.dart';
+import '../../core/error/failure.dart';
+import '../../core/utils/result.dart';
 import '../../data/datasources/subject_remote_data_source.dart';
 import '../../data/repositories/subject_repository_impl.dart';
 import '../../data/services/subject_service.dart';
@@ -40,3 +42,20 @@ final StateProvider<String> subjectSearchQueryProvider =
 /// The sort order currently selected in the Subject screen.
 final StateProvider<SubjectSortOrder> subjectSortOrderProvider =
     StateProvider<SubjectSortOrder>((Ref ref) => SubjectSortOrder.nameAsc);
+
+// ── Student browse ─────────────────────────────────────────────────────────────
+
+/// All active subjects — used by the student subject-browse screen.
+/// Auto-disposes when not in use so the list is always fresh on re-entry.
+final AutoDisposeFutureProvider<List<Subject>> activeSubjectsProvider =
+    FutureProvider.autoDispose<List<Subject>>((Ref ref) async {
+  final Result<List<Subject>> result =
+      await ref.watch(subjectServiceProvider).getSubjects(
+            isActive: true,
+            sortOrder: SubjectSortOrder.nameAsc,
+          );
+  return result.when(
+    success: (List<Subject> list) => list,
+    failure: (Failure f) => throw f,
+  );
+});
