@@ -16,6 +16,7 @@ import '../../presentation/screens/child/child_dashboard_screen.dart';
 import '../../presentation/screens/placeholder/placeholder_screen.dart';
 import '../../presentation/screens/subject/subject_screen.dart';
 import '../../presentation/screens/chapter/chapter_screen.dart';
+import '../../presentation/screens/topic/topic_screen.dart';
 import '../../presentation/screens/year/year_screen.dart';
 import '../../presentation/screens/child/child_profile_screen.dart';
 import '../../presentation/screens/child/edit_child_profile_screen.dart';
@@ -183,11 +184,11 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((Ref ref) {
         name: AppRoutes.chapterName,
         builder: (context, state) => const ChapterScreen(),
       ),
+      // ── Topic ────────────────────────────────────────────────────────────────
       GoRoute(
         path: AppRoutes.topic,
         name: AppRoutes.topicName,
-        builder: (context, state) =>
-            const PlaceholderScreen(moduleName: 'Topic'),
+        builder: (context, state) => const TopicScreen(),
       ),
       GoRoute(
         path: AppRoutes.questionBank,
