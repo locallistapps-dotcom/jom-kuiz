@@ -181,33 +181,11 @@ class AdminQuestionScreen extends ConsumerWidget {
       context: context,
       builder: (BuildContext dialogCtx) => _FileImportDialog(
         mode: _ImportMode.csv,
+        actionLabel: 'Preview',
         onImport: (List<({String name, String content})> files) async {
-          final controller =
-              ref.read(adminQuestionControllerProvider.notifier);
-          int totalRows = 0;
-          int totalSucceeded = 0;
-          int totalSkipped = 0;
-          final List<String> allErrors = <String>[];
-          for (final ({String name, String content}) f in files) {
-            final AdminImportSummary s =
-                await controller.importFromCsv(csvContent: f.content);
-            totalRows += s.totalRows;
-            totalSucceeded += s.succeeded;
-            totalSkipped += s.skipped;
-            allErrors.addAll(s.errors.map((String e) => '[${f.name}] $e'));
-          }
           if (dialogCtx.mounted) Navigator.of(dialogCtx).pop();
-          if (context.mounted) {
-            _showImportSummaryDialog(
-              context,
-              AdminImportSummary(
-                totalRows: totalRows,
-                succeeded: totalSucceeded,
-                skipped: totalSkipped,
-                errors: allErrors,
-              ),
-            );
-          }
+          if (!context.mounted) return;
+          await _showImportPreviewDialog(context, ref, _ImportMode.csv, files);
         },
       ),
     );
@@ -219,22 +197,55 @@ class AdminQuestionScreen extends ConsumerWidget {
       context: context,
       builder: (BuildContext dialogCtx) => _FileImportDialog(
         mode: _ImportMode.json,
+        actionLabel: 'Preview',
         onImport: (List<({String name, String content})> files) async {
-          final controller =
+          if (dialogCtx.mounted) Navigator.of(dialogCtx).pop();
+          if (!context.mounted) return;
+          await _showImportPreviewDialog(context, ref, _ImportMode.json, files);
+        },
+      ),
+    );
+  }
+
+  /// Opens the import preview dialog (validation dry-run), then on confirm
+  /// runs the actual import and shows the summary dialog.
+  static Future<void> _showImportPreviewDialog(
+    BuildContext context,
+    WidgetRef ref,
+    _ImportMode mode,
+    List<({String name, String content})> files,
+  ) async {
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogCtx) => _ImportPreviewDialog(
+        mode: mode,
+        files: files,
+        onImportConfirmed: () async {
+          if (dialogCtx.mounted) Navigator.of(dialogCtx).pop();
+          if (!context.mounted) return;
+          final AdminQuestionController controller =
               ref.read(adminQuestionControllerProvider.notifier);
           int totalRows = 0;
           int totalSucceeded = 0;
           int totalSkipped = 0;
+          int totalDuplicates = 0;
+          int totalFailed = 0;
           final List<String> allErrors = <String>[];
+          final List<AdminImportRowResult> allRowResults =
+              <AdminImportRowResult>[];
           for (final ({String name, String content}) f in files) {
-            final AdminImportSummary s =
-                await controller.importFromJson(jsonContent: f.content);
+            final AdminImportSummary s = mode == _ImportMode.csv
+                ? await controller.importFromCsv(csvContent: f.content)
+                : await controller.importFromJson(jsonContent: f.content);
             totalRows += s.totalRows;
             totalSucceeded += s.succeeded;
             totalSkipped += s.skipped;
+            totalDuplicates += s.duplicates;
+            totalFailed += s.failed;
             allErrors.addAll(s.errors.map((String e) => '[${f.name}] $e'));
+            allRowResults.addAll(s.rowResults);
           }
-          if (dialogCtx.mounted) Navigator.of(dialogCtx).pop();
           if (context.mounted) {
             _showImportSummaryDialog(
               context,
@@ -242,7 +253,10 @@ class AdminQuestionScreen extends ConsumerWidget {
                 totalRows: totalRows,
                 succeeded: totalSucceeded,
                 skipped: totalSkipped,
+                duplicates: totalDuplicates,
+                failed: totalFailed,
                 errors: allErrors,
+                rowResults: allRowResults,
               ),
             );
           }
@@ -261,11 +275,15 @@ class AdminQuestionScreen extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            _SummaryRow('Total rows', summary.totalRows.toString()),
+            _SummaryRow('Total Rows', summary.totalRows.toString()),
             _SummaryRow('Imported', summary.succeeded.toString(),
-                color: Colors.green),
+                color: summary.succeeded > 0 ? Colors.green : null),
             _SummaryRow('Skipped', summary.skipped.toString(),
                 color: summary.skipped > 0 ? Colors.orange : null),
+            _SummaryRow('Duplicate', summary.duplicates.toString(),
+                color: summary.duplicates > 0 ? Colors.orange : null),
+            _SummaryRow('Failed', summary.failed.toString(),
+                color: summary.failed > 0 ? Colors.red : null),
             if (summary.errors.isNotEmpty) ...<Widget>[
               const SizedBox(height: 12),
               const Text('Errors:',
@@ -287,6 +305,16 @@ class AdminQuestionScreen extends ConsumerWidget {
           ],
         ),
         actions: <Widget>[
+          if (summary.rowResults.isNotEmpty)
+            TextButton.icon(
+              icon: const Icon(Icons.download_rounded, size: 16),
+              label: const Text('Download Report'),
+              onPressed: () {
+                final String csv = AdminQuestionService.generateImportReport(
+                    summary.rowResults);
+                triggerFileDownload(csv, 'import_report.csv', 'text/csv');
+              },
+            ),
           if (summary.errors.isNotEmpty)
             TextButton.icon(
               icon: const Icon(Icons.copy_rounded, size: 16),
@@ -315,10 +343,11 @@ class AdminQuestionScreen extends ConsumerWidget {
     final String csv =
         await ref.read(adminQuestionControllerProvider.notifier).exportToCsv();
     if (!context.mounted) return;
+    final String filename = _buildExportFilename(ref);
     if (kIsWeb) {
-      triggerFileDownload(csv, 'jom_kuiz_questions.csv', 'text/csv');
+      triggerFileDownload(csv, filename, 'text/csv');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('CSV downloaded')),
+        SnackBar(content: Text('Downloaded: $filename')),
       );
     } else {
       showDialog<void>(
@@ -326,6 +355,65 @@ class AdminQuestionScreen extends ConsumerWidget {
         builder: (_) => _CsvExportDialog(csvContent: csv),
       );
     }
+  }
+
+  /// Builds a filename from active filter values, e.g.
+  /// `Matematik_Tahun_1_Bab_1_Tambah.csv`. Falls back to
+  /// `jom_kuiz_questions.csv` when no filters are active.
+  static String _buildExportFilename(WidgetRef ref) {
+    final String subjectId = ref.read(adminQSubjectFilterProvider);
+    final String yearId = ref.read(adminQYearFilterProvider);
+    final String chapterId = ref.read(adminQChapterFilterProvider);
+    final String topicId = ref.read(adminQTopicFilterProvider);
+
+    String slug(String s) =>
+        s.trim().replaceAll(RegExp(r'[^a-zA-Z0-9]+'), '_').replaceAll(
+              RegExp(r'_+$'),
+              '',
+            );
+    final List<String> parts = <String>[];
+
+    if (subjectId.isNotEmpty) {
+      final List<Subject>? subjects =
+          ref.read(adminSubjectsDropdownProvider).asData?.value;
+      final String? name = subjects
+          ?.where((Subject s) => s.subjectId == subjectId)
+          .map((Subject s) => s.subjectName)
+          .firstOrNull;
+      if (name != null) parts.add(slug(name));
+    }
+    if (yearId.isNotEmpty) {
+      final List<Year>? years =
+          ref.read(adminYearsDropdownProvider).asData?.value;
+      final String? name = years
+          ?.where((Year y) => y.yearId == yearId)
+          .map((Year y) => y.yearName)
+          .firstOrNull;
+      if (name != null) parts.add(slug(name));
+    }
+    if (chapterId.isNotEmpty && subjectId.isNotEmpty && yearId.isNotEmpty) {
+      final List<Chapter>? chapters = ref
+          .read(adminChaptersDropdownProvider(
+              (subjectId: subjectId, yearId: yearId)))
+          .asData
+          ?.value;
+      final String? name = chapters
+          ?.where((Chapter c) => c.chapterId == chapterId)
+          .map((Chapter c) => c.chapterName)
+          .firstOrNull;
+      if (name != null) parts.add(slug(name));
+    }
+    if (topicId.isNotEmpty && chapterId.isNotEmpty) {
+      final List<Topic>? topics =
+          ref.read(adminTopicsDropdownProvider(chapterId)).asData?.value;
+      final String? name = topics
+          ?.where((Topic t) => t.topicId == topicId)
+          .map((Topic t) => t.topicName)
+          .firstOrNull;
+      if (name != null) parts.add(slug(name));
+    }
+
+    return parts.isEmpty ? 'jom_kuiz_questions.csv' : '${parts.join('_')}.csv';
   }
 }
 
@@ -605,6 +693,10 @@ class _SortDropdown extends ConsumerWidget {
       underline: const SizedBox.shrink(),
       borderRadius: BorderRadius.circular(8),
       items: const <DropdownMenuItem<QuestionSortOrder>>[
+        DropdownMenuItem<QuestionSortOrder>(
+          value: QuestionSortOrder.hierarchyAsc,
+          child: Text('Hierarchy', style: TextStyle(fontSize: 13)),
+        ),
         DropdownMenuItem<QuestionSortOrder>(
           value: QuestionSortOrder.createdAtDesc,
           child: Text('Newest', style: TextStyle(fontSize: 13)),
@@ -2213,13 +2305,20 @@ enum _ImportMode { csv, json }
 /// Unified file-picker import dialog supporting CSV and JSON batch import
 /// with a progress indicator and a template download shortcut.
 class _FileImportDialog extends StatefulWidget {
-  const _FileImportDialog({required this.mode, required this.onImport});
+  const _FileImportDialog({
+    required this.mode,
+    required this.onImport,
+    this.actionLabel = 'Import',
+  });
 
   final _ImportMode mode;
 
-  /// Invoked when the user taps Import. The callback receives the decoded
-  /// file contents and is responsible for closing [dialogContext] and showing
-  /// any result dialogs afterward.
+  /// Label shown on the primary action button (e.g. 'Preview' or 'Import').
+  final String actionLabel;
+
+  /// Invoked when the user taps the action button. The callback receives the
+  /// decoded file contents and is responsible for closing [dialogContext] and
+  /// showing any result dialogs afterward.
   final Future<void> Function(List<({String name, String content})> files)
       onImport;
 
@@ -2322,7 +2421,7 @@ class _FileImportDialogState extends State<_FileImportDialog> {
         ),
         FilledButton(
           onPressed: (_selectedFiles.isEmpty || _importing) ? null : _doImport,
-          child: const Text('Import'),
+          child: Text(widget.actionLabel),
         ),
       ],
     );
@@ -2375,6 +2474,215 @@ class _FileImportDialogState extends State<_FileImportDialog> {
     if (bytes < 1024) return '$bytes B';
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
     return '${(bytes / 1024 / 1024).toStringAsFixed(1)} MB';
+  }
+}
+
+// ── Import preview dialog ─────────────────────────────────────────────────────
+
+/// Shows a dry-run validation of a CSV/JSON import before anything is written
+/// to the database. The user can review the row counts (new, duplicate,
+/// invalid) and then confirm or cancel the actual import.
+class _ImportPreviewDialog extends ConsumerStatefulWidget {
+  const _ImportPreviewDialog({
+    required this.mode,
+    required this.files,
+    required this.onImportConfirmed,
+  });
+
+  final _ImportMode mode;
+  final List<({String name, String content})> files;
+
+  /// Called when the user clicks Import in this dialog. The implementation
+  /// should close [dialogCtx] and run the actual import.
+  final Future<void> Function() onImportConfirmed;
+
+  @override
+  ConsumerState<_ImportPreviewDialog> createState() =>
+      _ImportPreviewDialogState();
+}
+
+class _ImportPreviewDialogState extends ConsumerState<_ImportPreviewDialog> {
+  bool _loading = true;
+  bool _importing = false;
+  AdminImportPreview? _preview;
+  String? _errorMsg;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPreview();
+  }
+
+  Future<void> _loadPreview() async {
+    try {
+      final AdminQuestionController controller =
+          ref.read(adminQuestionControllerProvider.notifier);
+      final ({String name, String content}) f = widget.files.first;
+      final AdminImportPreview preview = widget.mode == _ImportMode.csv
+          ? await controller.previewFromCsv(
+              fileName: f.name, csvContent: f.content)
+          : await controller.previewFromJson(
+              fileName: f.name, jsonContent: f.content);
+      if (mounted) setState(() { _preview = preview; _loading = false; });
+    } catch (e) {
+      if (mounted) setState(() { _errorMsg = e.toString(); _loading = false; });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Import Preview'),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: _loading
+            ? const Padding(
+                padding: EdgeInsets.symmetric(vertical: 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    CircularProgressIndicator(),
+                    SizedBox(height: 12),
+                    Text('Validating file…'),
+                  ],
+                ),
+              )
+            : _errorMsg != null
+                ? Text('Error: $_errorMsg',
+                    style: const TextStyle(color: Colors.red))
+                : _buildContent(),
+      ),
+      actions: <Widget>[
+        TextButton(
+          onPressed: _importing ? null : Navigator.of(context).pop,
+          child: const Text('Cancel'),
+        ),
+        if (!_loading && _errorMsg == null)
+          FilledButton(
+            onPressed: (_importing || (_preview?.newQuestions ?? 0) == 0)
+                ? null
+                : _doImport,
+            child: _importing
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: Colors.white),
+                  )
+                : const Text('Import'),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildContent() {
+    final AdminImportPreview p = _preview!;
+    final bool hasErrors = p.validationErrors.isNotEmpty;
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          _PreviewRow('File', p.fileName),
+          if (p.subjects.isNotEmpty)
+            _PreviewRow('Subject', p.subjects.join(', ')),
+          if (p.years.isNotEmpty) _PreviewRow('Year', p.years.join(', ')),
+          if (p.chapters.isNotEmpty)
+            _PreviewRow('Chapter', p.chapters.join(', ')),
+          if (p.topics.isNotEmpty) _PreviewRow('Topic', p.topics.join(', ')),
+          const Divider(height: 20),
+          _PreviewRow('Rows Found', p.rowsFound.toString()),
+          _PreviewRow(
+            'New Questions',
+            p.newQuestions.toString(),
+            color: p.newQuestions > 0 ? Colors.green[700] : null,
+          ),
+          _PreviewRow(
+            'Duplicate Questions',
+            p.duplicates.toString(),
+            color: p.duplicates > 0 ? Colors.orange[700] : null,
+          ),
+          _PreviewRow(
+            'Invalid Rows',
+            p.invalidRows.toString(),
+            color: p.invalidRows > 0 ? Colors.red[700] : null,
+          ),
+          const Divider(height: 20),
+          Text(
+            p.newQuestions > 0
+                ? 'Ready to import ${p.newQuestions} question(s).'
+                : 'Nothing to import.',
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: p.newQuestions > 0 ? Colors.green[700] : Colors.red[700],
+            ),
+          ),
+          if (hasErrors) ...<Widget>[
+            const SizedBox(height: 8),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 120),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: p.validationErrors
+                      .take(10)
+                      .map((String e) => Padding(
+                            padding: const EdgeInsets.only(bottom: 2),
+                            child: Text(e,
+                                style: const TextStyle(
+                                    fontSize: 11, color: Colors.red)),
+                          ))
+                      .toList(),
+                ),
+              ),
+            ),
+            if (p.validationErrors.length > 10)
+              Text(
+                '… and ${p.validationErrors.length - 10} more error(s)',
+                style: const TextStyle(fontSize: 11, color: Colors.red),
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Future<void> _doImport() async {
+    setState(() => _importing = true);
+    await widget.onImportConfirmed();
+    if (mounted) setState(() => _importing = false);
+  }
+}
+
+class _PreviewRow extends StatelessWidget {
+  const _PreviewRow(this.label, this.value, {this.color});
+  final String label;
+  final String value;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Text(label,
+              style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant)),
+          const SizedBox(width: 16),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              overflow: TextOverflow.ellipsis,
+              style:
+                  TextStyle(fontWeight: FontWeight.w600, color: color),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

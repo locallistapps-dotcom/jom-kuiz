@@ -383,12 +383,14 @@ class AdminQuestionController extends AsyncNotifier<List<Question>> {
       _fetchYears(),
       _fetchChapters(),
       _fetchTopics(),
+      _fetchExistingSignatures(),
     ]);
 
     final List<Subject> subjects = lookupResults[0] as List<Subject>;
     final List<Year> years = lookupResults[1] as List<Year>;
     final List<Chapter> chapters = lookupResults[2] as List<Chapter>;
     final List<Topic> topics = lookupResults[3] as List<Topic>;
+    final Set<String> existingSignatures = lookupResults[4] as Set<String>;
 
     final AdminImportLookups lookups = AdminImportLookups.from(
       subjects: subjects,
@@ -400,6 +402,7 @@ class AdminQuestionController extends AsyncNotifier<List<Question>> {
     final AdminImportSummary summary = await _adminService.importFromJson(
       jsonContent: jsonContent,
       lookups: lookups,
+      existingSignatures: existingSignatures,
     );
 
     if (summary.succeeded > 0) {
@@ -420,12 +423,14 @@ class AdminQuestionController extends AsyncNotifier<List<Question>> {
       _fetchYears(),
       _fetchChapters(),
       _fetchTopics(),
+      _fetchExistingSignatures(),
     ]);
 
     final List<Subject> subjects = lookupResults[0] as List<Subject>;
     final List<Year> years = lookupResults[1] as List<Year>;
     final List<Chapter> chapters = lookupResults[2] as List<Chapter>;
     final List<Topic> topics = lookupResults[3] as List<Topic>;
+    final Set<String> existingSignatures = lookupResults[4] as Set<String>;
 
     final AdminImportLookups lookups = AdminImportLookups.from(
       subjects: subjects,
@@ -437,6 +442,7 @@ class AdminQuestionController extends AsyncNotifier<List<Question>> {
     final AdminImportSummary summary = await _adminService.importFromCsv(
       csvContent: csvContent,
       lookups: lookups,
+      existingSignatures: existingSignatures,
     );
 
     if (summary.succeeded > 0) {
@@ -444,6 +450,56 @@ class AdminQuestionController extends AsyncNotifier<List<Question>> {
     }
 
     return summary;
+  }
+
+  /// Dry-run preview for a CSV import — no DB writes.
+  Future<AdminImportPreview> previewFromCsv({
+    required String fileName,
+    required String csvContent,
+  }) async {
+    final List<dynamic> r = await Future.wait<dynamic>(<Future<dynamic>>[
+      _fetchSubjects(),
+      _fetchYears(),
+      _fetchChapters(),
+      _fetchTopics(),
+      _fetchExistingSignatures(),
+    ]);
+    return _adminService.previewFromCsv(
+      fileName: fileName,
+      csvContent: csvContent,
+      lookups: AdminImportLookups.from(
+        subjects: r[0] as List<Subject>,
+        years: r[1] as List<Year>,
+        chapters: r[2] as List<Chapter>,
+        topics: r[3] as List<Topic>,
+      ),
+      existingSignatures: r[4] as Set<String>,
+    );
+  }
+
+  /// Dry-run preview for a JSON import — no DB writes.
+  Future<AdminImportPreview> previewFromJson({
+    required String fileName,
+    required String jsonContent,
+  }) async {
+    final List<dynamic> r = await Future.wait<dynamic>(<Future<dynamic>>[
+      _fetchSubjects(),
+      _fetchYears(),
+      _fetchChapters(),
+      _fetchTopics(),
+      _fetchExistingSignatures(),
+    ]);
+    return _adminService.previewFromJson(
+      fileName: fileName,
+      jsonContent: jsonContent,
+      lookups: AdminImportLookups.from(
+        subjects: r[0] as List<Subject>,
+        years: r[1] as List<Year>,
+        chapters: r[2] as List<Chapter>,
+        topics: r[3] as List<Topic>,
+      ),
+      existingSignatures: r[4] as Set<String>,
+    );
   }
 
   /// Returns the current question list as a human-readable CSV string.
@@ -493,6 +549,37 @@ class AdminQuestionController extends AsyncNotifier<List<Question>> {
   }
 
   // ── Private helpers ───────────────────────────────────────────────────────
+
+  /// Builds a set of `"topicId||questionTextLower"` signatures for every
+  /// question currently in the database (all active statuses, no limit).
+  ///
+  /// Used by import methods to detect questions that already exist.
+  Future<Set<String>> _fetchExistingSignatures() async {
+    try {
+      final Result<List<Question>> result = await _service.getQuestions(
+        subjectId: null,
+        yearId: null,
+        chapterId: null,
+        topicId: null,
+        search: null,
+        sortOrder: QuestionSortOrder.createdAtDesc,
+        questionType: null,
+        difficulty: null,
+        isActive: null,
+        limit: 99999,
+        offset: 0,
+      );
+      return result.when(
+        success: (List<Question> questions) => <String>{
+          for (final Question q in questions)
+            '${q.topicId}||${q.questionText.toLowerCase()}'
+        },
+        failure: (_) => <String>{},
+      );
+    } catch (_) {
+      return <String>{};
+    }
+  }
 
   Future<List<Subject>> _fetchSubjects() async {
     final result = await ref.read(subjectServiceProvider).getSubjects();

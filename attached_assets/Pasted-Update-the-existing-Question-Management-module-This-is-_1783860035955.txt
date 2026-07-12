@@ -1,0 +1,251 @@
+Update the existing Question Management module.
+
+This is an enhancement only.
+
+Do NOT change the existing database structure, APIs, UUIDs, or existing functionality.
+
+Everything currently working must continue working.
+
+====================================================
+1. IMPORT PREVIEW
+====================================================
+
+Before importing CSV or JSON, show a Preview dialog.
+
+The preview should validate the file before inserting anything into PostgreSQL.
+
+Display:
+
+File Name
+
+Subject
+
+Year
+
+Chapter
+
+Topic
+
+Rows Found
+
+New Questions
+
+Duplicate Questions
+
+Invalid Rows
+
+Estimated Import Count
+
+Example
+
+------------------------------------
+Import Preview
+
+File:
+Matematik_Tahun1_Bab1_Tambah.csv
+
+Subject:
+Matematik
+
+Year:
+Tahun 1
+
+Chapter:
+Bab 1 : Nombor Bulat Hingga 100
+
+Topic:
+Tambah
+
+Rows Found:
+200
+
+New Questions:
+195
+
+Duplicate Questions:
+5
+
+Invalid Rows:
+0
+
+Ready to Import
+
+[Cancel]    [Import]
+------------------------------------
+
+Nothing should be inserted until the user presses Import.
+
+====================================================
+2. DUPLICATE CHECK
+====================================================
+
+Before import,
+
+check duplicate questions based on
+
+Subject
+
+Year
+
+Chapter
+
+Topic
+
+Question Text
+
+If duplicate exists,
+
+do not import it.
+
+Display
+
+Skipped:
+Question already exists
+
+====================================================
+3. IMPORT VALIDATION
+====================================================
+
+Validate before importing.
+
+Check
+
+✓ Subject exists
+
+✓ Year exists
+
+✓ Chapter exists
+
+✓ Topic exists
+
+✓ Question Type valid
+
+✓ Difficulty valid
+
+✓ Correct Answer valid
+
+✓ Required columns exist
+
+If validation fails,
+
+show the exact problem before importing.
+
+====================================================
+4. IMPORT SUMMARY
+====================================================
+
+After import show
+
+Imported
+
+Skipped
+
+Failed
+
+Duplicate
+
+Total Rows
+
+Example
+
+------------------------------------
+
+Import Complete
+
+Total Rows : 200
+
+Imported : 195
+
+Skipped : 5
+
+Failed : 0
+
+Duplicates : 5
+
+------------------------------------
+
+====================================================
+5. DOWNLOAD REPORT
+====================================================
+
+Allow downloading the import report as CSV.
+
+Columns
+
+Row
+
+Question
+
+Status
+
+Reason
+
+Example
+
+25
+
+Berapakah 5 + 8?
+
+Skipped
+
+Duplicate Question
+
+====================================================
+6. EXPORT IMPROVEMENT
+====================================================
+
+When filters are applied
+
+Subject
+
+Year
+
+Chapter
+
+Topic
+
+only export filtered questions.
+
+Filename
+
+Matematik_Tahun1_Bab1_Tambah.csv
+
+Do not open popup.
+
+Download the file directly.
+
+====================================================
+7. AUTO SORT
+====================================================
+
+Question Bank should automatically sort by
+
+Subject
+
+Year
+
+Chapter
+
+Topic
+
+Question Number
+
+====================================================
+8. SAFETY
+====================================================
+
+Do not change UUIDs.
+
+Do not recreate records.
+
+Do not change existing APIs.
+
+Maintain backward compatibility.
+
+If migration is required,
+
+create a Supabase migration,
+
+commit,
+
+push to GitHub.

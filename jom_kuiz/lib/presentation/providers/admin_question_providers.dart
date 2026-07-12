@@ -42,7 +42,7 @@ final StateProvider<String> adminQSearchQueryProvider =
 
 final StateProvider<QuestionSortOrder> adminQSortOrderProvider =
     StateProvider<QuestionSortOrder>(
-        (Ref ref) => QuestionSortOrder.createdAtDesc);
+        (Ref ref) => QuestionSortOrder.hierarchyAsc);
 
 final StateProvider<QuestionType?> adminQTypeFilterProvider =
     StateProvider<QuestionType?>((Ref ref) => null);

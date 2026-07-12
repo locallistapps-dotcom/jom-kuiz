@@ -10,13 +10,35 @@ import '../../domain/entities/topic.dart';
 import '../../domain/entities/year.dart';
 import '../../domain/repositories/question_bank_repository.dart';
 
-/// Result of a CSV import operation.
+/// Per-row outcome recorded during an import operation.
+class AdminImportRowResult {
+  const AdminImportRowResult({
+    required this.rowNumber,
+    required this.questionText,
+    required this.status,
+    required this.reason,
+  });
+
+  final int rowNumber;
+  final String questionText;
+
+  /// 'Imported', 'Skipped', 'Duplicate', or 'Failed'
+  final String status;
+
+  /// Empty string for successfully imported rows.
+  final String reason;
+}
+
+/// Result of a CSV / JSON import operation.
 class AdminImportSummary {
   const AdminImportSummary({
     required this.totalRows,
     required this.succeeded,
     required this.skipped,
     required this.errors,
+    this.duplicates = 0,
+    this.failed = 0,
+    this.rowResults = const <AdminImportRowResult>[],
   });
 
   /// Total data rows parsed (excluding header).
@@ -25,11 +47,61 @@ class AdminImportSummary {
   /// Rows successfully created in the database.
   final int succeeded;
 
-  /// Rows skipped due to validation errors.
+  /// Rows skipped due to validation errors (not counting duplicates or DB
+  /// write failures).
   final int skipped;
+
+  /// Rows skipped because the same question already exists in the database.
+  final int duplicates;
+
+  /// Rows that passed validation but failed at the DB write step.
+  final int failed;
 
   /// Human-readable error messages per row (1-indexed).
   final List<String> errors;
+
+  /// Per-row outcomes for generating the downloadable import report.
+  final List<AdminImportRowResult> rowResults;
+}
+
+/// Dry-run result shown in the Import Preview dialog.
+///
+/// No questions are written to the database — this is a validation-only pass.
+class AdminImportPreview {
+  const AdminImportPreview({
+    required this.fileName,
+    required this.subjects,
+    required this.years,
+    required this.chapters,
+    required this.topics,
+    required this.rowsFound,
+    required this.newQuestions,
+    required this.duplicates,
+    required this.invalidRows,
+    required this.validationErrors,
+  });
+
+  final String fileName;
+
+  /// Unique subject names resolved from the file (empty on header error).
+  final List<String> subjects;
+  final List<String> years;
+  final List<String> chapters;
+  final List<String> topics;
+
+  final int rowsFound;
+
+  /// Rows that are valid, non-duplicate — would be inserted on actual import.
+  final int newQuestions;
+
+  /// Rows skipped because the same question already exists in the database.
+  final int duplicates;
+
+  /// Rows that failed validation (wrong type, unknown subject, etc.).
+  final int invalidRows;
+
+  /// Human-readable validation error messages (shown before import).
+  final List<String> validationErrors;
 }
 
 /// Admin-specific question operations that extend the base
@@ -169,6 +241,7 @@ class AdminQuestionService {
   Future<AdminImportSummary> importFromCsv({
     required String csvContent,
     required AdminImportLookups lookups,
+    Set<String> existingSignatures = const <String>{},
   }) async {
     final List<String> lines = csvContent
         .split('\n')
@@ -227,7 +300,12 @@ class AdminQuestionService {
     final List<String> dataLines = lines.sublist(1);
     int succeeded = 0;
     int skipped = 0;
+    int duplicatesCount = 0;
+    int failedCount = 0;
     final List<String> errors = <String>[];
+    final List<AdminImportRowResult> rowResults = <AdminImportRowResult>[];
+    // In-batch duplicate signatures: topicId||questionTextLower
+    final Set<String> batchSigs = <String>{};
 
     for (int i = 0; i < dataLines.length; i++) {
       final int rowNum = i + 2; // 1-based, accounting for header at row 1
@@ -258,10 +336,11 @@ class AdminQuestionService {
       if (questionText.isEmpty) {
         skipped++;
         errors.add('Row $rowNum: question text is required');
+        rowResults.add(AdminImportRowResult(rowNumber: rowNum, questionText: '', status: 'Skipped', reason: 'Question text is required'));
         continue;
       }
 
-      // Resolve topic ID via normalized lookup (case-insensitive, trimmed).
+      // Resolve hierarchy via normalized lookup (case-insensitive, trimmed).
       final String? subjectId =
           lookups.subjectNameToId[AdminImportLookups.normalizeKey(subjectName)];
       if (subjectId == null) {
@@ -272,6 +351,7 @@ class AdminQuestionService {
           '  DB subjects : ${_fmtList(lookups.subjectNames)}\n'
           '  (matched after trim + collapse spaces + lower-case)',
         );
+        rowResults.add(AdminImportRowResult(rowNumber: rowNum, questionText: questionText, status: 'Skipped', reason: 'Unknown Subject "$subjectName"'));
         continue;
       }
       final String? yearId =
@@ -284,6 +364,7 @@ class AdminQuestionService {
           '  DB years  : ${_fmtList(lookups.yearNames)}\n'
           '  (matched after trim + collapse spaces + lower-case)',
         );
+        rowResults.add(AdminImportRowResult(rowNumber: rowNum, questionText: questionText, status: 'Skipped', reason: 'Unknown Year "$yearName"'));
         continue;
       }
       final String? chapterId =
@@ -296,6 +377,7 @@ class AdminQuestionService {
           '  DB chapters: ${_fmtList(lookups.chapterNames)}\n'
           '  (matched after trim + collapse spaces + lower-case)',
         );
+        rowResults.add(AdminImportRowResult(rowNumber: rowNum, questionText: questionText, status: 'Skipped', reason: 'Unknown Chapter "$chapterName"'));
         continue;
       }
       final String? topicId =
@@ -308,6 +390,7 @@ class AdminQuestionService {
           '  DB topics : ${_fmtList(lookups.topicNames)}\n'
           '  (matched after trim + collapse spaces + lower-case)',
         );
+        rowResults.add(AdminImportRowResult(rowNumber: rowNum, questionText: questionText, status: 'Skipped', reason: 'Unknown Topic "$topicName"'));
         continue;
       }
 
@@ -315,9 +398,9 @@ class AdminQuestionService {
       final QuestionType? questionType = _parseType(questionTypeRaw);
       if (questionType == null) {
         skipped++;
-        errors.add(
-            'Row $rowNum: unknown question type "$questionTypeRaw" '
-            '(expected mcq, true_false/truefalse, or fill_in_blank/fill)');
+        final String reason = 'Unknown QuestionType "$questionTypeRaw" (expected mcq, true_false, fill_in_blank)';
+        errors.add('Row $rowNum: $reason');
+        rowResults.add(AdminImportRowResult(rowNumber: rowNum, questionText: questionText, status: 'Skipped', reason: reason));
         continue;
       }
 
@@ -334,8 +417,18 @@ class AdminQuestionService {
       if (answerErr != null) {
         skipped++;
         errors.add('Row $rowNum: $answerErr');
+        rowResults.add(AdminImportRowResult(rowNumber: rowNum, questionText: questionText, status: 'Skipped', reason: answerErr));
         continue;
       }
+
+      // DB-level + in-batch duplicate check.
+      final String dupSig = '$topicId||${questionText.toLowerCase()}';
+      if (existingSignatures.contains(dupSig) || batchSigs.contains(dupSig)) {
+        duplicatesCount++;
+        rowResults.add(AdminImportRowResult(rowNumber: rowNum, questionText: questionText, status: 'Duplicate', reason: 'Question already exists'));
+        continue;
+      }
+      batchSigs.add(dupSig);
 
       // Create the question
       final Result<Question> result = await _repository.createQuestion(
@@ -355,10 +448,14 @@ class AdminQuestionService {
       );
 
       result.when(
-        success: (_) => succeeded++,
+        success: (_) {
+          succeeded++;
+          rowResults.add(AdminImportRowResult(rowNumber: rowNum, questionText: questionText, status: 'Imported', reason: ''));
+        },
         failure: (Failure f) {
-          skipped++;
+          failedCount++;
           errors.add('Row $rowNum: ${f.message}');
+          rowResults.add(AdminImportRowResult(rowNumber: rowNum, questionText: questionText, status: 'Failed', reason: f.message));
         },
       );
     }
@@ -367,7 +464,10 @@ class AdminQuestionService {
       totalRows: dataLines.length,
       succeeded: succeeded,
       skipped: skipped,
+      duplicates: duplicatesCount,
+      failed: failedCount,
       errors: errors,
+      rowResults: rowResults,
     );
   }
 
@@ -397,6 +497,7 @@ class AdminQuestionService {
   Future<AdminImportSummary> importFromJson({
     required String jsonContent,
     required AdminImportLookups lookups,
+    Set<String> existingSignatures = const <String>{},
   }) async {
     List<dynamic> rows;
     try {
@@ -421,7 +522,10 @@ class AdminQuestionService {
 
     int succeeded = 0;
     int skipped = 0;
+    int duplicatesCount = 0;
+    int failedCount = 0;
     final List<String> errors = <String>[];
+    final List<AdminImportRowResult> rowResults = <AdminImportRowResult>[];
     // In-batch duplicate signatures: topicId||questionTextLower
     final Set<String> batchSigs = <String>{};
 
@@ -430,7 +534,9 @@ class AdminQuestionService {
       final dynamic rawRow = rows[i];
       if (rawRow is! Map<String, dynamic>) {
         skipped++;
-        errors.add('Row $rowNum: must be a JSON object, got ${rawRow.runtimeType}');
+        final String reason = 'Must be a JSON object, got ${rawRow.runtimeType}';
+        errors.add('Row $rowNum: $reason');
+        rowResults.add(AdminImportRowResult(rowNumber: rowNum, questionText: '', status: 'Skipped', reason: reason));
         continue;
       }
       final Map<String, dynamic> row = rawRow;
@@ -457,6 +563,7 @@ class AdminQuestionService {
       if (questionText.isEmpty) {
         skipped++;
         errors.add('Row $rowNum: Question text is required');
+        rowResults.add(AdminImportRowResult(rowNumber: rowNum, questionText: '', status: 'Skipped', reason: 'Question text is required'));
         continue;
       }
 
@@ -471,6 +578,7 @@ class AdminQuestionService {
           '  DB subjects : ${_fmtList(lookups.subjectNames)}\n'
           '  (matched after trim + collapse spaces + lower-case)',
         );
+        rowResults.add(AdminImportRowResult(rowNumber: rowNum, questionText: questionText, status: 'Skipped', reason: 'Unknown Subject "$subjectName"'));
         continue;
       }
       final String? yearId =
@@ -483,6 +591,7 @@ class AdminQuestionService {
           '  DB years   : ${_fmtList(lookups.yearNames)}\n'
           '  (matched after trim + collapse spaces + lower-case)',
         );
+        rowResults.add(AdminImportRowResult(rowNumber: rowNum, questionText: questionText, status: 'Skipped', reason: 'Unknown Year "$yearName"'));
         continue;
       }
       final String? chapterId =
@@ -495,6 +604,7 @@ class AdminQuestionService {
           '  DB chapters: ${_fmtList(lookups.chapterNames)}\n'
           '  (matched after trim + collapse spaces + lower-case)',
         );
+        rowResults.add(AdminImportRowResult(rowNumber: rowNum, questionText: questionText, status: 'Skipped', reason: 'Unknown Chapter "$chapterName"'));
         continue;
       }
       final String? topicId =
@@ -507,22 +617,25 @@ class AdminQuestionService {
           '  DB topics  : ${_fmtList(lookups.topicNames)}\n'
           '  (matched after trim + collapse spaces + lower-case)',
         );
+        rowResults.add(AdminImportRowResult(rowNumber: rowNum, questionText: questionText, status: 'Skipped', reason: 'Unknown Topic "$topicName"'));
         continue;
       }
 
-      // In-batch duplicate check
-      final String sig = '$topicId||${questionText.toLowerCase()}';
-      if (batchSigs.contains(sig)) {
-        skipped++;
-        errors.add('Row $rowNum: duplicate question in this import batch (skipped)');
+      // DB-level + in-batch duplicate check.
+      final String dupSig = '$topicId||${questionText.toLowerCase()}';
+      if (existingSignatures.contains(dupSig) || batchSigs.contains(dupSig)) {
+        duplicatesCount++;
+        rowResults.add(AdminImportRowResult(rowNumber: rowNum, questionText: questionText, status: 'Duplicate', reason: 'Question already exists'));
         continue;
       }
-      batchSigs.add(sig);
+      batchSigs.add(dupSig);
 
       final QuestionType? questionType = _parseType(questionTypeRaw);
       if (questionType == null) {
         skipped++;
-        errors.add('Row $rowNum: unknown QuestionType "$questionTypeRaw"');
+        final String reason = 'Unknown QuestionType "$questionTypeRaw" (expected mcq, true_false, fill_in_blank)';
+        errors.add('Row $rowNum: $reason');
+        rowResults.add(AdminImportRowResult(rowNumber: rowNum, questionText: questionText, status: 'Skipped', reason: reason));
         continue;
       }
 
@@ -537,6 +650,7 @@ class AdminQuestionService {
       if (answerErr != null) {
         skipped++;
         errors.add('Row $rowNum: $answerErr');
+        rowResults.add(AdminImportRowResult(rowNumber: rowNum, questionText: questionText, status: 'Skipped', reason: answerErr));
         continue;
       }
 
@@ -557,10 +671,14 @@ class AdminQuestionService {
       );
 
       result.when(
-        success: (_) => succeeded++,
+        success: (_) {
+          succeeded++;
+          rowResults.add(AdminImportRowResult(rowNumber: rowNum, questionText: questionText, status: 'Imported', reason: ''));
+        },
         failure: (Failure f) {
-          skipped++;
+          failedCount++;
           errors.add('Row $rowNum: ${f.message}');
+          rowResults.add(AdminImportRowResult(rowNumber: rowNum, questionText: questionText, status: 'Failed', reason: f.message));
         },
       );
     }
@@ -569,8 +687,364 @@ class AdminQuestionService {
       totalRows: rows.length,
       succeeded: succeeded,
       skipped: skipped,
+      duplicates: duplicatesCount,
+      failed: failedCount,
       errors: errors,
+      rowResults: rowResults,
     );
+  }
+
+  // ── Import preview (dry-run, no DB writes) ────────────────────────────────
+
+  /// Validates [csvContent] without inserting anything.
+  ///
+  /// Returns an [AdminImportPreview] showing how many rows would be imported,
+  /// how many are duplicates, and how many have validation errors.
+  Future<AdminImportPreview> previewFromCsv({
+    required String fileName,
+    required String csvContent,
+    required AdminImportLookups lookups,
+    Set<String> existingSignatures = const <String>{},
+  }) async {
+    final List<String> lines = csvContent
+        .split('\n')
+        .map((String l) => l.trim())
+        .where((String l) => l.isNotEmpty)
+        .toList();
+
+    if (lines.length < 2) {
+      return AdminImportPreview(
+        fileName: fileName,
+        subjects: const <String>[],
+        years: const <String>[],
+        chapters: const <String>[],
+        topics: const <String>[],
+        rowsFound: 0,
+        newQuestions: 0,
+        duplicates: 0,
+        invalidRows: 0,
+        validationErrors: const <String>['CSV is empty or has no data rows'],
+      );
+    }
+
+    // Parse header (same logic as importFromCsv).
+    final List<String> headerCells = _parseCsvLine(lines[0]);
+    final Map<String, int> colIdx = <String, int>{};
+    for (int h = 0; h < headerCells.length; h++) {
+      colIdx[headerCells[h].trim().toLowerCase().replaceAll(' ', '')] = h;
+    }
+
+    String cell(List<String> cells, String name, {String fallback = ''}) {
+      final int? idx = colIdx[name.toLowerCase().replaceAll(' ', '')];
+      if (idx == null || idx >= cells.length) return fallback;
+      return cells[idx].trim();
+    }
+
+    final List<String> requiredHeaders = <String>[
+      'subject', 'year', 'chapter', 'topic', 'correctanswer', 'questiontype',
+    ];
+    final bool hasQuestion =
+        colIdx.containsKey('question') || colIdx.containsKey('questiontext');
+    final List<String> missing =
+        requiredHeaders.where((String h) => !colIdx.containsKey(h)).toList();
+    if (!hasQuestion) missing.add('Question');
+    if (missing.isNotEmpty) {
+      return AdminImportPreview(
+        fileName: fileName,
+        subjects: const <String>[],
+        years: const <String>[],
+        chapters: const <String>[],
+        topics: const <String>[],
+        rowsFound: 0,
+        newQuestions: 0,
+        duplicates: 0,
+        invalidRows: 0,
+        validationErrors: <String>[
+          'CSV header is missing required columns: ${missing.join(', ')}\n'
+          '  Found columns: ${headerCells.map((String c) => c.trim()).join(', ')}',
+        ],
+      );
+    }
+
+    final List<String> dataLines = lines.sublist(1);
+    int newQuestions = 0;
+    int duplicatesCount = 0;
+    int invalidRows = 0;
+    final List<String> validationErrors = <String>[];
+    final Set<String> subjectsSet = <String>{};
+    final Set<String> yearsSet = <String>{};
+    final Set<String> chaptersSet = <String>{};
+    final Set<String> topicsSet = <String>{};
+    final Set<String> batchSigs = <String>{};
+
+    for (int i = 0; i < dataLines.length; i++) {
+      final int rowNum = i + 2;
+      final List<String> cells = _parseCsvLine(dataLines[i]);
+
+      final String subjectName = cell(cells, 'subject');
+      final String yearName = cell(cells, 'year');
+      final String chapterName = cell(cells, 'chapter');
+      final String topicName = cell(cells, 'topic');
+      final String questionText = colIdx.containsKey('questiontext')
+          ? cell(cells, 'questiontext')
+          : cell(cells, 'question');
+      final String questionTypeRaw = cell(cells, 'questiontype').toLowerCase();
+      final String optionA = cell(cells, 'optiona');
+      final String optionB = cell(cells, 'optionb');
+      final String correctAnswer = cell(cells, 'correctanswer');
+
+      if (questionText.isEmpty) {
+        invalidRows++;
+        validationErrors.add('Row $rowNum: question text is required');
+        continue;
+      }
+
+      final String? subjectId =
+          lookups.subjectNameToId[AdminImportLookups.normalizeKey(subjectName)];
+      if (subjectId == null) {
+        invalidRows++;
+        validationErrors.add('Row $rowNum: unknown Subject "$subjectName"');
+        continue;
+      }
+      final String? yearId =
+          lookups.yearNameToId[AdminImportLookups.normalizeKey(yearName)];
+      if (yearId == null) {
+        invalidRows++;
+        validationErrors.add('Row $rowNum: unknown Year "$yearName"');
+        continue;
+      }
+      final String? chapterId =
+          lookups.chapterNameToId[AdminImportLookups.normalizeKey(chapterName)];
+      if (chapterId == null) {
+        invalidRows++;
+        validationErrors.add('Row $rowNum: unknown Chapter "$chapterName"');
+        continue;
+      }
+      final String? topicId =
+          lookups.topicNameToId[AdminImportLookups.normalizeKey(topicName)];
+      if (topicId == null) {
+        invalidRows++;
+        validationErrors.add('Row $rowNum: unknown Topic "$topicName"');
+        continue;
+      }
+
+      final QuestionType? questionType = _parseType(questionTypeRaw);
+      if (questionType == null) {
+        invalidRows++;
+        validationErrors
+            .add('Row $rowNum: unknown QuestionType "$questionTypeRaw"');
+        continue;
+      }
+
+      final String? answerErr = _validateAnswer(
+        questionType: questionType,
+        correctAnswer: correctAnswer,
+        optionA: optionA,
+        optionB: optionB,
+      );
+      if (answerErr != null) {
+        invalidRows++;
+        validationErrors.add('Row $rowNum: $answerErr');
+        continue;
+      }
+
+      // Duplicate check (DB + in-batch).
+      final String dupSig = '$topicId||${questionText.toLowerCase()}';
+      if (existingSignatures.contains(dupSig) || batchSigs.contains(dupSig)) {
+        duplicatesCount++;
+        continue;
+      }
+      batchSigs.add(dupSig);
+
+      // Row is valid and non-duplicate — would be inserted.
+      newQuestions++;
+      subjectsSet.add(subjectName);
+      yearsSet.add(yearName);
+      chaptersSet.add(chapterName);
+      topicsSet.add(topicName);
+    }
+
+    return AdminImportPreview(
+      fileName: fileName,
+      subjects: subjectsSet.toList(),
+      years: yearsSet.toList(),
+      chapters: chaptersSet.toList(),
+      topics: topicsSet.toList(),
+      rowsFound: dataLines.length,
+      newQuestions: newQuestions,
+      duplicates: duplicatesCount,
+      invalidRows: invalidRows,
+      validationErrors: validationErrors,
+    );
+  }
+
+  /// Validates [jsonContent] without inserting anything.
+  Future<AdminImportPreview> previewFromJson({
+    required String fileName,
+    required String jsonContent,
+    required AdminImportLookups lookups,
+    Set<String> existingSignatures = const <String>{},
+  }) async {
+    List<dynamic> rows;
+    try {
+      rows = jsonDecode(jsonContent) as List<dynamic>;
+    } catch (e) {
+      return AdminImportPreview(
+        fileName: fileName,
+        subjects: const <String>[],
+        years: const <String>[],
+        chapters: const <String>[],
+        topics: const <String>[],
+        rowsFound: 0,
+        newQuestions: 0,
+        duplicates: 0,
+        invalidRows: 0,
+        validationErrors: <String>['Invalid JSON: $e'],
+      );
+    }
+
+    if (rows.isEmpty) {
+      return AdminImportPreview(
+        fileName: fileName,
+        subjects: const <String>[],
+        years: const <String>[],
+        chapters: const <String>[],
+        topics: const <String>[],
+        rowsFound: 0,
+        newQuestions: 0,
+        duplicates: 0,
+        invalidRows: 0,
+        validationErrors: const <String>['JSON array is empty'],
+      );
+    }
+
+    int newQuestions = 0;
+    int duplicatesCount = 0;
+    int invalidRows = 0;
+    final List<String> validationErrors = <String>[];
+    final Set<String> subjectsSet = <String>{};
+    final Set<String> yearsSet = <String>{};
+    final Set<String> chaptersSet = <String>{};
+    final Set<String> topicsSet = <String>{};
+    final Set<String> batchSigs = <String>{};
+
+    for (int i = 0; i < rows.length; i++) {
+      final int rowNum = i + 1;
+      final dynamic rawRow = rows[i];
+      if (rawRow is! Map<String, dynamic>) {
+        invalidRows++;
+        validationErrors.add(
+            'Row $rowNum: must be a JSON object, got ${rawRow.runtimeType}');
+        continue;
+      }
+      final Map<String, dynamic> row = rawRow;
+
+      final String subjectName = (row['Subject'] ?? '').toString().trim();
+      final String yearName = (row['Year'] ?? '').toString().trim();
+      final String chapterName = (row['Chapter'] ?? '').toString().trim();
+      final String topicName = (row['Topic'] ?? '').toString().trim();
+      final String questionText = (row['Question'] ?? '').toString().trim();
+      final String questionTypeRaw =
+          (row['QuestionType'] ?? '').toString().trim().toLowerCase();
+      final String optionA = (row['OptionA'] ?? '').toString().trim();
+      final String optionB = (row['OptionB'] ?? '').toString().trim();
+      final String correctAnswer = (row['CorrectAnswer'] ?? '').toString().trim();
+
+      if (questionText.isEmpty) {
+        invalidRows++;
+        validationErrors.add('Row $rowNum: Question text is required');
+        continue;
+      }
+
+      final String? subjectId =
+          lookups.subjectNameToId[AdminImportLookups.normalizeKey(subjectName)];
+      if (subjectId == null) {
+        invalidRows++;
+        validationErrors.add('Row $rowNum: unknown Subject "$subjectName"');
+        continue;
+      }
+      final String? yearId =
+          lookups.yearNameToId[AdminImportLookups.normalizeKey(yearName)];
+      if (yearId == null) {
+        invalidRows++;
+        validationErrors.add('Row $rowNum: unknown Year "$yearName"');
+        continue;
+      }
+      final String? chapterId =
+          lookups.chapterNameToId[AdminImportLookups.normalizeKey(chapterName)];
+      if (chapterId == null) {
+        invalidRows++;
+        validationErrors.add('Row $rowNum: unknown Chapter "$chapterName"');
+        continue;
+      }
+      final String? topicId =
+          lookups.topicNameToId[AdminImportLookups.normalizeKey(topicName)];
+      if (topicId == null) {
+        invalidRows++;
+        validationErrors.add('Row $rowNum: unknown Topic "$topicName"');
+        continue;
+      }
+
+      final QuestionType? questionType = _parseType(questionTypeRaw);
+      if (questionType == null) {
+        invalidRows++;
+        validationErrors
+            .add('Row $rowNum: unknown QuestionType "$questionTypeRaw"');
+        continue;
+      }
+
+      final String? answerErr = _validateAnswer(
+        questionType: questionType,
+        correctAnswer: correctAnswer,
+        optionA: optionA,
+        optionB: optionB,
+      );
+      if (answerErr != null) {
+        invalidRows++;
+        validationErrors.add('Row $rowNum: $answerErr');
+        continue;
+      }
+
+      final String dupSig = '$topicId||${questionText.toLowerCase()}';
+      if (existingSignatures.contains(dupSig) || batchSigs.contains(dupSig)) {
+        duplicatesCount++;
+        continue;
+      }
+      batchSigs.add(dupSig);
+
+      newQuestions++;
+      subjectsSet.add(subjectName);
+      yearsSet.add(yearName);
+      chaptersSet.add(chapterName);
+      topicsSet.add(topicName);
+    }
+
+    return AdminImportPreview(
+      fileName: fileName,
+      subjects: subjectsSet.toList(),
+      years: yearsSet.toList(),
+      chapters: chaptersSet.toList(),
+      topics: topicsSet.toList(),
+      rowsFound: rows.length,
+      newQuestions: newQuestions,
+      duplicates: duplicatesCount,
+      invalidRows: invalidRows,
+      validationErrors: validationErrors,
+    );
+  }
+
+  /// Generates a downloadable import report CSV from [rowResults].
+  ///
+  /// Columns: Row, Question, Status, Reason
+  static String generateImportReport(List<AdminImportRowResult> rowResults) {
+    final StringBuffer buf = StringBuffer();
+    buf.writeln('Row,Question,Status,Reason');
+    for (final AdminImportRowResult r in rowResults) {
+      final String q = r.questionText.replaceAll('"', '""');
+      final String reason = r.reason.replaceAll('"', '""');
+      buf.writeln('${r.rowNumber},"$q",${r.status},"$reason"');
+    }
+    return buf.toString();
   }
 
   // ── CSV export ─────────────────────────────────────────────────────────────

@@ -72,6 +72,10 @@ class QuestionBankRemoteDataSourceImpl implements QuestionBankRemoteDataSource {
         // so we map to a numeric proxy via a case expression at the
         // application layer. Server order defaults to created_at.
         return 'created_at.desc';
+      case QuestionSortOrder.hierarchyAsc:
+        // Group by topic (proxy for Subject→Year→Chapter→Topic hierarchy),
+        // then by insertion order within each topic.
+        return 'topic_id.asc,created_at.asc';
     }
   }
 

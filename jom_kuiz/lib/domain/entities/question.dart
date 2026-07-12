@@ -30,6 +30,10 @@ enum QuestionSortOrder {
 
   /// Easy → Medium → Hard.
   difficultyAsc,
+
+  /// Group by topic (proxy for Subject → Year → Chapter → Topic hierarchy),
+  /// then by creation order within each topic.
+  hierarchyAsc,
 }
 
 /// A single question in the question bank.

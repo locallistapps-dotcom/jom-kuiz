@@ -46,6 +46,10 @@ final Provider<List<Question>> filteredQuestionsProvider =
       case QuestionSortOrder.difficultyAsc:
         return _difficultyRank(a.difficulty)
             .compareTo(_difficultyRank(b.difficulty));
+      case QuestionSortOrder.hierarchyAsc:
+        // In the quiz bank the hierarchy sort falls back to newest-first
+        // (topic-level ordering is handled server-side for the admin view).
+        return b.createdAt.compareTo(a.createdAt);
     }
   });
 
