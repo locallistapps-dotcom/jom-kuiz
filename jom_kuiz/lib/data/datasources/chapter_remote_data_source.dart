@@ -249,22 +249,47 @@ class ChapterRemoteDataSourceImpl implements ChapterRemoteDataSource {
     }
 
     final int? status = e.response?.statusCode;
+    final String realMessage = _extractPostgrestMessage(e);
+
     if (status == 404 && notFoundCode != null) {
       return ServerException('Resource not found', notFoundCode, e);
     }
     if (status == 409 && conflictCode != null) {
-      return ValidationException('Duplicate entry', conflictCode, e);
+      return ValidationException(realMessage, conflictCode, e);
     }
     if (status == 422 && validationCode != null) {
-      return ValidationException('Validation failed', validationCode, e);
+      return ValidationException(realMessage, validationCode, e);
     }
     if (status == 401 || status == 403) {
       return const UnauthorizedException('Unauthorized');
     }
     return ServerException(
-      'Something went wrong',
+      realMessage,
       fallbackCode ?? ChapterErrorCodes.chapterOperationFailed,
       e,
     );
+  }
+
+  /// Extracts the real PostgREST / Supabase error from a [DioException].
+  ///
+  /// PostgREST error bodies look like:
+  /// `{"code":"23503","message":"...","details":"...","hint":"..."}`
+  static String _extractPostgrestMessage(DioException e) {
+    try {
+      final dynamic body = e.response?.data;
+      if (body is Map) {
+        final String? msg = body['message'] as String?;
+        final String? details = body['details'] as String?;
+        final String? hint = body['hint'] as String?;
+        final List<String> parts = <String>[
+          if (msg != null && msg.isNotEmpty) msg,
+          if (details != null && details.isNotEmpty) details,
+          if (hint != null && hint.isNotEmpty) 'Hint: $hint',
+        ];
+        if (parts.isNotEmpty) return parts.join('\n');
+      }
+    } catch (_) {}
+    final int? status = e.response?.statusCode;
+    return 'Server error${status != null ? " (HTTP $status)" : ""}';
   }
 }

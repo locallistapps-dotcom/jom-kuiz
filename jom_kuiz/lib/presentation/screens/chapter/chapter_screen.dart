@@ -5,7 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/error/failure.dart';
 import '../../../core/utils/result.dart';
 import '../../../domain/entities/chapter.dart';
+import '../../../domain/entities/subject.dart';
+import '../../../domain/entities/year.dart';
 import '../../controllers/chapter_controller.dart';
+import '../../providers/admin_question_providers.dart';
 import '../../providers/chapter_providers.dart';
 
 /// Admin screen for managing Chapters.
@@ -499,7 +502,7 @@ typedef _SaveCallback = Future<Result<Object?>> Function(
   bool isActive,
 );
 
-class _ChapterFormSheet extends StatefulWidget {
+class _ChapterFormSheet extends ConsumerStatefulWidget {
   const _ChapterFormSheet({
     super.key,
     required this.chapter,
@@ -514,13 +517,13 @@ class _ChapterFormSheet extends StatefulWidget {
   final _SaveCallback onSave;
 
   @override
-  State<_ChapterFormSheet> createState() => _ChapterFormSheetState();
+  ConsumerState<_ChapterFormSheet> createState() => _ChapterFormSheetState();
 }
 
-class _ChapterFormSheetState extends State<_ChapterFormSheet> {
+class _ChapterFormSheetState extends ConsumerState<_ChapterFormSheet> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  late final TextEditingController _subjectIdCtrl;
-  late final TextEditingController _yearIdCtrl;
+  String? _selectedSubjectId;
+  String? _selectedYearId;
   late final TextEditingController _nameCtrl;
   late final TextEditingController _descCtrl;
   late final TextEditingController _orderCtrl;
@@ -532,12 +535,10 @@ class _ChapterFormSheetState extends State<_ChapterFormSheet> {
   void initState() {
     super.initState();
     final Chapter? c = widget.chapter;
-    _subjectIdCtrl = TextEditingController(
-      text: c?.subjectId ?? widget.defaultSubjectId,
-    );
-    _yearIdCtrl = TextEditingController(
-      text: c?.yearId ?? widget.defaultYearId,
-    );
+    final String preSubject = c?.subjectId ?? widget.defaultSubjectId;
+    final String preYear = c?.yearId ?? widget.defaultYearId;
+    _selectedSubjectId = preSubject.isEmpty ? null : preSubject;
+    _selectedYearId = preYear.isEmpty ? null : preYear;
     _nameCtrl = TextEditingController(text: c?.chapterName ?? '');
     _descCtrl = TextEditingController(text: c?.description ?? '');
     _orderCtrl =
@@ -547,8 +548,6 @@ class _ChapterFormSheetState extends State<_ChapterFormSheet> {
 
   @override
   void dispose() {
-    _subjectIdCtrl.dispose();
-    _yearIdCtrl.dispose();
     _nameCtrl.dispose();
     _descCtrl.dispose();
     _orderCtrl.dispose();
@@ -567,8 +566,8 @@ class _ChapterFormSheetState extends State<_ChapterFormSheet> {
         : _descCtrl.text.trim();
 
     final Result<Object?> result = await widget.onSave(
-      _subjectIdCtrl.text.trim(),
-      _yearIdCtrl.text.trim(),
+      _selectedSubjectId!,
+      _selectedYearId!,
       _nameCtrl.text.trim(),
       desc,
       int.tryParse(_orderCtrl.text.trim()) ?? 0,
@@ -589,6 +588,13 @@ class _ChapterFormSheetState extends State<_ChapterFormSheet> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isEdit = widget.chapter != null;
+
+    // Subject and Year lists for the dropdowns.
+    final List<Subject> subjects =
+        ref.watch(adminSubjectsDropdownProvider).asData?.value ??
+            <Subject>[];
+    final List<Year> years =
+        ref.watch(adminYearsDropdownProvider).asData?.value ?? <Year>[];
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -624,39 +630,51 @@ class _ChapterFormSheetState extends State<_ChapterFormSheet> {
               ),
               const SizedBox(height: 20),
 
-              // Subject ID
-              TextFormField(
-                controller: _subjectIdCtrl,
+              // Subject dropdown
+              DropdownButtonFormField<String>(
+                value: _selectedSubjectId,
                 decoration: const InputDecoration(
-                  labelText: 'Subject ID *',
-                  hintText: 'UUID of the parent subject',
+                  labelText: 'Subject *',
                   border: OutlineInputBorder(),
-                  helperText: 'Will become a dropdown in a future release',
                 ),
-                validator: (String? v) {
-                  if (v == null || v.trim().isEmpty) {
-                    return 'Subject ID is required';
-                  }
-                  return null;
-                },
+                hint: const Text('Select subject'),
+                isExpanded: true,
+                items: subjects
+                    .map(
+                      (Subject s) => DropdownMenuItem<String>(
+                        value: s.subjectId,
+                        child: Text(s.subjectName),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (String? v) =>
+                    setState(() => _selectedSubjectId = v),
+                validator: (String? v) =>
+                    (v == null || v.isEmpty) ? 'Subject is required' : null,
               ),
               const SizedBox(height: 16),
 
-              // Year ID
-              TextFormField(
-                controller: _yearIdCtrl,
+              // Year dropdown
+              DropdownButtonFormField<String>(
+                value: _selectedYearId,
                 decoration: const InputDecoration(
-                  labelText: 'Year ID *',
-                  hintText: 'UUID of the parent year',
+                  labelText: 'Year *',
                   border: OutlineInputBorder(),
-                  helperText: 'Will become a dropdown in a future release',
                 ),
-                validator: (String? v) {
-                  if (v == null || v.trim().isEmpty) {
-                    return 'Year ID is required';
-                  }
-                  return null;
-                },
+                hint: const Text('Select year'),
+                isExpanded: true,
+                items: years
+                    .map(
+                      (Year y) => DropdownMenuItem<String>(
+                        value: y.yearId,
+                        child: Text(y.yearName),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (String? v) =>
+                    setState(() => _selectedYearId = v),
+                validator: (String? v) =>
+                    (v == null || v.isEmpty) ? 'Year is required' : null,
               ),
               const SizedBox(height: 16),
 
