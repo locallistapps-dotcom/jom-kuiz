@@ -185,7 +185,45 @@ class AdminQuestionService {
       );
     }
 
-    // Skip header row (index 0).
+    // Parse header row into a name→index map (case-insensitive, no spaces).
+    // This lets the importer tolerate any column ordering in the CSV.
+    final List<String> headerCells = _parseCsvLine(lines[0]);
+    final Map<String, int> colIdx = <String, int>{};
+    for (int h = 0; h < headerCells.length; h++) {
+      // Normalize: lowercase, strip spaces — e.g. "Question Type" == "questiontype"
+      colIdx[headerCells[h].trim().toLowerCase().replaceAll(' ', '')] = h;
+    }
+
+    // Helper: read a cell by header name; returns fallback if column absent.
+    String cell(List<String> cells, String name, {String fallback = ''}) {
+      final int? idx = colIdx[name.toLowerCase().replaceAll(' ', '')];
+      if (idx == null || idx >= cells.length) return fallback;
+      return cells[idx].trim();
+    }
+
+    // Validate required headers are present.
+    // Accept "question" or "questiontext" for the question body.
+    final List<String> requiredHeaders = <String>[
+      'subject', 'year', 'chapter', 'topic', 'correctanswer', 'questiontype',
+    ];
+    final bool hasQuestion =
+        colIdx.containsKey('question') || colIdx.containsKey('questiontext');
+    final List<String> missingHeaders = requiredHeaders
+        .where((String h) => !colIdx.containsKey(h))
+        .toList();
+    if (!hasQuestion) missingHeaders.add('Question');
+    if (missingHeaders.isNotEmpty) {
+      return AdminImportSummary(
+        totalRows: 0,
+        succeeded: 0,
+        skipped: 0,
+        errors: <String>[
+          'CSV header is missing required columns: ${missingHeaders.join(', ')}\n'
+          '  Found columns: ${headerCells.map((String c) => c.trim()).join(', ')}',
+        ],
+      );
+    }
+
     final List<String> dataLines = lines.sublist(1);
     int succeeded = 0;
     int skipped = 0;
@@ -195,31 +233,26 @@ class AdminQuestionService {
       final int rowNum = i + 2; // 1-based, accounting for header at row 1
       final List<String> cells = _parseCsvLine(dataLines[i]);
 
-      if (cells.length < 11) {
-        skipped++;
-        errors.add('Row $rowNum: insufficient columns (expected ≥11, got ${cells.length})');
-        continue;
-      }
-
-      final String subjectName = cells[0].trim();
-      final String yearName = cells[1].trim();
-      final String chapterName = cells[2].trim();
-      final String topicName = cells[3].trim();
-      final String questionText = cells[4].trim();
-      final String questionTypeRaw = cells[5].trim().toLowerCase();
-      final String optionA = cells.length > 6 ? cells[6].trim() : '';
-      final String optionB = cells.length > 7 ? cells[7].trim() : '';
-      final String optionC = cells.length > 8 ? cells[8].trim() : '';
-      final String optionD = cells.length > 9 ? cells[9].trim() : '';
-      final String correctAnswer = cells[10].trim();
+      final String subjectName = cell(cells, 'subject');
+      final String yearName = cell(cells, 'year');
+      final String chapterName = cell(cells, 'chapter');
+      final String topicName = cell(cells, 'topic');
+      // Accept either "Question" or "QuestionText" header.
+      final String questionText = colIdx.containsKey('questiontext')
+          ? cell(cells, 'questiontext')
+          : cell(cells, 'question');
+      final String questionTypeRaw =
+          cell(cells, 'questiontype').toLowerCase();
+      final String optionA = cell(cells, 'optiona');
+      final String optionB = cell(cells, 'optionb');
+      final String optionC = cell(cells, 'optionc');
+      final String optionD = cell(cells, 'optiond');
+      final String correctAnswer = cell(cells, 'correctanswer');
       final String difficultyRaw =
-          cells.length > 11 ? cells[11].trim().toLowerCase() : 'easy';
-      final String explanation =
-          cells.length > 12 ? cells[12].trim() : '';
-      final String explanationImageUrl =
-          cells.length > 13 ? cells[13].trim() : '';
-      final String reference =
-          cells.length > 14 ? cells[14].trim() : '';
+          cell(cells, 'difficulty', fallback: 'easy').toLowerCase();
+      final String explanation = cell(cells, 'explanation');
+      final String explanationImageUrl = cell(cells, 'explanationimageurl');
+      final String reference = cell(cells, 'reference');
 
       // Validate required fields
       if (questionText.isEmpty) {
