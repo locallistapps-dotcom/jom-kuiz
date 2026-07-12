@@ -4,8 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/error/failure.dart';
 import '../../../core/utils/result.dart';
+import '../../../domain/entities/chapter.dart';
+import '../../../domain/entities/subject.dart';
 import '../../../domain/entities/topic.dart';
+import '../../../domain/entities/year.dart';
 import '../../controllers/topic_controller.dart';
+import '../../providers/admin_question_providers.dart';
 import '../../providers/topic_providers.dart';
 import 'topic_detail_screen.dart';
 
@@ -760,7 +764,7 @@ typedef _SaveCallback = Future<Result<Object?>> Function(
   bool isActive,
 );
 
-class _TopicFormSheet extends StatefulWidget {
+class _TopicFormSheet extends ConsumerStatefulWidget {
   const _TopicFormSheet({
     super.key,
     required this.topic,
@@ -773,12 +777,11 @@ class _TopicFormSheet extends StatefulWidget {
   final _SaveCallback onSave;
 
   @override
-  State<_TopicFormSheet> createState() => _TopicFormSheetState();
+  ConsumerState<_TopicFormSheet> createState() => _TopicFormSheetState();
 }
 
-class _TopicFormSheetState extends State<_TopicFormSheet> {
+class _TopicFormSheetState extends ConsumerState<_TopicFormSheet> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  late final TextEditingController _chapterIdCtrl;
   late final TextEditingController _nameCtrl;
   late final TextEditingController _descCtrl;
   late final TextEditingController _orderCtrl;
@@ -786,23 +789,34 @@ class _TopicFormSheetState extends State<_TopicFormSheet> {
   bool _saving = false;
   String? _errorMessage;
 
+  // Cascading hierarchy selection for Chapter dropdown.
+  String? _selectedSubjectId;
+  String? _selectedYearId;
+  String? _selectedChapterId;
+  // Guards auto-resolve so it only runs once per open.
+  bool _hierarchyResolved = false;
+
   @override
   void initState() {
     super.initState();
     final Topic? t = widget.topic;
-    _chapterIdCtrl = TextEditingController(
-      text: t?.chapterId ?? widget.defaultChapterId,
-    );
     _nameCtrl = TextEditingController(text: t?.topicName ?? '');
     _descCtrl = TextEditingController(text: t?.description ?? '');
     _orderCtrl =
         TextEditingController(text: (t?.displayOrder ?? 0).toString());
     _isActive = t?.isActive ?? true;
+
+    // For edit, chapterId is a real UUID from the entity — pre-select it.
+    // For add, defaultChapterId may be a UUID from the active filter or empty.
+    final String preChapter = t?.chapterId ?? widget.defaultChapterId;
+    // Only pre-select if it looks like a UUID (contains hyphens).
+    if (preChapter.contains('-')) {
+      _selectedChapterId = preChapter;
+    }
   }
 
   @override
   void dispose() {
-    _chapterIdCtrl.dispose();
     _nameCtrl.dispose();
     _descCtrl.dispose();
     _orderCtrl.dispose();
@@ -821,7 +835,7 @@ class _TopicFormSheetState extends State<_TopicFormSheet> {
         : _descCtrl.text.trim();
 
     final Result<Object?> result = await widget.onSave(
-      _chapterIdCtrl.text.trim(),
+      _selectedChapterId!,
       _nameCtrl.text.trim(),
       desc,
       int.tryParse(_orderCtrl.text.trim()) ?? 0,
@@ -842,6 +856,43 @@ class _TopicFormSheetState extends State<_TopicFormSheet> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isEdit = widget.topic != null;
+
+    // ── Provider data for cascading dropdowns ─────────────────────────────
+    final List<Subject> subjects =
+        ref.watch(adminSubjectsDropdownProvider).asData?.value ??
+            <Subject>[];
+    final List<Year> years =
+        ref.watch(adminYearsDropdownProvider).asData?.value ?? <Year>[];
+    final List<Chapter> chapters = ref
+            .watch(adminChaptersDropdownProvider((
+              subjectId: _selectedSubjectId ?? '',
+              yearId: _selectedYearId ?? '',
+            )))
+            .asData
+            ?.value ??
+        <Chapter>[];
+
+    // ── Auto-resolve subject+year when editing an existing topic ──────────
+    if (isEdit && !_hierarchyResolved) {
+      final Map<String, Chapter>? allChapters =
+          ref.watch(adminAllChaptersProvider).asData?.value;
+      if (allChapters != null) {
+        final Chapter? parentChapter =
+            allChapters[widget.topic!.chapterId];
+        if (parentChapter != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              setState(() {
+                _selectedSubjectId = parentChapter.subjectId;
+                _selectedYearId = parentChapter.yearId;
+                _selectedChapterId = parentChapter.chapterId;
+                _hierarchyResolved = true;
+              });
+            }
+          });
+        }
+      }
+    }
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -877,23 +928,86 @@ class _TopicFormSheetState extends State<_TopicFormSheet> {
               ),
               const SizedBox(height: 20),
 
-              // Chapter ID
-              TextFormField(
-                controller: _chapterIdCtrl,
+              // ── Subject dropdown ────────────────────────────────────────
+              DropdownButtonFormField<String>(
+                value: _selectedSubjectId,
                 decoration: const InputDecoration(
-                  labelText: 'Chapter ID *',
-                  hintText: 'UUID of the parent chapter',
+                  labelText: 'Subject *',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.book_outlined),
+                ),
+                hint: const Text('Select subject'),
+                isExpanded: true,
+                items: subjects
+                    .map(
+                      (Subject s) => DropdownMenuItem<String>(
+                        value: s.subjectId,
+                        child: Text(s.subjectName),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (String? v) => setState(() {
+                  _selectedSubjectId = v;
+                  // Cascade: reset chapter when subject changes.
+                  _selectedChapterId = null;
+                }),
+                validator: (String? v) =>
+                    (v == null || v.isEmpty) ? 'Subject is required' : null,
+              ),
+              const SizedBox(height: 16),
+
+              // ── Year dropdown ───────────────────────────────────────────
+              DropdownButtonFormField<String>(
+                value: _selectedYearId,
+                decoration: const InputDecoration(
+                  labelText: 'Year *',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.school_outlined),
+                ),
+                hint: const Text('Select year'),
+                isExpanded: true,
+                items: years
+                    .map(
+                      (Year y) => DropdownMenuItem<String>(
+                        value: y.yearId,
+                        child: Text(y.yearName),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (String? v) => setState(() {
+                  _selectedYearId = v;
+                  // Cascade: reset chapter when year changes.
+                  _selectedChapterId = null;
+                }),
+                validator: (String? v) =>
+                    (v == null || v.isEmpty) ? 'Year is required' : null,
+              ),
+              const SizedBox(height: 16),
+
+              // ── Chapter dropdown (filtered by selected subject + year) ──
+              DropdownButtonFormField<String>(
+                value: _selectedChapterId,
+                decoration: const InputDecoration(
+                  labelText: 'Chapter *',
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.menu_book_outlined),
                   helperText:
-                      'Will become a filtered dropdown in a future release',
+                      'Select Subject and Year first to load chapters',
                 ),
-                validator: (String? v) {
-                  if (v == null || v.trim().isEmpty) {
-                    return 'Chapter ID is required';
-                  }
-                  return null;
-                },
+                hint: const Text('Select chapter'),
+                isExpanded: true,
+                items: chapters
+                    .map(
+                      (Chapter c) => DropdownMenuItem<String>(
+                        value: c.chapterId,
+                        child: Text(c.chapterName),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (String? v) =>
+                    setState(() => _selectedChapterId = v),
+                validator: (String? v) =>
+                    (v == null || v.isEmpty) ? 'Chapter is required' : null,
               ),
               const SizedBox(height: 16),
 

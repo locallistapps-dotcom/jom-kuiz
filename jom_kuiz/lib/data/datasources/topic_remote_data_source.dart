@@ -269,22 +269,52 @@ class TopicRemoteDataSourceImpl implements TopicRemoteDataSource {
     }
 
     final int? status = e.response?.statusCode;
+    final String realMessage = _extractPostgrestMessage(e);
+
     if (status == 404 && notFoundCode != null) {
-      return ServerException('Resource not found', notFoundCode, e);
+      return ServerException(realMessage, notFoundCode, e);
     }
     if (status == 409 && conflictCode != null) {
-      return ValidationException('Duplicate entry', conflictCode, e);
+      return ValidationException(realMessage, conflictCode, e);
     }
     if (status == 422 && validationCode != null) {
-      return ValidationException('Validation failed', validationCode, e);
+      return ValidationException(realMessage, validationCode, e);
     }
     if (status == 401 || status == 403) {
       return const UnauthorizedException('Unauthorized');
     }
     return ServerException(
-      'Something went wrong',
+      realMessage,
       fallbackCode ?? TopicErrorCodes.topicOperationFailed,
       e,
     );
+  }
+
+  /// Extracts the real PostgreSQL / PostgREST error text from the Dio response
+  /// body. PostgREST wraps errors as JSON with `message`, `details`, and
+  /// `hint` fields. Falls back to the Dio message when the body is absent or
+  /// cannot be decoded.
+  static String _extractPostgrestMessage(DioException e) {
+    try {
+      final dynamic data = e.response?.data;
+      if (data is Map<String, dynamic>) {
+        final String msg = (data['message'] as String? ?? '').trim();
+        final String details = (data['details'] as String? ?? '').trim();
+        final String hint = (data['hint'] as String? ?? '').trim();
+        final StringBuffer buf = StringBuffer();
+        if (msg.isNotEmpty) buf.write(msg);
+        if (details.isNotEmpty) {
+          if (buf.isNotEmpty) buf.write(' — ');
+          buf.write(details);
+        }
+        if (hint.isNotEmpty) {
+          if (buf.isNotEmpty) buf.write(' (hint: ');
+          buf.write(hint);
+          buf.write(')');
+        }
+        if (buf.isNotEmpty) return buf.toString();
+      }
+    } catch (_) {}
+    return e.message ?? 'Something went wrong';
   }
 }
