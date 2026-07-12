@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import '../../core/error/admin_error_codes.dart';
 import '../../core/error/failure.dart';
 import '../../core/utils/result.dart';
@@ -315,12 +317,233 @@ class AdminQuestionService {
     );
   }
 
+  // ── JSON import ────────────────────────────────────────────────────────────
+
+  /// Parses a JSON array and creates one question per valid object.
+  ///
+  /// Expected JSON schema (same fields as the CSV template):
+  /// ```json
+  /// [
+  ///   {
+  ///     "Subject": "Matematik",
+  ///     "Year": "Tahun 1",
+  ///     "Chapter": "Nombor Bulat hingga 100",
+  ///     "Topic": "Tambah",
+  ///     "Question": "Berapakah 2 + 3?",
+  ///     "QuestionType": "mcq",
+  ///     "OptionA": "4", "OptionB": "5", "OptionC": "6", "OptionD": "7",
+  ///     "CorrectAnswer": "B",
+  ///     "Difficulty": "easy",
+  ///     "Explanation": "2 + 3 = 5",
+  ///     "ExplanationImageUrl": "",
+  ///     "Reference": "KSSR pg. 10"
+  ///   }
+  /// ]
+  /// ```
+  Future<AdminImportSummary> importFromJson({
+    required String jsonContent,
+    required Map<String, String> subjectNameToId,
+    required Map<String, String> yearNameToId,
+    required Map<String, String> chapterNameToId,
+    required Map<String, String> topicNameToId,
+  }) async {
+    List<dynamic> rows;
+    try {
+      rows = jsonDecode(jsonContent) as List<dynamic>;
+    } catch (e) {
+      return AdminImportSummary(
+        totalRows: 0,
+        succeeded: 0,
+        skipped: 0,
+        errors: <String>['Invalid JSON: $e'],
+      );
+    }
+
+    if (rows.isEmpty) {
+      return const AdminImportSummary(
+        totalRows: 0,
+        succeeded: 0,
+        skipped: 0,
+        errors: <String>['JSON array is empty'],
+      );
+    }
+
+    int succeeded = 0;
+    int skipped = 0;
+    final List<String> errors = <String>[];
+    // In-batch duplicate signatures: topicId||questionTextLower
+    final Set<String> batchSigs = <String>{};
+
+    for (int i = 0; i < rows.length; i++) {
+      final int rowNum = i + 1;
+      final dynamic rawRow = rows[i];
+      if (rawRow is! Map<String, dynamic>) {
+        skipped++;
+        errors.add('Row $rowNum: must be a JSON object, got ${rawRow.runtimeType}');
+        continue;
+      }
+      final Map<String, dynamic> row = rawRow;
+
+      final String subjectName = (row['Subject'] ?? '').toString().trim();
+      final String yearName = (row['Year'] ?? '').toString().trim();
+      final String chapterName = (row['Chapter'] ?? '').toString().trim();
+      final String topicName = (row['Topic'] ?? '').toString().trim();
+      final String questionText = (row['Question'] ?? '').toString().trim();
+      final String questionTypeRaw =
+          (row['QuestionType'] ?? '').toString().trim().toLowerCase();
+      final String optionA = (row['OptionA'] ?? '').toString().trim();
+      final String optionB = (row['OptionB'] ?? '').toString().trim();
+      final String optionC = (row['OptionC'] ?? '').toString().trim();
+      final String optionD = (row['OptionD'] ?? '').toString().trim();
+      final String correctAnswer = (row['CorrectAnswer'] ?? '').toString().trim();
+      final String difficultyRaw =
+          (row['Difficulty'] ?? 'easy').toString().trim().toLowerCase();
+      final String explanation = (row['Explanation'] ?? '').toString().trim();
+      final String explanationImageUrl =
+          (row['ExplanationImageUrl'] ?? '').toString().trim();
+      final String reference = (row['Reference'] ?? '').toString().trim();
+
+      if (questionText.isEmpty) {
+        skipped++;
+        errors.add('Row $rowNum: Question text is required');
+        continue;
+      }
+
+      // Resolve topic ID
+      final String? topicId = topicNameToId[topicName];
+      if (topicId == null) {
+        if (subjectNameToId[subjectName] == null) {
+          skipped++;
+          errors.add('Row $rowNum: unknown Subject "$subjectName"');
+          continue;
+        }
+        if (yearNameToId[yearName] == null) {
+          skipped++;
+          errors.add('Row $rowNum: unknown Year "$yearName"');
+          continue;
+        }
+        if (chapterNameToId[chapterName] == null) {
+          skipped++;
+          errors.add('Row $rowNum: unknown Chapter "$chapterName"');
+          continue;
+        }
+        skipped++;
+        errors.add('Row $rowNum: unknown Topic "$topicName"');
+        continue;
+      }
+
+      // In-batch duplicate check
+      final String sig = '$topicId||${questionText.toLowerCase()}';
+      if (batchSigs.contains(sig)) {
+        skipped++;
+        errors.add('Row $rowNum: duplicate question in this import batch (skipped)');
+        continue;
+      }
+      batchSigs.add(sig);
+
+      final QuestionType? questionType = _parseType(questionTypeRaw);
+      if (questionType == null) {
+        skipped++;
+        errors.add('Row $rowNum: unknown QuestionType "$questionTypeRaw"');
+        continue;
+      }
+
+      final QuestionDifficulty difficulty = _parseDifficulty(difficultyRaw);
+
+      final String? answerErr = _validateAnswer(
+        questionType: questionType,
+        correctAnswer: correctAnswer,
+        optionA: optionA,
+        optionB: optionB,
+      );
+      if (answerErr != null) {
+        skipped++;
+        errors.add('Row $rowNum: $answerErr');
+        continue;
+      }
+
+      final Result<Question> result = await _repository.createQuestion(
+        topicId: topicId,
+        questionText: questionText,
+        questionType: questionType,
+        difficulty: difficulty,
+        correctAnswer: correctAnswer,
+        optionA: optionA.isNotEmpty ? optionA : null,
+        optionB: optionB.isNotEmpty ? optionB : null,
+        optionC: optionC.isNotEmpty ? optionC : null,
+        optionD: optionD.isNotEmpty ? optionD : null,
+        explanation: explanation.isNotEmpty ? explanation : null,
+        explanationImageUrl:
+            explanationImageUrl.isNotEmpty ? explanationImageUrl : null,
+        reference: reference.isNotEmpty ? reference : null,
+      );
+
+      result.when(
+        success: (_) => succeeded++,
+        failure: (Failure f) {
+          skipped++;
+          errors.add('Row $rowNum: ${f.message}');
+        },
+      );
+    }
+
+    return AdminImportSummary(
+      totalRows: rows.length,
+      succeeded: succeeded,
+      skipped: skipped,
+      errors: errors,
+    );
+  }
+
   // ── CSV export ─────────────────────────────────────────────────────────────
 
-  /// Converts [questions] to a CSV string with a header row.
+  /// Converts [questions] to a CSV string using human-readable names.
+  ///
+  /// The output format matches the import template exactly so the CSV is
+  /// round-trip importable without any UUID editing.
+  String exportToCsvWithNames(
+    List<Question> questions, {
+    required Map<String, Topic> topicsById,
+    required Map<String, Chapter> chaptersById,
+    required Map<String, Subject> subjectsById,
+    required Map<String, Year> yearsById,
+  }) {
+    final StringBuffer buf = StringBuffer();
+    buf.writeln(
+      'Subject,Year,Chapter,Topic,Question,QuestionType,'
+      'OptionA,OptionB,OptionC,OptionD,CorrectAnswer,Difficulty,'
+      'Explanation,ExplanationImageUrl,Reference',
+    );
+    for (final Question q in questions) {
+      final Topic? topic = topicsById[q.topicId];
+      final Chapter? chapter =
+          topic != null ? chaptersById[topic.chapterId] : null;
+      final Subject? subject =
+          chapter != null ? subjectsById[chapter.subjectId] : null;
+      final Year? year =
+          chapter != null ? yearsById[chapter.yearId] : null;
+      buf.writeln(
+        '${_esc(subject?.subjectName ?? '')},'
+        '${_esc(year?.yearName ?? '')},'
+        '${_esc(chapter?.chapterName ?? '')},'
+        '${_esc(topic?.topicName ?? q.topicId)},'
+        '${_esc(q.questionText)},'
+        '${_esc(_typeLabel(q.questionType))},'
+        '${_esc(q.optionA)},${_esc(q.optionB)},'
+        '${_esc(q.optionC)},${_esc(q.optionD)},'
+        '${_esc(q.correctAnswer)},'
+        '${_esc(_diffLabel(q.difficulty))},'
+        '${_esc(q.explanation)},'
+        '${_esc(q.explanationImageUrl)},'
+        '${_esc(q.reference)}',
+      );
+    }
+    return buf.toString();
+  }
+
+  /// Legacy export — kept for internal use; prefer [exportToCsvWithNames].
   String exportToCsv(List<Question> questions) {
     final StringBuffer buf = StringBuffer();
-    // Header
     buf.writeln(
       'ID,TopicID,Question,Type,OptionA,OptionB,OptionC,OptionD,'
       'CorrectAnswer,Difficulty,Explanation,ExplanationImageUrl,'
@@ -341,6 +564,30 @@ class AdminQuestionService {
     }
     return buf.toString();
   }
+
+  // ── JSON template ──────────────────────────────────────────────────────────
+
+  /// Returns a JSON template string showing the expected import format.
+  static String get jsonImportTemplate => const JsonEncoder.withIndent('  ')
+      .convert(<Map<String, String>>[
+    <String, String>{
+      'Subject': 'Matematik',
+      'Year': 'Tahun 1',
+      'Chapter': 'Nombor Bulat hingga 100',
+      'Topic': 'Tambah',
+      'Question': 'Berapakah 2 + 3?',
+      'QuestionType': 'mcq',
+      'OptionA': '4',
+      'OptionB': '5',
+      'OptionC': '6',
+      'OptionD': '7',
+      'CorrectAnswer': 'B',
+      'Difficulty': 'easy',
+      'Explanation': '2 + 3 = 5',
+      'ExplanationImageUrl': '',
+      'Reference': 'KSSR pg. 10',
+    },
+  ]);
 
   // ── Private helpers ────────────────────────────────────────────────────────
 

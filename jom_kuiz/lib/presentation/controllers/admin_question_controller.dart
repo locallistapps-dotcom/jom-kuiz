@@ -372,6 +372,46 @@ class AdminQuestionController extends AsyncNotifier<List<Question>> {
     return result;
   }
 
+  /// Parses and imports [jsonContent], resolving names to IDs.
+  /// The JSON must be an array of objects matching [AdminQuestionService.jsonImportTemplate].
+  Future<AdminImportSummary> importFromJson({
+    required String jsonContent,
+  }) async {
+    final List<dynamic> lookupResults =
+        await Future.wait<dynamic>(<Future<dynamic>>[
+      _fetchSubjects(),
+      _fetchYears(),
+      _fetchChapters(),
+      _fetchTopics(),
+    ]);
+
+    final List<Subject> subjects = lookupResults[0] as List<Subject>;
+    final List<Year> years = lookupResults[1] as List<Year>;
+    final List<Chapter> chapters = lookupResults[2] as List<Chapter>;
+    final List<Topic> topics = lookupResults[3] as List<Topic>;
+
+    final AdminImportLookups lookups = AdminImportLookups.from(
+      subjects: subjects,
+      years: years,
+      chapters: chapters,
+      topics: topics,
+    );
+
+    final AdminImportSummary summary = await _adminService.importFromJson(
+      jsonContent: jsonContent,
+      subjectNameToId: lookups.subjectNameToId,
+      yearNameToId: lookups.yearNameToId,
+      chapterNameToId: lookups.chapterNameToId,
+      topicNameToId: lookups.topicNameToId,
+    );
+
+    if (summary.succeeded > 0) {
+      ref.invalidateSelf();
+    }
+
+    return summary;
+  }
+
   /// Parses and imports [csvContent], resolving names to IDs by fetching
   /// all subjects / years / chapters / topics from their services.
   Future<AdminImportSummary> importFromCsv({
@@ -412,10 +452,50 @@ class AdminQuestionController extends AsyncNotifier<List<Question>> {
     return summary;
   }
 
-  /// Returns the current question list as a CSV string.
-  String exportToCsv() {
+  /// Returns the current question list as a human-readable CSV string.
+  ///
+  /// Topic/Chapter/Subject/Year UUIDs are resolved to display names so
+  /// the exported CSV matches the import template format exactly.
+  Future<String> exportToCsv() async {
     final List<Question> questions = state.asData?.value ?? <Question>[];
-    return _adminService.exportToCsv(questions);
+    if (questions.isEmpty) {
+      return _adminService.exportToCsvWithNames(
+        questions,
+        topicsById: <String, Topic>{},
+        chaptersById: <String, Chapter>{},
+        subjectsById: <String, Subject>{},
+        yearsById: <String, Year>{},
+      );
+    }
+
+    final List<dynamic> results =
+        await Future.wait<dynamic>(<Future<dynamic>>[
+      _fetchSubjects(),
+      _fetchYears(),
+      _fetchChapters(),
+      _fetchTopics(),
+    ]);
+
+    final List<Subject> subjects = results[0] as List<Subject>;
+    final List<Year> years = results[1] as List<Year>;
+    final List<Chapter> chapters = results[2] as List<Chapter>;
+    final List<Topic> topics = results[3] as List<Topic>;
+
+    return _adminService.exportToCsvWithNames(
+      questions,
+      topicsById: <String, Topic>{
+        for (final Topic t in topics) t.topicId: t
+      },
+      chaptersById: <String, Chapter>{
+        for (final Chapter c in chapters) c.chapterId: c
+      },
+      subjectsById: <String, Subject>{
+        for (final Subject s in subjects) s.subjectId: s
+      },
+      yearsById: <String, Year>{
+        for (final Year y in years) y.yearId: y
+      },
+    );
   }
 
   // ── Private helpers ───────────────────────────────────────────────────────

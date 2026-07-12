@@ -1,0 +1,269 @@
+Update the existing Question Management module WITHOUT changing the current database structure, APIs, or existing functionality. This is an enhancement only.
+
+========================
+1. QUESTION DETAIL SCREEN
+========================
+
+Improve the Metadata section.
+
+CURRENT
+
+Question ID:
+b0000000-0000-0000-0000-000000000099
+
+Topic ID:
+a0000000-0000-0000-0000-000000000004
+
+NEW
+
+Question No:
+99
+
+Topic:
+Tambah
+
+Do NOT display UUIDs to admins anymore.
+
+Internally the database must continue using UUIDs and foreign keys.
+
+The UUID remains hidden and is only used by the backend.
+
+========================
+2. QUESTION NUMBER
+========================
+
+Instead of showing UUIDs, display an easy-to-read running number.
+
+Examples
+
+Question No:
+1
+2
+3
+...
+99
+100
+101
+...
+560
+561
+
+This number is for display only.
+
+The real UUID remains unchanged.
+
+Existing questions already inside PostgreSQL should automatically receive display numbers without modifying any question content.
+
+Display numbering must always remain unique.
+
+========================
+3. TOPIC DISPLAY
+========================
+
+Instead of displaying
+
+Topic ID:
+a0000000-0000-0000-0000-000000000004
+
+display
+
+Topic:
+Tambah
+
+The application should automatically join with the Topics table and show the topic name.
+
+The backend continues using topic_uuid internally.
+
+========================
+4. CSV IMPORT
+========================
+
+Replace the current Paste CSV dialog with proper file upload.
+
+Support
+
+Choose CSV File
+
+Browse
+
+Drag & Drop (desktop)
+
+Maximum file size validation.
+
+========================
+5. JSON IMPORT
+========================
+
+Add
+
+Import JSON
+
+beside
+
+Import CSV
+
+Both importers should work using the existing backend.
+
+========================
+6. DOWNLOAD TEMPLATE
+========================
+
+Add
+
+Download CSV Template
+
+Download JSON Template
+
+The templates must match the required import format.
+
+========================
+7. AUTO MAPPING
+========================
+
+CSV/JSON should NOT require
+
+Question ID
+
+Topic UUID
+
+Chapter UUID
+
+Subject UUID
+
+Year UUID
+
+Instead the file contains
+
+Subject
+
+Year
+
+Chapter
+
+Topic
+
+The importer automatically maps them to their UUIDs.
+
+========================
+8. AUTO UUID
+========================
+
+During import,
+
+never require UUIDs.
+
+PostgreSQL generates Question UUID automatically.
+
+Topic UUID is resolved automatically.
+
+No manual UUID handling.
+
+========================
+9. DUPLICATE CHECK
+========================
+
+Before importing,
+
+check duplicate questions within the same
+
+Subject
+
+Year
+
+Chapter
+
+Topic
+
+Question Text
+
+Duplicate questions should be skipped.
+
+Provide a summary
+
+Imported:
+Skipped:
+Failed:
+
+========================
+10. IMPORT REPORT
+========================
+
+After import show
+
+Imported:
+Skipped:
+Failed:
+
+Allow downloading a report.
+
+========================
+11. EXPORT
+========================
+
+Export should download an actual CSV file.
+
+Do not display CSV inside a popup.
+
+Filename example
+
+Matematik_Tahun1_Nombor_Tambah.csv
+
+If filters are selected,
+
+export only filtered questions.
+
+========================
+12. BATCH IMPORT
+========================
+
+Support importing multiple CSV or JSON files in one action.
+
+The system imports them sequentially.
+
+========================
+13. PROGRESS
+========================
+
+Show upload progress.
+
+Uploading...
+
+35%
+
+1200 / 3500
+
+========================
+14. EXISTING DATA
+========================
+
+All existing questions already stored in PostgreSQL must continue working.
+
+Do NOT recreate records.
+
+Do NOT change UUIDs.
+
+Only improve the admin display.
+
+========================
+15. DATABASE SAFETY
+========================
+
+Do not modify existing table structures unless absolutely necessary.
+
+Do not break existing APIs.
+
+Maintain backward compatibility.
+
+========================
+16. GITHUB
+========================
+
+If any database migration is required,
+
+create a Supabase migration,
+
+commit it,
+
+and push it to GitHub.
+
+Do not leave schema changes only inside the live database.

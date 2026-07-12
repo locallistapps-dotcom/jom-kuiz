@@ -122,3 +122,27 @@ final AutoDisposeFutureProviderFamily<List<Topic>, String>
     );
   },
 );
+
+/// ALL topics as topicId → Topic entity, used for name-lookup in question
+/// cards and for auto-resolving hierarchy when editing a question.
+final AutoDisposeFutureProvider<Map<String, Topic>> adminAllTopicsProvider =
+    FutureProvider.autoDispose<Map<String, Topic>>((ref) async {
+  final result = await ref.watch(topicServiceProvider).getTopics();
+  return result.when(
+    success: (List<Topic> list) =>
+        <String, Topic>{for (final Topic t in list) t.topicId: t},
+    failure: (Failure f) => throw f,
+  );
+});
+
+/// ALL chapters as chapterId → Chapter entity, used to resolve
+/// subject/year when auto-populating the hierarchy dropdowns for editing.
+final AutoDisposeFutureProvider<Map<String, Chapter>> adminAllChaptersProvider =
+    FutureProvider.autoDispose<Map<String, Chapter>>((ref) async {
+  final result = await ref.watch(chapterServiceProvider).getChapters();
+  return result.when(
+    success: (List<Chapter> list) =>
+        <String, Chapter>{for (final Chapter c in list) c.chapterId: c},
+    failure: (Failure f) => throw f,
+  );
+});

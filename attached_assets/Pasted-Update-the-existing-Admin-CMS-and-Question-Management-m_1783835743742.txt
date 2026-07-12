@@ -1,0 +1,638 @@
+Update the existing Admin CMS and Question Management module WITHOUT changing the current database structure, APIs, or existing functionality.
+
+This is an enhancement only.
+
+Maintain backward compatibility.
+
+==================================================
+1. QUESTION DETAIL SCREEN
+==================================================
+
+Improve the Metadata section.
+
+CURRENT
+
+Question ID:
+b0000000-0000-0000-0000-000000000099
+
+Topic ID:
+a0000000-0000-0000-0000-000000000004
+
+NEW
+
+Question No:
+99
+
+Topic:
+Tambah
+
+Do NOT display UUIDs to admins anymore.
+
+Internally the database must continue using UUIDs and foreign keys.
+
+UUIDs remain hidden and are only used by the backend.
+
+==================================================
+2. QUESTION NUMBER
+==================================================
+
+Instead of displaying UUIDs, display an easy-to-read running number.
+
+Example
+
+1
+2
+3
+...
+99
+100
+101
+...
+560
+561
+
+This number is for display only.
+
+The real UUID remains unchanged.
+
+Existing questions already stored inside PostgreSQL should automatically receive display numbers.
+
+Do not modify question content.
+
+Display numbers must always remain unique.
+
+==================================================
+3. TOPIC DISPLAY
+==================================================
+
+Instead of displaying
+
+Topic ID
+
+display
+
+Topic Name
+
+Example
+
+Tambah
+
+The application should automatically join with the Topics table.
+
+Internally continue using Topic UUID.
+
+==================================================
+4. CSV IMPORT
+==================================================
+
+Replace the current Paste CSV dialog.
+
+Support
+
+• Choose CSV File
+• Browse
+• Drag & Drop (Desktop)
+• Mobile file picker
+• Maximum file size validation
+
+==================================================
+5. JSON IMPORT
+==================================================
+
+Add
+
+Import JSON
+
+beside
+
+Import CSV
+
+Both importers must use the existing backend.
+
+==================================================
+6. DOWNLOAD TEMPLATE
+==================================================
+
+Add
+
+Download CSV Template
+
+Download JSON Template
+
+The templates must match the required import structure.
+
+==================================================
+7. AUTO MAPPING
+==================================================
+
+CSV and JSON must NOT require
+
+Question UUID
+
+Topic UUID
+
+Chapter UUID
+
+Subject UUID
+
+Year UUID
+
+Instead files only contain
+
+Subject
+
+Year
+
+Chapter
+
+Topic
+
+The importer automatically maps them to the correct UUIDs.
+
+==================================================
+8. AUTO UUID
+==================================================
+
+During import
+
+never ask for UUID.
+
+Question UUID
+
+must be generated automatically by PostgreSQL.
+
+Topic UUID
+
+must be resolved automatically.
+
+==================================================
+9. DUPLICATE CHECK
+==================================================
+
+Before importing
+
+check duplicates using
+
+Subject
+
+Year
+
+Chapter
+
+Topic
+
+Question Text
+
+Duplicate questions must be skipped.
+
+Show summary
+
+Imported
+
+Skipped
+
+Failed
+
+==================================================
+10. IMPORT REPORT
+==================================================
+
+After import
+
+show
+
+Imported
+
+Skipped
+
+Failed
+
+Allow downloading the report.
+
+==================================================
+11. EXPORT
+==================================================
+
+Export should download an actual CSV file.
+
+Do NOT display CSV inside a popup.
+
+Example filename
+
+Matematik_Tahun1_Nombor_Tambah.csv
+
+When filters are selected
+
+export only filtered questions.
+
+==================================================
+12. BATCH IMPORT
+==================================================
+
+Support importing multiple CSV and JSON files simultaneously.
+
+The system imports them sequentially.
+
+==================================================
+13. UPLOAD PROGRESS
+==================================================
+
+Show upload progress.
+
+Uploading...
+
+35%
+
+1200 / 3500
+
+==================================================
+14. EXISTING DATA
+==================================================
+
+All existing questions inside PostgreSQL must continue working.
+
+Do NOT recreate records.
+
+Do NOT change UUIDs.
+
+Only improve the admin display.
+
+==================================================
+15. DATABASE SAFETY
+==================================================
+
+Do not modify existing table structures unless absolutely necessary.
+
+Do not break existing APIs.
+
+Maintain backward compatibility.
+
+==================================================
+16. GITHUB
+==================================================
+
+If any migration is required
+
+create a Supabase migration
+
+commit
+
+push to GitHub
+
+Never leave schema changes only inside the live database.
+
+==================================================
+17. KSSR MATHEMATICS YEAR 1 HIERARCHY
+==================================================
+
+Update Mathematics Tahun 1 hierarchy according to the latest KSSR syllabus.
+
+Do NOT change database structure.
+
+Populate Chapters and Topics automatically.
+
+If a Chapter exists
+
+update if necessary.
+
+If it does not exist
+
+insert it.
+
+If a Topic exists
+
+update if necessary.
+
+If it does not exist
+
+insert it.
+
+Never create duplicates.
+
+Maintain existing UUID relationships.
+
+Existing questions must continue working.
+
+==================================================
+18. CHAPTER & TOPIC MANAGEMENT
+==================================================
+
+Improve Chapter and Topic management.
+
+Admin can
+
+Add Chapter
+
+Edit Chapter
+
+Delete Chapter (only if unused)
+
+Add Topic
+
+Edit Topic
+
+Delete Topic (only if unused)
+
+Prevent duplicate Chapter names within the same Subject and Year.
+
+Prevent duplicate Topic names within the same Chapter.
+
+Automatically sort according to official KSSR order.
+
+If Topic Name changes
+
+existing questions must continue pointing to the same Topic UUID.
+
+Never recreate UUIDs unnecessarily.
+
+==================================================
+19. ADMIN FRIENDLY DROPDOWNS
+==================================================
+
+Remove every UUID input from the CMS.
+
+Replace them with searchable dropdowns.
+
+Never require administrators to type UUIDs.
+
+Replace
+
+Subject ID
+
+with
+
+Subject
+
+Replace
+
+Year ID
+
+with
+
+Year
+
+Replace
+
+Chapter ID
+
+with
+
+Chapter
+
+Replace
+
+Topic ID
+
+with
+
+Topic
+
+Admins only see names.
+
+The backend continues storing UUIDs.
+
+==================================================
+20. CASCADE DROPDOWNS
+==================================================
+
+Dropdowns must filter automatically.
+
+Workflow
+
+Subject
+
+↓
+
+Year
+
+↓
+
+Chapter
+
+↓
+
+Topic
+
+Example
+
+Subject
+
+Matematik
+
+↓
+
+Year
+
+Tahun 1
+
+↓
+
+Chapter
+
+Nombor
+
+↓
+
+Topic
+
+Tambah
+
+Tolak
+
+Gabungan Tambah dan Tolak
+
+Only valid data should appear.
+
+==================================================
+21. AUTO SELECTION
+==================================================
+
+When editing
+
+automatically select
+
+Subject
+
+Year
+
+Chapter
+
+Topic
+
+inside dropdowns.
+
+Admin should never need to remember UUIDs.
+
+==================================================
+22. CHAPTER FORM
+==================================================
+
+Replace
+
+Subject ID
+
+with Subject dropdown.
+
+Replace
+
+Year ID
+
+with Year dropdown.
+
+Form should become
+
+Subject
+
+Year
+
+Chapter Name
+
+Description
+
+Display Order
+
+Status
+
+UUIDs remain hidden.
+
+==================================================
+23. TOPIC FORM
+==================================================
+
+Replace
+
+Chapter ID
+
+with
+
+Subject dropdown
+
+↓
+
+Year dropdown
+
+↓
+
+Chapter dropdown
+
+Then
+
+Topic Name
+
+Description
+
+Display Order
+
+Status
+
+The application automatically stores Chapter UUID internally.
+
+==================================================
+24. DETAIL SCREENS
+==================================================
+
+Improve
+
+Chapter Detail
+
+Topic Detail
+
+Display
+
+Subject
+
+Year
+
+Chapter
+
+Topic
+
+instead of UUIDs.
+
+==================================================
+25. QUESTION MANAGEMENT
+==================================================
+
+Question filters must continue working.
+
+Subject
+
+↓
+
+Year
+
+↓
+
+Chapter
+
+↓
+
+Topic
+
+Topic list automatically updates according to selected Chapter.
+
+==================================================
+26. COPY BUTTONS
+==================================================
+
+Where appropriate add
+
+Copy
+
+buttons for
+
+Question Text
+
+Explanation
+
+CSV Template
+
+JSON Template
+
+Export Result
+
+Import Report
+
+This helps admins quickly copy content.
+
+==================================================
+27. KSSR DISPLAY ORDER
+==================================================
+
+Automatically arrange Chapters and Topics according to official KSSR sequence.
+
+Admins should not need to manually reorder every item.
+
+==================================================
+28. USER EXPERIENCE
+==================================================
+
+Modernise the CMS while preserving all existing functionality.
+
+Remove technical information from the UI.
+
+Never expose UUIDs.
+
+Everything should be readable by normal administrators.
+
+==================================================
+29. FINAL REQUIREMENTS
+==================================================
+
+Do not rebuild the CMS.
+
+Do not replace existing APIs.
+
+Do not remove existing functionality.
+
+Only improve the UI, UX, import/export workflow, hierarchy management, and admin usability.
+
+If migrations are required
+
+create Supabase migrations
+
+commit
+
+push to GitHub.
+
+Ensure all existing data continues working without data loss.

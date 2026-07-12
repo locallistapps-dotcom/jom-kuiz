@@ -34,6 +34,9 @@ dependencies:
   # Media picking — images / videos from device gallery or camera
   image_picker: ^1.1.2
 
+  # File picking — CSV / JSON import from device storage or browser
+  file_picker: ^8.0.0+1
+
   # Payment — opens ToyyibPay page in the device browser
   url_launcher: ^6.3.0
 
