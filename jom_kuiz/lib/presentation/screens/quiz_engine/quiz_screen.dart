@@ -286,6 +286,65 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                               height: 1.5,
                             ),
                           ),
+                          if (q.questionImageUrl != null &&
+                              q.questionImageUrl!.isNotEmpty) ...<Widget>[
+                            const SizedBox(height: 16),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                q.questionImageUrl!,
+                                fit: BoxFit.contain,
+                                width: double.infinity,
+                                loadingBuilder: (BuildContext ctx,
+                                    Widget child,
+                                    ImageChunkEvent? loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  final int? total =
+                                      loadingProgress.expectedTotalBytes;
+                                  final double? pct = total != null
+                                      ? loadingProgress
+                                              .cumulativeBytesLoaded /
+                                          total
+                                      : null;
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 20),
+                                    child: Center(
+                                      child: CircularProgressIndicator(
+                                          value: pct),
+                                    ),
+                                  );
+                                },
+                                errorBuilder: (BuildContext ctx,
+                                    Object error, StackTrace? _) {
+                                  return Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: colors.errorContainer,
+                                      borderRadius:
+                                          BorderRadius.circular(8),
+                                    ),
+                                    child: Row(
+                                      children: <Widget>[
+                                        Icon(Icons.broken_image_rounded,
+                                            color: colors.onErrorContainer),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            'Image failed to load: $error',
+                                            style: TextStyle(
+                                                color:
+                                                    colors.onErrorContainer,
+                                                fontSize: 12),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
