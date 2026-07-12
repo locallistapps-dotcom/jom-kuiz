@@ -46,11 +46,16 @@ final Provider<AuthInterceptor> authInterceptorProvider = Provider<AuthIntercept
   (Ref ref) => AuthInterceptor(ref.watch(tokenManagerProvider)),
 );
 
-final Provider<Dio> dioProvider = Provider<Dio>(
-  (Ref ref) => ApiClient.create(
-    authInterceptor: ref.watch(authInterceptorProvider),
-  ),
-);
+final Provider<Dio> dioProvider = Provider<Dio>((Ref ref) {
+  final AuthInterceptor interceptor = ref.watch(authInterceptorProvider);
+  final Dio dio = ApiClient.create(authInterceptor: interceptor);
+  // Give the interceptor a back-reference to its parent Dio so it can retry
+  // the original request after a successful token refresh (401 → refresh →
+  // retry). This intentionally happens *after* Dio is built to break the
+  // circular dependency: Dio needs the interceptor; interceptor needs Dio.
+  interceptor.setParentDio(dio);
+  return dio;
+});
 
 /// Dedicated Dio instance for Supabase Auth endpoints (`/auth/v1/…`).
 ///
