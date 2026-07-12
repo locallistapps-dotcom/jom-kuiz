@@ -1,0 +1,148 @@
+The project already uses Supabase Auth.
+
+However, users occasionally experience JWT expiration issues after long login sessions.
+
+Do NOT implement a custom authentication system.
+
+Instead, audit the existing Supabase Auth implementation and make it production-ready.
+
+====================================================
+1. Supabase Auth Audit
+====================================================
+
+Review the complete authentication flow.
+
+Verify:
+
+- Session persistence
+- Auto token refresh
+- Refresh token rotation
+- Session restoration
+- Auth state listener
+- Logout flow
+
+====================================================
+2. Session Restoration
+====================================================
+
+When the app starts:
+
+Use the existing Supabase session.
+
+Do not force users to login again if the session is still valid.
+
+If a valid session exists:
+
+→ Navigate directly to the correct dashboard.
+
+====================================================
+3. Auto Token Refresh
+====================================================
+
+Verify that Supabase automatic token refresh is working correctly.
+
+The app must not continue using an expired JWT.
+
+If a token refresh is required,
+
+allow Supabase to refresh it automatically before API requests fail.
+
+====================================================
+4. Auth State Listener
+====================================================
+
+Verify that the app correctly listens to
+
+onAuthStateChange()
+
+Handle:
+
+SIGNED_IN
+
+TOKEN_REFRESHED
+
+SIGNED_OUT
+
+USER_UPDATED
+
+PASSWORD_RECOVERY
+
+Update the application state immediately.
+
+====================================================
+5. Unauthorized Handling
+====================================================
+
+The app should never randomly show Unauthorized because of an expired JWT.
+
+If Supabase refreshes successfully,
+
+retry the original request automatically.
+
+If refresh fails,
+
+logout cleanly and redirect to Login.
+
+====================================================
+6. Multiple Requests
+====================================================
+
+Prevent multiple simultaneous refresh requests.
+
+Only one refresh should occur.
+
+Other requests should wait.
+
+====================================================
+7. Secure Storage
+====================================================
+
+Verify that Supabase session is stored securely.
+
+Do not manually duplicate JWT storage unless absolutely necessary.
+
+Do not store passwords.
+
+====================================================
+8. Debug Audit
+====================================================
+
+Identify the real cause of JWT issues.
+
+Determine whether the problem is:
+
+- Supabase configuration
+- Flutter client implementation
+- Auth state management
+- Session restoration
+- Repository layer
+- API interceptor
+- Manual JWT handling overriding Supabase
+
+Explain the root cause.
+
+====================================================
+9. Remove Redundant JWT Logic
+====================================================
+
+If custom JWT management duplicates Supabase functionality,
+
+remove or simplify it.
+
+Avoid maintaining two separate authentication systems.
+
+====================================================
+10. Deliverables
+====================================================
+
+Provide:
+
+1. Root cause of the JWT issue.
+2. Files modified.
+3. Improvements made.
+4. Authentication flow diagram.
+5. Confirmation that the app now relies correctly on Supabase Auth session management.
+
+Do not change the login flow or database schema.
+
+Only improve the existing Supabase authentication implementation.
