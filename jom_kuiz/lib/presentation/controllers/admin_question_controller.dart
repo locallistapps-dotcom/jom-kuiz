@@ -399,10 +399,7 @@ class AdminQuestionController extends AsyncNotifier<List<Question>> {
 
     final AdminImportSummary summary = await _adminService.importFromJson(
       jsonContent: jsonContent,
-      subjectNameToId: lookups.subjectNameToId,
-      yearNameToId: lookups.yearNameToId,
-      chapterNameToId: lookups.chapterNameToId,
-      topicNameToId: lookups.topicNameToId,
+      lookups: lookups,
     );
 
     if (summary.succeeded > 0) {
@@ -439,10 +436,7 @@ class AdminQuestionController extends AsyncNotifier<List<Question>> {
 
     final AdminImportSummary summary = await _adminService.importFromCsv(
       csvContent: csvContent,
-      subjectNameToId: lookups.subjectNameToId,
-      yearNameToId: lookups.yearNameToId,
-      chapterNameToId: lookups.chapterNameToId,
-      topicNameToId: lookups.topicNameToId,
+      lookups: lookups,
     );
 
     if (summary.succeeded > 0) {

@@ -163,14 +163,12 @@ class AdminQuestionService {
   /// Explanation,ExplanationImageUrl,Reference
   /// ```
   ///
-  /// Lookup maps (name → id) for Subject, Year, Chapter, Topic must be
-  /// provided by the caller so the service avoids extra network calls.
+  /// Name → UUID resolution is performed by [lookups], which applies
+  /// case-insensitive, whitespace-normalized matching so that "Matematik",
+  /// "matematik", and "MATEMATIK " all resolve to the same Subject UUID.
   Future<AdminImportSummary> importFromCsv({
     required String csvContent,
-    required Map<String, String> subjectNameToId,
-    required Map<String, String> yearNameToId,
-    required Map<String, String> chapterNameToId,
-    required Map<String, String> topicNameToId,
+    required AdminImportLookups lookups,
   }) async {
     final List<String> lines = csvContent
         .split('\n')
@@ -230,30 +228,53 @@ class AdminQuestionService {
         continue;
       }
 
-      // Resolve topic ID
-      final String? topicId = topicNameToId[topicName];
-      if (topicId == null) {
-        // Try to resolve from lookup maps
-        final String? subjectId = subjectNameToId[subjectName];
-        final String? yearId = yearNameToId[yearName];
-        if (subjectId == null) {
-          skipped++;
-          errors.add('Row $rowNum: unknown subject "$subjectName"');
-          continue;
-        }
-        if (yearId == null) {
-          skipped++;
-          errors.add('Row $rowNum: unknown year "$yearName"');
-          continue;
-        }
-        final String? chapterId = chapterNameToId[chapterName];
-        if (chapterId == null) {
-          skipped++;
-          errors.add('Row $rowNum: unknown chapter "$chapterName"');
-          continue;
-        }
+      // Resolve topic ID via normalized lookup (case-insensitive, trimmed).
+      final String? subjectId =
+          lookups.subjectNameToId[AdminImportLookups.normalizeKey(subjectName)];
+      if (subjectId == null) {
         skipped++;
-        errors.add('Row $rowNum: unknown topic "$topicName"');
+        errors.add(
+          'Row $rowNum: unknown Subject\n'
+          '  CSV value   : "$subjectName"\n'
+          '  DB subjects : ${_fmtList(lookups.subjectNames)}\n'
+          '  (matched after trim + collapse spaces + lower-case)',
+        );
+        continue;
+      }
+      final String? yearId =
+          lookups.yearNameToId[AdminImportLookups.normalizeKey(yearName)];
+      if (yearId == null) {
+        skipped++;
+        errors.add(
+          'Row $rowNum: unknown Year\n'
+          '  CSV value : "$yearName"\n'
+          '  DB years  : ${_fmtList(lookups.yearNames)}\n'
+          '  (matched after trim + collapse spaces + lower-case)',
+        );
+        continue;
+      }
+      final String? chapterId =
+          lookups.chapterNameToId[AdminImportLookups.normalizeKey(chapterName)];
+      if (chapterId == null) {
+        skipped++;
+        errors.add(
+          'Row $rowNum: unknown Chapter\n'
+          '  CSV value  : "$chapterName"\n'
+          '  DB chapters: ${_fmtList(lookups.chapterNames)}\n'
+          '  (matched after trim + collapse spaces + lower-case)',
+        );
+        continue;
+      }
+      final String? topicId =
+          lookups.topicNameToId[AdminImportLookups.normalizeKey(topicName)];
+      if (topicId == null) {
+        skipped++;
+        errors.add(
+          'Row $rowNum: unknown Topic\n'
+          '  CSV value : "$topicName"\n'
+          '  DB topics : ${_fmtList(lookups.topicNames)}\n'
+          '  (matched after trim + collapse spaces + lower-case)',
+        );
         continue;
       }
 
@@ -342,10 +363,7 @@ class AdminQuestionService {
   /// ```
   Future<AdminImportSummary> importFromJson({
     required String jsonContent,
-    required Map<String, String> subjectNameToId,
-    required Map<String, String> yearNameToId,
-    required Map<String, String> chapterNameToId,
-    required Map<String, String> topicNameToId,
+    required AdminImportLookups lookups,
   }) async {
     List<dynamic> rows;
     try {
@@ -409,26 +427,53 @@ class AdminQuestionService {
         continue;
       }
 
-      // Resolve topic ID
-      final String? topicId = topicNameToId[topicName];
-      if (topicId == null) {
-        if (subjectNameToId[subjectName] == null) {
-          skipped++;
-          errors.add('Row $rowNum: unknown Subject "$subjectName"');
-          continue;
-        }
-        if (yearNameToId[yearName] == null) {
-          skipped++;
-          errors.add('Row $rowNum: unknown Year "$yearName"');
-          continue;
-        }
-        if (chapterNameToId[chapterName] == null) {
-          skipped++;
-          errors.add('Row $rowNum: unknown Chapter "$chapterName"');
-          continue;
-        }
+      // Resolve all four hierarchy levels via normalized lookup.
+      final String? subjectId =
+          lookups.subjectNameToId[AdminImportLookups.normalizeKey(subjectName)];
+      if (subjectId == null) {
         skipped++;
-        errors.add('Row $rowNum: unknown Topic "$topicName"');
+        errors.add(
+          'Row $rowNum: unknown Subject\n'
+          '  JSON value  : "$subjectName"\n'
+          '  DB subjects : ${_fmtList(lookups.subjectNames)}\n'
+          '  (matched after trim + collapse spaces + lower-case)',
+        );
+        continue;
+      }
+      final String? yearId =
+          lookups.yearNameToId[AdminImportLookups.normalizeKey(yearName)];
+      if (yearId == null) {
+        skipped++;
+        errors.add(
+          'Row $rowNum: unknown Year\n'
+          '  JSON value : "$yearName"\n'
+          '  DB years   : ${_fmtList(lookups.yearNames)}\n'
+          '  (matched after trim + collapse spaces + lower-case)',
+        );
+        continue;
+      }
+      final String? chapterId =
+          lookups.chapterNameToId[AdminImportLookups.normalizeKey(chapterName)];
+      if (chapterId == null) {
+        skipped++;
+        errors.add(
+          'Row $rowNum: unknown Chapter\n'
+          '  JSON value : "$chapterName"\n'
+          '  DB chapters: ${_fmtList(lookups.chapterNames)}\n'
+          '  (matched after trim + collapse spaces + lower-case)',
+        );
+        continue;
+      }
+      final String? topicId =
+          lookups.topicNameToId[AdminImportLookups.normalizeKey(topicName)];
+      if (topicId == null) {
+        skipped++;
+        errors.add(
+          'Row $rowNum: unknown Topic\n'
+          '  JSON value : "$topicName"\n'
+          '  DB topics  : ${_fmtList(lookups.topicNames)}\n'
+          '  (matched after trim + collapse spaces + lower-case)',
+        );
         continue;
       }
 
@@ -653,6 +698,12 @@ class AdminQuestionService {
     }
   }
 
+  /// Formats a list of names for display in error messages.
+  static String _fmtList(List<String> names) {
+    if (names.isEmpty) return '(none — check DB connection)';
+    return names.map((String n) => '"$n"').join(', ');
+  }
+
   String? _validateAnswer({
     required QuestionType questionType,
     required String correctAnswer,
@@ -701,19 +752,46 @@ class AdminQuestionService {
   }
 }
 
-/// Lookup maps derived from a set of domain entities — used by CSV import.
+/// Lookup maps derived from a set of domain entities — used by CSV/JSON import.
+///
+/// All map keys are **normalized** (trimmed, whitespace-collapsed, lower-cased)
+/// so that "Matematik", "matematik", "MATEMATIK ", and "Matematik" all resolve
+/// to the same UUID.  The original display names are kept separately so that
+/// error messages can show what the database actually contains.
 class AdminImportLookups {
   const AdminImportLookups({
     required this.subjectNameToId,
     required this.yearNameToId,
     required this.chapterNameToId,
     required this.topicNameToId,
+    required this.subjectNames,
+    required this.yearNames,
+    required this.chapterNames,
+    required this.topicNames,
   });
 
+  // Normalized key (lower-case, trimmed, single-spaced) → UUID
   final Map<String, String> subjectNameToId;
   final Map<String, String> yearNameToId;
   final Map<String, String> chapterNameToId;
   final Map<String, String> topicNameToId;
+
+  // Original display names — for human-readable error messages only.
+  final List<String> subjectNames;
+  final List<String> yearNames;
+  final List<String> chapterNames;
+  final List<String> topicNames;
+
+  /// Normalizes a name for map key comparison:
+  ///   • trim leading/trailing whitespace
+  ///   • collapse internal runs of whitespace to a single space
+  ///   • lower-case
+  ///
+  /// Applied to both map keys (in [from]) and to incoming CSV/JSON values
+  /// (in [AdminQuestionService.importFromCsv] / [importFromJson]) so the
+  /// comparison is always symmetric.
+  static String normalizeKey(String s) =>
+      s.trim().replaceAll(RegExp(r'\s+'), ' ').toLowerCase();
 
   factory AdminImportLookups.from({
     required List<Subject> subjects,
@@ -723,17 +801,23 @@ class AdminImportLookups {
   }) {
     return AdminImportLookups(
       subjectNameToId: <String, String>{
-        for (final Subject s in subjects) s.subjectName: s.subjectId,
+        for (final Subject s in subjects)
+          normalizeKey(s.subjectName): s.subjectId,
       },
       yearNameToId: <String, String>{
-        for (final Year y in years) y.yearName: y.yearId,
+        for (final Year y in years) normalizeKey(y.yearName): y.yearId,
       },
       chapterNameToId: <String, String>{
-        for (final Chapter c in chapters) c.chapterName: c.chapterId,
+        for (final Chapter c in chapters)
+          normalizeKey(c.chapterName): c.chapterId,
       },
       topicNameToId: <String, String>{
-        for (final Topic t in topics) t.topicName: t.topicId,
+        for (final Topic t in topics) normalizeKey(t.topicName): t.topicId,
       },
+      subjectNames: subjects.map((Subject s) => s.subjectName).toList(),
+      yearNames: years.map((Year y) => y.yearName).toList(),
+      chapterNames: chapters.map((Chapter c) => c.chapterName).toList(),
+      topicNames: topics.map((Topic t) => t.topicName).toList(),
     );
   }
 }
