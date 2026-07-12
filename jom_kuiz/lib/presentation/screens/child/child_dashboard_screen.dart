@@ -8,14 +8,39 @@ import '../../../domain/entities/homework.dart';
 import '../../controllers/achievement_controller.dart';
 import '../../controllers/child_profile_controller.dart';
 import '../../controllers/homework_controller.dart';
+import '../../controllers/session_controller.dart';
 import '../../widgets/feedback/app_error_widget.dart';
 import '../../widgets/feedback/loading_widget.dart';
 
-/// Child Dashboard — the landing screen when a parent navigates into a
-/// child's view. Shows a welcome card, profile summary, parent link status,
-/// class information, pending homework count, and quick navigation actions.
+/// Child Dashboard — the landing screen when a child is logged in.
+/// Shows a welcome card, profile summary, parent link status, class
+/// information, pending homework count, and quick navigation actions.
 class ChildDashboardScreen extends ConsumerWidget {
   const ChildDashboardScreen({super.key});
+
+  Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext ctx) => AlertDialog(
+        title: const Text('Log Keluar'),
+        content: const Text('Adakah anda pasti mahu log keluar?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Log Keluar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      await ref.read(sessionControllerProvider.notifier).logout();
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -30,6 +55,11 @@ class ChildDashboardScreen extends ConsumerWidget {
             icon: const Icon(Icons.person_outline),
             tooltip: 'Profile',
             onPressed: () => context.push(AppRoutes.childProfile),
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout_outlined),
+            tooltip: 'Log Keluar',
+            onPressed: () => _confirmLogout(context, ref),
           ),
         ],
       ),

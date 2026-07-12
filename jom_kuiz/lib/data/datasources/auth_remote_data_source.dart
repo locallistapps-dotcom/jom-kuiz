@@ -193,7 +193,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     if (_isTransportError(e)) return _networkException(e);
     if (e.response?.statusCode == 400 || e.response?.statusCode == 401) {
       return UnauthorizedException(
-        _supabaseMessage(e, 'Invalid email or password'),
+        _supabaseMessage(e, 'E-mel atau kata laluan tidak betul. Sila cuba lagi.'),
         AuthErrorCodes.invalidCredentials,
         e,
       );
@@ -217,7 +217,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     if (_isTransportError(e)) return _networkException(e);
     if (e.response?.statusCode == 400 || e.response?.statusCode == 401) {
       return TokenExpiredException(
-        _supabaseMessage(e, 'Session expired, please log in again'),
+        _supabaseMessage(e, 'Sesi tamat tempoh. Sila log masuk semula.'),
         AuthErrorCodes.tokenExpired,
         e,
       );
@@ -231,7 +231,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   AppException _networkException(DioException e) => NetworkException(
-        'Unable to reach Supabase. Check your connection.',
+        'Tiada sambungan Internet. Sila semak sambungan anda.',
         AuthErrorCodes.networkError,
         e,
       );

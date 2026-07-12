@@ -133,19 +133,27 @@ class AccountManagementRemoteDataSourceImpl
       // PostgREST RPC returns an array of rows.
       final List<dynamic> rows = res.data as List<dynamic>;
       if (rows.isEmpty) {
-        throw UnauthorizedException('Invalid student ID or username', null, null);
+        throw UnauthorizedException(
+          'Student ID tidak dijumpai. Sila semak nombor Student ID anda.',
+          null,
+          null,
+        );
       }
       final Map<String, dynamic> row = rows.first as Map<String, dynamic>;
 
       final bool isValid = row['is_valid'] as bool? ?? false;
       if (!isValid) {
-        throw UnauthorizedException('Invalid credentials', null, null);
+        throw UnauthorizedException(
+          'Kata laluan atau username tidak betul. Sila cuba lagi.',
+          null,
+          null,
+        );
       }
 
       final String status = (row['account_status'] as String?) ?? '';
       if (status != 'active') {
         throw ValidationException(
-          'Account is disabled',
+          'Akaun anda telah dinaktifkan. Sila hubungi ibu bapa anda.',
           AccountManagementErrorCodes.disabledAccount,
           null,
         );
@@ -155,6 +163,14 @@ class AccountManagementRemoteDataSourceImpl
     } on AppException {
       rethrow;
     } on DioException catch (e) {
+      // Surface network failures with a Malay user-friendly message.
+      if (_isTransportError(e)) {
+        throw NetworkException(
+          'Tiada sambungan Internet. Sila semak sambungan anda.',
+          null,
+          e,
+        );
+      }
       throw _mapError(
         e,
         validationCode: AccountManagementErrorCodes.disabledAccount,

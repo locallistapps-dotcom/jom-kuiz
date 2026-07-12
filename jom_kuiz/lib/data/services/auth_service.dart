@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 import '../../core/logger/app_logger.dart';
 import '../../core/utils/result.dart';
 import '../../domain/entities/auth_tokens.dart';
@@ -113,7 +115,68 @@ class AuthService {
     }
   }
 
+  /// Inspects the browser URL fragment for an OAuth token pair.
+  ///
+  /// Called once per app start on Flutter Web. When Supabase redirects back
+  /// from the Google consent screen the URL looks like:
+  /// `https://app.example.com/#access_token=...&refresh_token=...&expires_in=3600`
+  ///
+  /// If the fragment contains a valid token pair it is written to secure
+  /// storage via [TokenManager] and the check returns `true`. GoRouter then
+  /// navigates away (e.g. to `/dashboard`), discarding the fragment from the
+  /// visible URL.
+  Future<void> _tryProcessOAuthCallback() async {
+    try {
+      final String fragment = Uri.base.fragment;
+      if (fragment.isEmpty || !fragment.contains('access_token=')) return;
+
+      final Map<String, String> params = Uri.splitQueryString(fragment);
+      final String? accessToken = params['access_token'];
+      final String? refreshToken = params['refresh_token'];
+      final String? expiresInStr = params['expires_in'];
+
+      if (accessToken == null ||
+          accessToken.isEmpty ||
+          refreshToken == null ||
+          refreshToken.isEmpty ||
+          expiresInStr == null) {
+        // Fragment present but incomplete — could be an auth error fragment.
+        final String? error = params['error'];
+        if (error != null) {
+          AppLogger.instance.warning(
+            'OAuth callback error: $error — ${params['error_description'] ?? ''}',
+          );
+        }
+        return;
+      }
+
+      final int expiresIn = int.tryParse(expiresInStr) ?? 3600;
+      await _tokenManager.saveTokens(
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+        expiresAt: DateTime.now().add(Duration(seconds: expiresIn)),
+      );
+      AppLogger.instance.debug(
+        'OAuth callback: saved token pair from URL fragment (expires_in=${expiresIn}s)',
+      );
+    } catch (e, st) {
+      AppLogger.instance.error(
+        'OAuth callback processing failed — continuing as unauthenticated',
+        error: e,
+        stackTrace: st,
+      );
+    }
+  }
+
   Future<SessionStatus> _doCheckSession() async {
+    // ── Web OAuth callback ──────────────────────────────────────────────────
+    // When Supabase redirects back after Google (or other) OAuth, the token
+    // pair arrives in the URL fragment: #access_token=...&refresh_token=...
+    // We save them here so the rest of checkSession sees a valid session.
+    if (kIsWeb) {
+      await _tryProcessOAuthCallback();
+    }
+
     final bool hasSession = await _tokenManager.hasValidSession;
     if (!hasSession) {
       AppLogger.instance.debug('checkSession: no stored session');

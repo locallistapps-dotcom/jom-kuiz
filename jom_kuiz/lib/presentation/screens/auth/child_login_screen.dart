@@ -3,11 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/validators/validators.dart';
 import '../../controllers/auth_controller.dart';
+import '../../providers/login_preferences_providers.dart';
 import '../../widgets/buttons/primary_button.dart';
 import '../../widgets/inputs/app_text_field.dart';
 import '../../widgets/inputs/password_field.dart';
 
 /// Child login screen — requires Student ID + Username + Password.
+///
+/// Student ID and username are remembered via SharedPreferences and
+/// pre-filled on the next visit. Password is never stored.
 ///
 /// A disabled child account receives an explicit error rather than a generic
 /// "invalid credentials" message, so parents can identify the problem quickly.
@@ -28,6 +32,12 @@ class _ChildLoginScreenState extends ConsumerState<ChildLoginScreen> {
   String? _passwordError;
 
   @override
+  void initState() {
+    super.initState();
+    _loadRememberedCredentials();
+  }
+
+  @override
   void dispose() {
     _studentIdController.dispose();
     _usernameController.dispose();
@@ -35,11 +45,32 @@ class _ChildLoginScreenState extends ConsumerState<ChildLoginScreen> {
     super.dispose();
   }
 
+  // ── Remember credentials ──────────────────────────────────────────────────
+
+  Future<void> _loadRememberedCredentials() async {
+    final creds = await ref
+        .read(loginPreferencesServiceProvider)
+        .getChildCredentials();
+    if (creds != null && mounted) {
+      _studentIdController.text = creds.studentId;
+      _usernameController.text = creds.username;
+    }
+  }
+
+  Future<void> _saveCredentials() async {
+    await ref.read(loginPreferencesServiceProvider).saveChildCredentials(
+          studentId: _studentIdController.text.trim(),
+          username: _usernameController.text.trim().toLowerCase(),
+        );
+  }
+
+  // ── Validation + submit ───────────────────────────────────────────────────
+
   bool _validate() {
     final String? studentIdError =
         Validators.studentId(_studentIdController.text);
     final String? usernameError = _usernameController.text.trim().isEmpty
-        ? 'Username is required'
+        ? 'Username diperlukan'
         : null;
     final String? passwordError = Validators.password(_passwordController.text);
 
@@ -57,16 +88,25 @@ class _ChildLoginScreenState extends ConsumerState<ChildLoginScreen> {
   Future<void> _submit() async {
     if (!_validate()) return;
 
-    await ref.read(authControllerProvider.notifier).loginAsChild(
-          studentId: _studentIdController.text.trim(),
-          username: _usernameController.text.trim().toLowerCase(),
-          password: _passwordController.text,
-        );
+    final bool success =
+        await ref.read(authControllerProvider.notifier).loginAsChild(
+              studentId: _studentIdController.text.trim(),
+              username: _usernameController.text.trim().toLowerCase(),
+              password: _passwordController.text,
+            );
+
+    if (success) {
+      // Remember the non-sensitive credentials for next time.
+      await _saveCredentials();
+    }
   }
+
+  // ── Build ─────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<AsyncValue<void>>(authControllerProvider, (_, AsyncValue<void> next) {
+    ref.listen<AsyncValue<void>>(authControllerProvider,
+        (_, AsyncValue<void> next) {
       next.whenOrNull(
         error: (Object error, _) {
           ScaffoldMessenger.of(context)
@@ -79,7 +119,7 @@ class _ChildLoginScreenState extends ConsumerState<ChildLoginScreen> {
     final bool isLoading = ref.watch(authControllerProvider).isLoading;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Student Login')),
+      appBar: AppBar(title: const Text('Log Masuk Pelajar')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -93,12 +133,12 @@ class _ChildLoginScreenState extends ConsumerState<ChildLoginScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              'Student Login',
+              'Log Masuk Pelajar',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             Text(
-              'Enter your Student ID, username and password',
+              'Masukkan Student ID, username dan kata laluan anda',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.outline,
@@ -111,7 +151,7 @@ class _ChildLoginScreenState extends ConsumerState<ChildLoginScreen> {
               label: 'Student ID',
               controller: _studentIdController,
               keyboardType: TextInputType.number,
-              hintText: 'e.g. 48392715',
+              hintText: 'cth. 48392715',
               errorText: _studentIdError,
               enabled: !isLoading,
               onChanged: (_) {
@@ -135,8 +175,9 @@ class _ChildLoginScreenState extends ConsumerState<ChildLoginScreen> {
             ),
             const SizedBox(height: 16),
             PasswordField(
-              label: 'Password',
+              label: 'Kata Laluan',
               controller: _passwordController,
+              enabled: !isLoading,
               errorText: _passwordError,
               onChanged: (_) {
                 if (_passwordError != null) {
@@ -146,9 +187,9 @@ class _ChildLoginScreenState extends ConsumerState<ChildLoginScreen> {
             ),
             const SizedBox(height: 24),
             PrimaryButton(
-              label: 'Login',
+              label: 'Log Masuk',
               isLoading: isLoading,
-              onPressed: _submit,
+              onPressed: isLoading ? null : _submit,
             ),
             const SizedBox(height: 16),
             const _DisabledAccountNote(),
@@ -158,6 +199,8 @@ class _ChildLoginScreenState extends ConsumerState<ChildLoginScreen> {
     );
   }
 }
+
+// ── _DisabledAccountNote ─────────────────────────────────────────────────────
 
 class _DisabledAccountNote extends StatelessWidget {
   const _DisabledAccountNote({super.key});
@@ -177,7 +220,7 @@ class _DisabledAccountNote extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'If your account is disabled, please contact your parent.',
+              'Jika akaun anda diblokkan, sila hubungi ibu bapa anda.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),

@@ -47,6 +47,9 @@ class RouteGuard {
           if (isSplash) return AppRoutes.login;
           // Allow child-login and other public routes while signed out.
           if (isPublicRoute || isChildLogin) return null;
+          // Send child routes to the child login screen (better UX after
+          // child logout or session expiry on a child-only route).
+          if (location.startsWith('/child/')) return AppRoutes.childLogin;
           return AppRoutes.login;
         }
 
