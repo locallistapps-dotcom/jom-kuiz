@@ -145,6 +145,13 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     final String? current = session.answerFor(q.questionId);
     final int idx = session.currentIndex;
 
+    // ── IMAGE DEBUG ── remove after diagnosis ──────────────────────────────
+    debugPrint(
+      '[QuizScreen] Q${idx + 1} id=${q.questionId} '
+      'questionImageUrl=${q.questionImageUrl ?? "NULL"}',
+    );
+    // ─────────────────────────────────────────────────────────────────────
+
     // Sync fill-blank text field when question changes
     if (idx != _lastIndex) {
       _lastIndex = idx;
